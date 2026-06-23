@@ -48,23 +48,20 @@
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
-        /* --- Main Layout CSS (Desktop Base) --- */
+        /* --- Main Layout CSS --- */
         .main-system { display: none; height: 100vh; overflow: hidden; position: relative; }
         .sidebar {
             background: linear-gradient(180deg, var(--primary-color) 0%, #1e3a8a 100%);
             color: white; height: 100vh; position: fixed; width: 250px; overflow-y: auto; z-index: 1000;
             transition: all 0.3s;
         }
-        /* Custom scrollbar for sidebar */
         .sidebar::-webkit-scrollbar { width: 5px; }
         .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 5px; }
 
         html[dir="ltr"] .sidebar { left: 0; }
         html[dir="rtl"] .sidebar { right: 0; }
         
-        .main-content {
-            padding: 20px; height: 100vh; overflow-y: auto; overflow-x: hidden; transition: all 0.3s;
-        }
+        .main-content { padding: 20px; height: 100vh; overflow-y: auto; overflow-x: hidden; transition: all 0.3s; }
         html[dir="ltr"] .main-content { margin-left: 250px; }
         html[dir="rtl"] .main-content { margin-right: 250px; }
 
@@ -75,7 +72,6 @@
         .page { display: none; }
         .page.active { display: block; }
         
-        /* --- Cards & UI Elements --- */
         .stat-card { 
             background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
             padding: 20px; margin-bottom: 20px; cursor: pointer; transition: all 0.3s ease; 
@@ -86,7 +82,6 @@
             width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; 
             justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        /* Dashboard Card Gradients */
         .bg-gradient-primary { background: linear-gradient(45deg, #2c5aa0, #4b7bc4); }
         .bg-gradient-success { background: linear-gradient(45deg, #34a853, #55c472); }
         .bg-gradient-warning { background: linear-gradient(45deg, #ffc107, #ffcf33); }
@@ -99,20 +94,20 @@
         html[dir="rtl"] .toast-container { right: auto; left: 20px; }
         .barcode-box { display: flex; justify-content: center; margin: 15px 0; padding: 15px; background: #fff; border-radius: 8px; border: 1px dashed #ccc; overflow: hidden; }
         #reader { width: 100%; max-width: 500px; margin: auto; }
-        
-        /* Hide annoying red scanner error messages in UI */
         #reader__dashboard_section_csr span { color: #888 !important; }
 
         .action-btns .btn { padding: 4px 8px; font-size: 12px; margin-inline-end: 4px; }
+        
+        /* Returns / Refund Styles */
+        .returned-row { background-color: #ffeaea !important; text-decoration: line-through; opacity: 0.7; }
+        .returned-badge { text-decoration: none; display: inline-block; }
 
-        /* --- Responsive Styles (Mobile & Tablet) - PLACED AFTER DESKTOP CSS TO FIX OVERRIDE BUG --- */
         @media (max-width: 991.98px) {
             html[dir="ltr"] .sidebar { transform: translateX(-100%); }
             html[dir="rtl"] .sidebar { transform: translateX(100%); }
             html[dir="ltr"] .sidebar.show { transform: translateX(0); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
             html[dir="rtl"] .sidebar.show { transform: translateX(0); box-shadow: -2px 0 10px rgba(0,0,0,0.5); }
             
-            /* Removes the 250px white space on mobile screens perfectly */
             html[dir="ltr"] .main-content { margin-left: 0; }
             html[dir="rtl"] .main-content { margin-right: 0; }
             .sidebar-overlay.show { display: block; }
@@ -122,36 +117,29 @@
             .login-container { flex-direction: column; height: auto; min-height: 100vh; }
             .login-left, .login-right { padding: 30px 20px; flex: none; height: auto; }
             .login-left { text-align: center; padding-bottom: 20px; }
-            .features-list { display: none; } /* Hide extra text on very small screens to save space */
+            .features-list { display: none; }
             
-            /* Quick actions spacing */
             .d-flex.gap-2.flex-wrap .btn { flex: 1 1 45%; font-size: 14px; padding: 8px 4px; }
             .d-flex.gap-2.flex-wrap .dropdown { flex: 1 1 100%; }
             .d-flex.gap-2.flex-wrap .dropdown .btn { width: 100%; }
             
-            /* Topbar mobile wrap */
             .topbar-mobile-wrap { flex-direction: column; align-items: flex-start !important; gap: 15px; }
             .topbar-mobile-wrap .gap-3 { width: 100%; justify-content: space-between; }
         }
 
-        /* --- Print Styles --- */
         .no-print-section { display: none !important; }
 
         @media print {
-            /* 80mm Thermal Printer Settings */
             @page { margin: 0; size: 80mm auto; } 
-            
             body * { visibility: hidden; }
             
-            /* Show all sections that might need printing independently */
             #printSection, #printSection *, 
             #genericPrintSection, #genericPrintSection *,
             #qrPrintSection, #qrPrintSection * { visibility: visible; }
             
-            /* Receipt Styling */
             #printSection, #genericPrintSection { 
                 position: absolute; left: 0; top: 0; 
-                width: 78mm; /* specifically for 80mm rolls */
+                width: 78mm; 
                 padding: 4mm; 
                 background: white; 
                 margin: 0;
@@ -166,7 +154,6 @@
             .border-dashed { border-bottom: 1px dashed #000; margin-bottom: 5px; padding-bottom: 5px; }
             .border-dashed-top { border-top: 1px dashed #000; margin-top: 5px; padding-top: 5px; }
             
-            /* Barcode Label Grid Print Styles */
             #qrPrintSection { 
                 position: absolute; left: 0; top: 0; width: 100%; background: white; 
                 display: grid !important; grid-template-columns: repeat(3, 1fr); 
@@ -243,7 +230,6 @@
 
     <!-- Main System -->
     <div id="mainSystem" class="main-system">
-        <!-- Overlay for Mobile Sidebar -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
         
         <div class="container-fluid p-0">
@@ -258,10 +244,13 @@
                     <li class="nav-item"><a class="nav-link" onclick="showPage('medicines')"><i class="fas fa-pills"></i> <span data-i18n="medicines">Medicines</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="sales">Sales (POS)</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('inventory')"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory</span></a></li>
+                    <!-- New Customer Link -->
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('customers')"><i class="fas fa-user-friends"></i> <span data-i18n="customers">Customers (Khata)</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('alerts')"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Reports</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('suppliers')"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('employees')"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('delivery')"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
                     <hr class="text-white border-white opacity-25 my-2">
                     <li class="nav-item"><a class="nav-link text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
@@ -294,7 +283,6 @@
 
                 <!-- 1. Dashboard Page -->
                 <div id="dashboard" class="page active">
-                    <!-- Quick Actions Row -->
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="d-flex gap-2 flex-wrap">
@@ -302,7 +290,6 @@
                                 <button class="btn btn-success" onclick="showPage('medicines'); openAddMedicineModal();"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add Medicine</span></button>
                                 <button class="btn btn-info text-white" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
                                 
-                                <!-- Barcode Print Dropdown -->
                                 <div class="dropdown d-inline-block">
                                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-print"></i> <span data-i18n="print_qr">Print Barcodes</span>
@@ -317,7 +304,6 @@
                         </div>
                     </div>
 
-                    <!-- Statistics Cards -->
                     <div class="row">
                         <div class="col-md-3">
                             <div class="stat-card" onclick="openDetailsModal('sales')">
@@ -342,17 +328,6 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" onclick="showPage('alerts')">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-muted" data-i18n="alerts">Alerts</h6>
-                                        <h4 class="fw-bold text-danger" id="dashAlerts">0</h4>
-                                    </div>
-                                    <div class="icon bg-gradient-warning text-white"><i class="fas fa-bell"></i></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
                             <div class="stat-card" onclick="showPage('reports')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -363,9 +338,19 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" onclick="showPage('customers')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted" data-i18n="khata_balance">Total Udhaar</h6>
+                                        <h4 class="fw-bold text-danger" id="dashUdhaar">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-warning text-white"><i class="fas fa-book-open"></i></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Charts Row -->
                     <div class="row mb-4">
                         <div class="col-md-8">
                             <div class="card dash-widget-card h-100">
@@ -388,7 +373,6 @@
                         </div>
                     </div>
 
-                    <!-- Recent Activity & Low Stock -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="card dash-widget-card">
@@ -430,7 +414,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <input type="text" class="form-control mb-3" id="medSearch" placeholder="Search by name or scan barcode..." onkeyup="renderMedicines()">
+                            <input type="text" class="form-control mb-3" id="medSearch" placeholder="Search by name, formula or barcode..." onkeyup="renderMedicines()">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
@@ -451,21 +435,44 @@
                     </div>
                 </div>
 
-                <!-- 3. Sales Page -->
+                <!-- 3. Sales Page (Advanced POS) -->
                 <div id="sales" class="page">
                     <div class="row">
                         <div class="col-md-8">
                             <div class="card">
                                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                                     <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> <span data-i18n="pos">POS</span></h5>
-                                    <button class="btn btn-light btn-sm" onclick="newSale()"><i class="fas fa-receipt"></i> <span data-i18n="new_sale">New / Clear</span></button>
+                                    <div>
+                                        <button class="btn btn-warning btn-sm text-dark me-2" onclick="holdCurrentCart()"><i class="fas fa-pause"></i> <span data-i18n="hold_bill">Hold Cart</span></button>
+                                        <button class="btn btn-dark btn-sm me-2" onclick="openHeldBillsModal()"><i class="fas fa-list"></i> <span data-i18n="held_bills">Held Carts</span> (<span id="heldBillsCount">0</span>)</button>
+                                        <button class="btn btn-light btn-sm" onclick="newSale()"><i class="fas fa-receipt"></i> <span data-i18n="new_sale">New / Clear</span></button>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <div class="d-flex gap-2 mb-3">
                                         <input type="text" class="form-control mb-0" id="saleSearchInput" placeholder="Scan Barcode or Type Name..." onkeypress="handleSaleSearch(event)" onkeyup="searchSaleItemLive()">
                                         <button class="btn btn-outline-primary" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i></button>
                                     </div>
-                                    <input type="text" class="form-control mb-3" id="customerName" placeholder="Customer Name (Optional)">
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                                <select class="form-select" id="posCustomerSelect"></select>
+                                                <button class="btn btn-outline-secondary" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
+                                                <select class="form-select" id="posPaymentMethod">
+                                                    <option value="Cash" data-i18n="cash">Cash</option>
+                                                    <option value="Credit" data-i18n="credit">Credit (Udhaar)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="table-responsive">
                                         <table class="table table-sm align-middle">
                                             <thead>
@@ -477,17 +484,30 @@
                                         </table>
                                     </div>
                                     <hr>
-                                    <div class="row mt-3 align-items-end">
-                                        <div class="col-md-6 mb-3 mb-md-0">
-                                            <label class="form-label text-muted small fw-bold" data-i18n="discount">Discount (Rs)</label>
+                                    <!-- Tax and Discount Section -->
+                                    <div class="row mt-3 align-items-center bg-light p-3 rounded">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label text-muted small fw-bold" data-i18n="tax">Tax / GST (%)</label>
                                             <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-minus-circle"></i></span>
-                                                <input type="number" class="form-control form-control-lg" id="saleDiscount" value="0" min="0" oninput="renderSaleTable()">
+                                                <input type="number" class="form-control form-control-sm" id="saleTax" value="0" min="0" oninput="renderSaleTable()">
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
-                                        <div class="col-md-6 text-end">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label text-muted small fw-bold" data-i18n="discount">Discount</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control form-control-sm" id="saleDiscount" value="0" min="0" oninput="renderSaleTable()">
+                                                <select class="form-select form-select-sm" id="saleDiscountType" onchange="renderSaleTable()" style="max-width: 80px;">
+                                                    <option value="Rs">Rs</option>
+                                                    <option value="%">%</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
                                             <h6 class="text-muted mb-1"><span data-i18n="subtotal">Subtotal</span>: Rs <span id="saleSubTotal">0.00</span></h6>
                                             <h3 class="text-primary fw-bold mb-2"><span data-i18n="total">Grand Total</span>: Rs <span id="saleGrandTotal">0.00</span></h3>
+                                        </div>
+                                        <div class="col-12 mt-2">
                                             <button class="btn btn-success btn-lg w-100" onclick="completeSale()"><i class="fas fa-print"></i> <span data-i18n="complete_sale">Complete Sale (Thermal Print)</span></button>
                                         </div>
                                     </div>
@@ -498,6 +518,32 @@
                             <div class="card">
                                 <div class="card-header bg-info text-white"><h5 class="mb-0" data-i18n="quick_items">Quick Items</h5></div>
                                 <div class="card-body" id="quickItemsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.5 Customers & Khata Page -->
+                <div id="customers" class="page">
+                    <div class="card">
+                        <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center" style="background-color: #6f42c1;">
+                            <h5 class="mb-0"><i class="fas fa-user-friends me-2"></i> <span data-i18n="customers">Customers (Khata)</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i> <span data-i18n="add_customer">Add Customer</span></button>
+                        </div>
+                        <div class="card-body">
+                            <input type="text" class="form-control mb-3" id="custSearch" placeholder="Search customer..." onkeyup="renderCustomers()">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="name">Name</th>
+                                            <th data-i18n="contact">Phone</th>
+                                            <th data-i18n="balance">Balance (Udhaar)</th>
+                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTableBody"></tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -537,7 +583,7 @@
                     </div>
                 </div>
 
-                <!-- 6. Reports Page -->
+                <!-- 6. Reports Page (Updated with Return logic) -->
                 <div id="reports" class="page">
                     <div class="card">
                         <div class="card-header bg-dark text-white d-flex justify-content-between">
@@ -551,7 +597,9 @@
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle" id="reportsTable">
                                     <thead><tr>
-                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th><th data-i18n="discount">Disc.</th><th data-i18n="total">Total</th><th data-i18n="net_profit" class="text-success">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
+                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th>
+                                        <th data-i18n="discount">Disc. / Tax</th><th data-i18n="total">Total</th>
+                                        <th data-i18n="net_profit" class="text-success">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
                                     </tr></thead>
                                     <tbody id="reportsTableBody"></tbody>
                                 </table>
@@ -651,6 +699,72 @@
     </div>
 
     <!-- Modals -->
+
+    <!-- Add/Edit Customer Modal -->
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="add_customer">Add Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="custId">
+                    <div class="mb-3"><label data-i18n="name">Name</label><input type="text" class="form-control" id="cName" required></div>
+                    <div class="mb-3"><label data-i18n="contact">Phone Number</label><input type="text" class="form-control" id="cPhone"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCustomer()" data-i18n="save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Ledger Modal -->
+    <div class="modal fade" id="ledgerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title"><i class="fas fa-book"></i> Ledger: <span id="ledgerCustName" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded">
+                        <h4 class="mb-0">Balance: <span id="ledgerBalance" class="text-danger fw-bold">0</span></h4>
+                        <div class="input-group" style="width: 250px;">
+                            <input type="number" class="form-control" id="ledgerReceiveAmt" placeholder="Amount...">
+                            <button class="btn btn-success" onclick="receiveLedgerPayment()">Receive</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-striped">
+                            <thead><tr><th>Date</th><th>Description</th><th class="text-danger">Debit (Udhaar)</th><th class="text-success">Credit (Jama)</th></tr></thead>
+                            <tbody id="ledgerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Held Bills Modal -->
+    <div class="modal fade" id="heldBillsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-list"></i> <span data-i18n="held_bills">Held Carts</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group" id="heldBillsList">
+                        <!-- Carts will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add/Edit Medicine Modal -->
     <div class="modal fade" id="medicineModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -661,7 +775,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="medForm">
-                        <input type="hidden" id="medIdOriginal"> <!-- To track original ID when editing -->
+                        <input type="hidden" id="medIdOriginal">
                         <div class="mb-3">
                             <label data-i18n="barcode_id">Barcode / ID</label>
                             <input type="text" class="form-control border-primary" id="medId" placeholder="Scan Barcode or leave empty">
@@ -807,6 +921,7 @@
     <!-- 80mm Thermal Receipt Print Area -->
     <div id="printSection" class="thermal-receipt no-print-section">
         <div style="text-align: center; margin-bottom: 5px;">
+            <!-- Pharmacy Logo Placeholder -->
             <i class="fas fa-clinic-medical" style="font-size: 28px; display:block; margin: 0 auto 5px auto;"></i>
             <h3 id="invPharmaName" style="margin: 0; font-size: 16px; font-weight: bold;">Elite Pharmacy</h3>
             <div id="invAddress" style="font-size: 11px; margin-top: 2px;"></div>
@@ -831,12 +946,14 @@
         <div class="border-dashed-top"></div>
         <div style="text-align: right; margin-top: 5px;">
             <div id="invSubTotalRow" style="font-size: 12px; color:#333;"></div>
-            <div id="invDiscountRow" style="font-size: 12px; color:#333; margin-bottom: 4px;"></div>
+            <div id="invDiscountRow" style="font-size: 12px; color:#333;"></div>
+            <div id="invTaxRow" style="font-size: 12px; color:#333; margin-bottom: 4px;"></div>
             <h4 id="invGrandTotal" style="margin: 0; font-size: 14px; font-weight: bold;"></h4>
+            <div id="invPaymentMethod" style="font-size: 11px; color:#555; margin-top: 3px;"></div>
         </div>
         
         <div style="text-align: center; margin-top: 15px;">
-            <!-- Barcode Area for Receipt -->
+            <div id="invReturnMsg" style="font-weight:bold; font-size: 14px; margin-bottom: 5px; color: red;"></div>
             <svg id="invBarcodeSvg"></svg>
             <p style="font-size: 11px; margin-top: 5px; font-weight: bold;">Thank you for your visit!</p>
         </div>
@@ -870,6 +987,8 @@
                 dashboard: "Dashboard", medicines: "Medicines", sales: "Sales (POS)", inventory: "Inventory", 
                 alerts: "Alerts", reports: "Reports", suppliers: "Suppliers", employees: "Employees", 
                 delivery: "Delivery", settings: "Settings", profile: "Profile", logout: "Logout",
+                customers: "Customers (Khata)", add_customer: "Add Customer", khata_balance: "Total Udhaar",
+                hold_bill: "Hold Cart", held_bills: "Held Carts", return_sale: "Return", cash: "Cash", credit: "Credit (Udhaar)",
                 total_sales: "Total Sales", available_meds: "Available Meds", low_stock: "Low Stock Items", click_details: "Click for details",
                 add_med: "Add New", scan_qr: "Scan Barcode", barcode_id: "Barcode / ID", barcode_hint: "Scan barcode with device",
                 med_name: "Medicine Name", category: "Category", price: "Price", stock: "Stock", actions: "Actions",
@@ -880,8 +999,8 @@
                 batch_no: "Batch / Lot No", formula: "Formula / Generic", batch_expiry: "Batch & Expiry",
                 sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
                 print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine",
-                purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", subtotal: "Subtotal", net_profit: "Net Profit",
-                expiring_soon: "Expiring Soon", expired: "Expired!"
+                purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", tax: "Tax / GST (%)", subtotal: "Subtotal", net_profit: "Net Profit",
+                balance: "Balance (Udhaar)"
             },
             ur: {
                 sys_title: "فارمیسی مینجمنٹ سسٹم",
@@ -891,6 +1010,8 @@
                 dashboard: "ڈیش بورڈ", medicines: "ادویات", sales: "سیلز (POS)", inventory: "انوینٹری", 
                 alerts: "الرٹس", reports: "رپورٹس", suppliers: "سپلائرز", employees: "ملازمین", 
                 delivery: "ڈلیوری", settings: "ترتیبات", profile: "پروفائل", logout: "لاگ آؤٹ",
+                customers: "گاہک (کھاتہ)", add_customer: "گاہک شامل کریں", khata_balance: "کل ادھار",
+                hold_bill: "بل روکیں", held_bills: "روکے گئے بل", return_sale: "واپسی", cash: "نقد", credit: "ادھار",
                 total_sales: "کل سیلز", available_meds: "دستیاب ادویات", low_stock: "کم اسٹاک", click_details: "تفصیلات کے لیے کلک کریں",
                 add_med: "نیا شامل کریں", scan_qr: "بارکوڈ اسکین کریں", barcode_id: "بارکوڈ / آئی ڈی", barcode_hint: "ڈیوائس سے بارکوڈ اسکین کریں",
                 med_name: "دوا کا نام", category: "زمرہ", price: "قیمت", stock: "اسٹاک", actions: "ایکشنز",
@@ -901,8 +1022,8 @@
                 batch_no: "بیچ نمبر", formula: "فارمولا / جنرک", batch_expiry: "بیچ اور ایکسپائری",
                 sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
                 print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں",
-                purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
-                expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!"
+                purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ", tax: "ٹیکس (%)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
+                balance: "بقایا (ادھار)"
             }
         };
 
@@ -940,26 +1061,28 @@
                 db = JSON.parse(saved);
                 db.medicines = db.medicines || [];
                 db.sales = db.sales || [];
-                db.currentSale = db.currentSale || { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null };
+                db.currentSale = db.currentSale || { items: [], subTotal: 0, discount: 0, discountType: 'Rs', taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = db.suppliers || [];
                 db.employees = db.employees || [];
                 db.alerts = db.alerts || [];
                 db.deliveries = db.deliveries || [];
                 db.settings = db.settings || { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
-                
+                db.customers = db.customers || [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
+                db.heldBills = db.heldBills || [];
             } else {
                 db.medicines = [
                     { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
-                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
-                    { id: 'M103', name: 'Vitamin C', formula: 'Ascorbic Acid', batchNumber: 'B-003', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
+                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' }
                 ];
                 db.sales = [];
-                db.currentSale = { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null };
+                db.currentSale = { items: [], subTotal: 0, discount: 0, discountType: 'Rs', taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567' }];
                 db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
                 db.deliveries = [];
                 db.alerts = [];
                 db.settings = { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
+                db.customers = [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
+                db.heldBills = [];
             }
             generateSystemAlerts();
             saveDB(); 
@@ -973,18 +1096,11 @@
             const next90Days = new Date(today.getTime() + (90 * 24 * 60 * 60 * 1000));
 
             db.medicines.forEach(m => {
-                // Low Stock Check
-                if (m.stock <= m.minStock) {
-                    db.alerts.push({ id: Date.now()+Math.random(), msg: `Low stock warning for ${m.name} (Current: ${m.stock})`, type: 'warning' });
-                }
-                // Expiry Check
+                if (m.stock <= m.minStock) { db.alerts.push({ id: Date.now()+Math.random(), msg: `Low stock warning for ${m.name} (Current: ${m.stock})`, type: 'warning' }); }
                 if (m.expiryDate) {
                     const expDate = new Date(m.expiryDate);
-                    if (expDate < today) {
-                        db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} has EXPIRED on ${m.expiryDate}!`, type: 'danger' });
-                    } else if (expDate <= next90Days) {
-                        db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} is expiring soon (${m.expiryDate}).`, type: 'warning' });
-                    }
+                    if (expDate < today) { db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} has EXPIRED on ${m.expiryDate}!`, type: 'danger' }); } 
+                    else if (expDate <= next90Days) { db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} is expiring soon (${m.expiryDate}).`, type: 'warning' }); }
                 }
             });
 
@@ -1056,7 +1172,6 @@
             });
         }
 
-        /* Responsive Sidebar Toggle */
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('show');
             document.getElementById('sidebarOverlay').classList.toggle('show');
@@ -1073,13 +1188,10 @@
             document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
             
             document.getElementById(pageId).classList.add('active');
-            
             document.querySelectorAll(`.sidebar .nav-link`).forEach(l => {
                 if(l.getAttribute('onclick').includes(pageId)) l.classList.add('active');
             });
-            
             document.getElementById('pageTitle').innerText = i18n[currentLang][pageId] || pageId.toUpperCase();
-
             closeSidebar(); 
 
             if(pageId === 'dashboard') loadDashboard();
@@ -1091,6 +1203,7 @@
             if(pageId === 'employees') renderEmployees();
             if(pageId === 'delivery') renderDeliveries();
             if(pageId === 'alerts') renderAlerts();
+            if(pageId === 'customers') renderCustomers();
             if(pageId === 'settings') loadSettings();
         }
 
@@ -1100,19 +1213,25 @@
 
         function loadDashboard() {
             generateSystemAlerts(); 
-            const totalSales = db.sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
-            const netProfit = db.sales.reduce((sum, s) => sum + parseFloat(s.profit || 0), 0);
+            // Calculate sales ONLY for non-returned items
+            const activeSales = db.sales.filter(s => !s.isReturned);
+            const totalSales = activeSales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
+            const netProfit = activeSales.reduce((sum, s) => sum + parseFloat(s.profit || 0), 0);
+            
             const lowStockList = db.medicines.filter(m => m.stock <= m.minStock || (m.expiryDate && new Date(m.expiryDate) < new Date(new Date().getTime() + 90*24*60*60*1000)));
+            const totalUdhaar = db.customers.reduce((sum, c) => sum + parseFloat(c.balance || 0), 0);
             
             document.getElementById('dashTotalSales').innerText = 'Rs ' + totalSales.toFixed(2);
             document.getElementById('dashTotalMeds').innerText = db.medicines.length;
             document.getElementById('dashAlerts').innerText = db.alerts.length;
             document.getElementById('dashNetProfit').innerText = 'Rs ' + netProfit.toFixed(2);
+            document.getElementById('dashUdhaar').innerText = 'Rs ' + totalUdhaar.toFixed(2);
 
             const recentSalesTbody = document.getElementById('dashRecentSales');
             recentSalesTbody.innerHTML = '';
             db.sales.slice(-5).reverse().forEach(s => {
-                recentSalesTbody.innerHTML += `<tr><td><small>${s.id}</small></td><td>${s.customer}</td><td class="text-success fw-bold">Rs ${s.total}</td></tr>`;
+                const badge = s.isReturned ? `<span class="badge bg-danger ms-1">Returned</span>` : '';
+                recentSalesTbody.innerHTML += `<tr class="${s.isReturned ? 'returned-row' : ''}"><td><small>${s.id}</small></td><td>${s.customer} ${badge}</td><td class="text-success fw-bold">Rs ${s.total}</td></tr>`;
             });
             if(db.sales.length === 0) recentSalesTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No sales yet</td></tr>`;
 
@@ -1131,13 +1250,14 @@
             const ctxSales = document.getElementById('salesTrendChart').getContext('2d');
             if (salesTrendChartInst) salesTrendChartInst.destroy();
             
+            const activeSales = db.sales.filter(s => !s.isReturned);
             salesTrendChartInst = new Chart(ctxSales, {
                 type: 'line',
                 data: {
                     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                     datasets: [{
                         label: 'Sales (Rs)',
-                        data: [1200, 1900, 1500, 2200, 1800, 2500, db.sales.reduce((s,a)=>s+parseFloat(a.total||0),0) || 3000],
+                        data: [1200, 1900, 1500, 2200, 1800, 2500, activeSales.reduce((s,a)=>s+parseFloat(a.total||0),0) || 3000],
                         borderColor: '#2c5aa0',
                         backgroundColor: 'rgba(44, 90, 160, 0.1)',
                         borderWidth: 2, tension: 0.4, fill: true
@@ -1167,295 +1287,134 @@
             });
         }
 
-        let currentModalContext = '';
-        function openDetailsModal(type) {
-            currentModalContext = type;
-            const thead = document.getElementById('detailsTableHead');
-            const tbody = document.getElementById('detailsTableBody');
-            thead.innerHTML = ''; tbody.innerHTML = '';
-            let title = '';
-
-            if (type === 'sales') {
-                title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
-                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th><th>Profit</th></tr>`;
-                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success">Rs ${s.profit||0}</td></tr>`; });
-            } else if (type === 'medicines') {
-                title = currentLang==='en'?'All Medicines':'تمام ادویات';
-                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name & Formula</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
-                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class="text-muted">${m.formula||''}</small></td><td>${m.batchNumber||'-'}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
-            } else if (type === 'lowstock') {
-                title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
-                thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
-                db.medicines.filter(m=>m.stock<=m.minStock).forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`; });
-            }
-            document.getElementById('detailsModalTitle').innerText = title;
-            new bootstrap.Modal(document.getElementById('detailsModal')).show();
-        }
-
-        function exportDetailsPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(document.getElementById('detailsModalTitle').innerText, 14, 15);
-            doc.autoTable({ html: '#detailsTable', startY: 20 });
-            doc.save(`${currentModalContext}_report.pdf`);
-            showToast('PDF Exported Successfully!');
-        }
-
-        /* ================= Generic Thermal Print (For Employee/Supplier/Delivery) ================= */
-        function printGenericRecord(title, detailsObj) {
-            let html = `<div style="text-align: center; margin-bottom: 10px;">
-                <i class="fas fa-clinic-medical" style="font-size: 24px; display:block; margin: 0 auto 5px auto;"></i>
-                <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
-                <h4 style="margin: 5px 0; font-size: 14px; text-decoration: underline;">${title}</h4>
-            </div><div style="font-size: 12px; line-height: 1.5;">`;
-            
-            for(const [key, val] of Object.entries(detailsObj)) {
-                html += `<div><strong>${key}:</strong> ${val}</div>`;
-            }
-            html += `</div><div class="border-dashed-top"></div>
-            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
-            
-            document.getElementById('genericPrintSection').innerHTML = html;
-            
-            // Isolate generic print section
-            document.getElementById('mainSystem').classList.add('no-print-section');
-            document.getElementById('printSection').classList.add('no-print-section');
-            document.getElementById('qrPrintSection').classList.add('no-print-section');
-            document.getElementById('genericPrintSection').classList.remove('no-print-section');
-            
-            window.print();
-            
-            setTimeout(() => {
-                document.getElementById('genericPrintSection').classList.add('no-print-section');
-                document.getElementById('mainSystem').classList.remove('no-print-section');
-            }, 500);
-        }
-
-        /* ================= Barcode Printing Logic ================= */
-        function openSingleQRPrintModal() {
-            const select = document.getElementById('singleQRSelect');
-            select.innerHTML = '';
-            if(db.medicines.length === 0) {
-                showToast('No medicines available to print.', 'warning');
-                return;
-            }
-            db.medicines.forEach(m => {
-                select.innerHTML += `<option value="${m.id}">${m.name} (${m.id})</option>`;
-            });
-            new bootstrap.Modal(document.getElementById('singleQRModal')).show();
-        }
-
-        function printSingleQRCode() {
-            const medId = document.getElementById('singleQRSelect').value;
-            const med = db.medicines.find(m => m.id === medId);
-            if(med) {
-                bootstrap.Modal.getInstance(document.getElementById('singleQRModal')).hide();
-                executeQRPrint([med]);
-            }
-        }
-
-        function printBulkQRCodes() {
-            if(db.medicines.length === 0) {
-                showToast('No medicines available to print.', 'warning');
-                return;
-            }
-            executeQRPrint(db.medicines);
-        }
-
-        function executeQRPrint(medicinesToPrint) {
-            const printArea = document.getElementById('qrPrintSection');
-            printArea.innerHTML = ''; 
-
-            medicinesToPrint.forEach(med => {
-                const label = document.createElement('div');
-                label.className = 'qr-label-print';
-                label.innerHTML = `
-                    <div style="font-weight:bold; font-size: 14px;">${med.name}</div>
-                    <svg id="print-barcode-${med.id}"></svg>
-                    <div style="font-size: 12px; color: #555;">Rs ${med.price}</div>
-                `;
-                printArea.appendChild(label);
-                
-                JsBarcode(`#print-barcode-${med.id}`, med.id, {
-                    format: "CODE128",
-                    width: 2,          
-                    height: 80,        
-                    displayValue: true,
-                    fontSize: 14,
-                    margin: 20,        
-                    background: "#ffffff"
-                });
-            });
-
-            document.getElementById('printSection').classList.add('no-print-section'); 
-            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
-            document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
-            document.getElementById('mainSystem').classList.add('no-print-section'); 
-            
-            setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                    document.getElementById('qrPrintSection').classList.add('no-print-section');
-                    document.getElementById('mainSystem').classList.remove('no-print-section');
-                }, 500);
-            }, 600);
-        }
-
-        /* ================= Medicines & UI Logic ================= */
-        function renderMedicines() {
-            if (!db || !Array.isArray(db.medicines)) return; 
-
-            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
-            const tbody = document.getElementById('medTableBody');
+        /* ================= Customers & Khata (Udhaar) ================= */
+        function renderCustomers() {
+            const q = document.getElementById('custSearch')?.value.toLowerCase() || '';
+            const tbody = document.getElementById('customersTableBody');
             tbody.innerHTML = '';
             
-            db.medicines.filter(m => 
-                m.name.toLowerCase().includes(q) || 
-                m.id.toLowerCase().includes(q) || 
-                (m.formula && m.formula.toLowerCase().includes(q)) ||
-                (m.batchNumber && m.batchNumber.toLowerCase().includes(q))
-            ).forEach(m => {
-                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
-                const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
+            db.customers.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)).forEach(c => {
+                const balClass = c.balance > 0 ? 'text-danger fw-bold' : 'text-success';
+                const actionBtns = c.id === 'C-WALKIN' ? '' : `
+                    <button class="btn btn-sm btn-info text-white" onclick="openLedger('${c.id}')"><i class="fas fa-book"></i> Ledger</button>
+                    <button class="btn btn-sm btn-primary" onclick="editCustomer('${c.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.id}')"><i class="fas fa-trash"></i></button>
+                `;
                 
                 tbody.innerHTML += `
                     <tr>
-                        <td><strong>${m.id}</strong></td>
-                        <td>${m.name} <br><small class="text-muted">${m.formula || ''}</small></td>
-                        <td>${m.category}</td>
-                        <td>Rs ${m.price} <br><small class="text-muted">(Purch: Rs ${m.purchasePrice || 0})</small></td>
-                        <td class="${stockClass}">${m.stock}</td>
-                        <td><span class="badge bg-secondary mb-1">${m.batchNumber || 'N/A'}</span><br><span class="${expClass}">${m.expiryDate || '-'}</span></td>
-                        <td class="action-btns text-center">
-                            <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
-                        </td>
+                        <td><strong>${c.name}</strong> <small class="text-muted d-block">${c.id}</small></td>
+                        <td>${c.phone || '-'}</td>
+                        <td class="${balClass}">Rs ${parseFloat(c.balance).toFixed(2)}</td>
+                        <td class="text-center action-btns">${actionBtns}</td>
                     </tr>`;
             });
         }
 
-        function openAddMedicineModal() {
-            document.getElementById('medForm').reset();
-            document.getElementById('medIdOriginal').value = '';
-            document.getElementById('medId').value = ''; 
-            document.getElementById('mFormula').value = ''; 
-            document.getElementById('mBatch').value = ''; 
-            document.getElementById('barcodeContainerDiv').style.display = 'none';
-            document.getElementById('qrHint').style.display = 'none';
-            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
-            new bootstrap.Modal(document.getElementById('medicineModal')).show();
-            setTimeout(() => document.getElementById('medId').focus(), 500);
+        function openAddCustomerModal() {
+            document.getElementById('custId').value = '';
+            document.getElementById('cName').value = '';
+            document.getElementById('cPhone').value = '';
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
         }
 
-        function saveMedicine() {
-            const originalId = document.getElementById('medIdOriginal').value;
-            const inputId = document.getElementById('medId').value.trim();
-            const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
+        function saveCustomer() {
+            const id = document.getElementById('custId').value || 'C-' + Date.now().toString().slice(-5);
+            const name = document.getElementById('cName').value;
+            const phone = document.getElementById('cPhone').value;
             
-            const med = {
-                id: newId, 
-                name: document.getElementById('mName').value, 
-                formula: document.getElementById('mFormula').value,
-                batchNumber: document.getElementById('mBatch').value,
-                category: document.getElementById('mCat').value,
-                purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value || 0),
-                price: parseFloat(document.getElementById('mPrice').value), 
-                stock: parseInt(document.getElementById('mStock').value),
-                minStock: parseInt(document.getElementById('mMinStock').value),
-                expiryDate: document.getElementById('mExpiryDate').value
-            };
+            if(!name) { showToast("Name is required", "danger"); return; }
 
-            if (originalId) { // Editing existing
-                db.medicines = db.medicines.filter(m => m.id !== originalId);
-                db.medicines.push(med);
-            } else { // Adding new
-                if (db.medicines.find(m => m.id === newId)) {
-                    showToast('Barcode / ID already exists!', 'danger');
-                    return;
-                }
-                db.medicines.push(med);
+            const existing = db.customers.find(c => c.id === id);
+            if (existing) {
+                existing.name = name; existing.phone = phone;
+            } else {
+                db.customers.push({ id, name, phone, balance: 0, ledger: [] });
             }
-            
-            saveDB();
-            generateSystemAlerts(); // Re-check expiries
-            
-            document.getElementById('barcodeContainerDiv').style.display = 'flex';
-            document.getElementById('qrHint').style.display = 'block';
-            JsBarcode("#barcodeSvg", med.id, { 
-                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff" 
-            });
-
-            showToast(currentLang==='en'?'Medicine Saved!':'محفوظ ہو گیا!');
-            renderMedicines();
-            setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide(); }, 2000);
+            saveDB(); renderCustomers(); renderPOSCustomers();
+            bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+            showToast('Customer Saved!');
         }
 
-        function editMedicine(id) {
-            const m = db.medicines.find(x => x.id === id);
-            if(!m) return;
-            document.getElementById('medIdOriginal').value = m.id;
-            document.getElementById('medId').value = m.id; 
-            document.getElementById('mName').value = m.name;
-            document.getElementById('mFormula').value = m.formula || '';
-            document.getElementById('mBatch').value = m.batchNumber || '';
-            document.getElementById('mCat').value = m.category; 
-            document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
-            document.getElementById('mPrice').value = m.price;
-            document.getElementById('mStock').value = m.stock; 
-            document.getElementById('mMinStock').value = m.minStock;
-            document.getElementById('mExpiryDate').value = m.expiryDate || '';
-            
-            document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
-            document.getElementById('qrHint').style.display = 'block';
-            JsBarcode("#barcodeSvg", m.id, { 
-                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff"
-            });
-
-            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
-            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+        function editCustomer(id) {
+            const c = db.customers.find(x => x.id === id);
+            if(!c) return;
+            document.getElementById('custId').value = c.id;
+            document.getElementById('cName').value = c.name;
+            document.getElementById('cPhone').value = c.phone;
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
         }
 
-        function deleteMedicine(id) {
-            showConfirm(currentLang==='en'?'Delete this medicine?':'کیا آپ حذف کرنا چاہتے ہیں؟', () => {
-                db.medicines = db.medicines.filter(m => m.id !== id);
-                saveDB(); renderMedicines(); showToast('Deleted');
+        function deleteCustomer(id) {
+            showConfirm('Delete this customer?', () => {
+                db.customers = db.customers.filter(c => c.id !== id);
+                saveDB(); renderCustomers(); renderPOSCustomers(); showToast('Deleted');
             });
         }
 
-        /* ================= Camera Scanner (Barcode Optimization) ================= */
-        let html5QrcodeScanner = null; let scanContext = '';
-        function openQRScanner(context) {
-            scanContext = context;
-            new bootstrap.Modal(document.getElementById('scannerModal')).show();
+        let activeLedgerCustomer = null;
+        function openLedger(id) {
+            activeLedgerCustomer = db.customers.find(c => c.id === id);
+            if(!activeLedgerCustomer) return;
             
-            setTimeout(() => {
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                    fps: 10, 
-                    rememberLastUsedCamera: true,
-                    formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ],
-                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-                }, false);
-                
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            }, 500);
+            document.getElementById('ledgerCustName').innerText = activeLedgerCustomer.name;
+            document.getElementById('ledgerReceiveAmt').value = '';
+            
+            renderLedgerTable();
+            new bootstrap.Modal(document.getElementById('ledgerModal')).show();
         }
-        function onScanSuccess(decodedText, decodedResult) {
-            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
-            if(scanContext === 'sale') addToSale(decodedText);
-            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
-        }
-        function onScanFailure(error) { } 
-        function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
 
-        /* ================= Sales (POS) & Physical Scanner Logic ================= */
+        function renderLedgerTable() {
+            document.getElementById('ledgerBalance').innerText = 'Rs ' + parseFloat(activeLedgerCustomer.balance).toFixed(2);
+            const tbody = document.getElementById('ledgerTableBody');
+            tbody.innerHTML = '';
+            
+            activeLedgerCustomer.ledger.slice().reverse().forEach(entry => {
+                const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
+                const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
+                tbody.innerHTML += `<tr><td><small>${entry.date}</small></td><td>${entry.desc}</td><td class="text-danger">${debit}</td><td class="text-success">${credit}</td></tr>`;
+            });
+            if(activeLedgerCustomer.ledger.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center">No transaction history</td></tr>`;
+        }
+
+        function receiveLedgerPayment() {
+            const amt = parseFloat(document.getElementById('ledgerReceiveAmt').value);
+            if(!amt || amt <= 0) return;
+            
+            activeLedgerCustomer.balance -= amt;
+            activeLedgerCustomer.ledger.push({
+                date: new Date().toLocaleString(),
+                desc: 'Payment Received',
+                type: 'credit',
+                amount: amt
+            });
+            
+            saveDB(); renderLedgerTable(); renderCustomers();
+            document.getElementById('ledgerReceiveAmt').value = '';
+            showToast('Payment Received successfully!');
+        }
+
+        /* ================= Sales (POS) & Hold Cart Logic ================= */
         function loadSalesPage() {
             const qList = document.getElementById('quickItemsList');
             qList.innerHTML = '';
             db.medicines.slice(0, 8).forEach(m => {
                 qList.innerHTML += `<button class="btn btn-outline-primary btn-sm m-1" onclick="addToSale('${m.id}')">${m.name}</button>`;
             });
+            
+            renderPOSCustomers();
+            updateHeldBillsCount();
             renderSaleTable();
             setTimeout(() => document.getElementById('saleSearchInput').focus(), 300);
+        }
+
+        function renderPOSCustomers() {
+            const sel = document.getElementById('posCustomerSelect');
+            if(!sel) return;
+            sel.innerHTML = '';
+            db.customers.forEach(c => {
+                sel.innerHTML += `<option value="${c.id}">${c.name} ${c.id==='C-WALKIN'?'':'(Bal: Rs '+c.balance+')'}</option>`;
+            });
         }
 
         function handleSaleSearch(event) {
@@ -1463,36 +1422,22 @@
                 event.preventDefault();
                 const q = document.getElementById('saleSearchInput').value.trim();
                 if(!q) return;
-                
                 const match = db.medicines.find(m => m.id.toLowerCase() === q.toLowerCase());
-                if(match) {
-                    addToSale(match.id);
-                    document.getElementById('saleSearchInput').value = ''; 
-                } else {
-                    showToast('Item not found for barcode: ' + q, 'danger');
-                    document.getElementById('saleSearchInput').value = ''; 
-                }
+                if(match) { addToSale(match.id); document.getElementById('saleSearchInput').value = ''; } 
+                else { showToast('Item not found: ' + q, 'danger'); document.getElementById('saleSearchInput').value = ''; }
             }
         }
 
         function searchSaleItemLive() {
             const q = document.getElementById('saleSearchInput').value.toLowerCase();
             if(q.length < 2) return;
-            const match = db.medicines.find(m => 
-                m.name.toLowerCase() === q || 
-                m.id.toLowerCase() === q || 
-                (m.formula && m.formula.toLowerCase() === q) || 
-                (m.batchNumber && m.batchNumber.toLowerCase() === q)
-            );
-            if(match) { 
-                addToSale(match.id); 
-                document.getElementById('saleSearchInput').value = ''; 
-            }
+            const match = db.medicines.find(m => m.name.toLowerCase() === q || m.id.toLowerCase() === q || (m.formula && m.formula.toLowerCase() === q) || (m.batchNumber && m.batchNumber.toLowerCase() === q));
+            if(match) { addToSale(match.id); document.getElementById('saleSearchInput').value = ''; }
         }
 
         function addToSale(id) {
             const med = db.medicines.find(m => m.id === id);
-            if(!med) { showToast('Medicine not found', 'danger'); return; }
+            if(!med) return;
             if(med.stock <= 0) { showToast('Out of stock!', 'danger'); return; }
             
             const existing = db.currentSale.items.find(i => i.id === id);
@@ -1512,13 +1457,10 @@
 
         function updateSaleQty(index, dir) {
             const item = db.currentSale.items[index]; const med = db.medicines.find(m => m.id === item.id);
-            if(dir === 1 && item.qty >= med.stock) { showToast('Limit reached', 'warning'); return; }
+            if(dir === 1 && item.qty >= med.stock) return;
             item.qty += dir;
             if(item.qty <= 0) db.currentSale.items.splice(index, 1);
-            else {
-                item.total = item.qty * item.price;
-                item.totalPurchase = item.qty * item.purchasePrice;
-            }
+            else { item.total = item.qty * item.price; item.totalPurchase = item.qty * item.purchasePrice; }
             saveDB(); renderSaleTable();
         }
 
@@ -1532,25 +1474,100 @@
                         <td>${item.total}</td></tr>`;
             });
             
-            db.currentSale.subTotal = subTotal;
-            
+            // Handle Advanced Math (Discount & Tax)
             const discountInput = document.getElementById('saleDiscount');
-            let discount = parseFloat(discountInput.value) || 0;
-            if(discount > subTotal) { discount = subTotal; discountInput.value = subTotal; }
-            
-            db.currentSale.discount = discount;
-            db.currentSale.total = subTotal - discount; 
+            let discountVal = parseFloat(discountInput.value) || 0;
+            let discountType = document.getElementById('saleDiscountType').value;
+            let taxPercent = parseFloat(document.getElementById('saleTax').value) || 0;
+
+            let discountAmt = 0;
+            if (discountType === '%') { discountAmt = subTotal * (discountVal / 100); } 
+            else { discountAmt = discountVal; }
+            if (discountAmt > subTotal) discountAmt = subTotal; // Cap discount
+
+            let totalAfterDisc = subTotal - discountAmt;
+            let taxAmt = totalAfterDisc * (taxPercent / 100);
+            let grandTotal = totalAfterDisc + taxAmt;
+
+            // Save state
+            db.currentSale.subTotal = subTotal;
+            db.currentSale.discountAmt = discountAmt;
+            db.currentSale.discountType = discountType;
+            db.currentSale.discountVal = discountVal;
+            db.currentSale.taxPercent = taxPercent;
+            db.currentSale.taxAmt = taxAmt;
+            db.currentSale.total = grandTotal;
             
             document.getElementById('saleSubTotal').innerText = subTotal.toFixed(2);
-            document.getElementById('saleGrandTotal').innerText = db.currentSale.total.toFixed(2);
+            document.getElementById('saleGrandTotal').innerText = grandTotal.toFixed(2);
+        }
+
+        function holdCurrentCart() {
+            if(db.currentSale.items.length === 0) { showToast('Cart is empty', 'warning'); return; }
+            const holdId = 'HOLD-' + Date.now().toString().slice(-4);
+            db.heldBills.push({
+                holdId: holdId,
+                time: new Date().toLocaleTimeString(),
+                cart: JSON.parse(JSON.stringify(db.currentSale))
+            });
+            showToast('Cart placed on Hold');
+            newSale();
+            updateHeldBillsCount();
+        }
+
+        function updateHeldBillsCount() {
+            document.getElementById('heldBillsCount').innerText = db.heldBills.length;
+        }
+
+        function openHeldBillsModal() {
+            const list = document.getElementById('heldBillsList');
+            list.innerHTML = '';
+            if(db.heldBills.length === 0) { list.innerHTML = `<div class="text-center p-3 text-muted">No held carts</div>`; }
+            else {
+                db.heldBills.forEach((h, index) => {
+                    list.innerHTML += `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><strong>${h.holdId}</strong> <br><small class="text-muted">${h.time} - ${h.cart.items.length} items</small></div>
+                        <div>
+                            <button class="btn btn-success btn-sm me-1" onclick="restoreHeldCart(${index})">Restore</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteHeldCart(${index})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                });
+            }
+            new bootstrap.Modal(document.getElementById('heldBillsModal')).show();
+        }
+
+        function restoreHeldCart(index) {
+            if(db.currentSale.items.length > 0) {
+                showToast("Current cart is not empty. Please hold or clear it first.", "danger");
+                return;
+            }
+            db.currentSale = db.heldBills[index].cart;
+            deleteHeldCart(index, true);
+            
+            // Restore inputs
+            document.getElementById('saleDiscount').value = db.currentSale.discountVal || 0;
+            document.getElementById('saleDiscountType').value = db.currentSale.discountType || 'Rs';
+            document.getElementById('saleTax').value = db.currentSale.taxPercent || 0;
+            
+            saveDB(); renderSaleTable();
+            bootstrap.Modal.getInstance(document.getElementById('heldBillsModal')).hide();
+        }
+
+        function deleteHeldCart(index, silent=false) {
+            db.heldBills.splice(index, 1);
+            saveDB(); updateHeldBillsCount();
+            if(!silent) { openHeldBillsModal(); showToast('Held Cart Deleted'); }
         }
 
         function newSale() { 
-            db.currentSale = { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null }; 
+            db.currentSale = { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null }; 
             document.getElementById('saleDiscount').value = '0';
-            saveDB(); 
-            renderSaleTable(); 
-            document.getElementById('customerName').value=''; 
+            document.getElementById('saleTax').value = '0';
+            document.getElementById('posCustomerSelect').value = 'C-WALKIN';
+            document.getElementById('posPaymentMethod').value = 'Cash';
+            saveDB(); renderSaleTable(); 
             document.getElementById('saleSearchInput').focus(); 
         }
 
@@ -1560,27 +1577,52 @@
             const invId = db.currentSale.editingId || ('INV-' + Date.now().toString().slice(-6));
             const now = new Date();
             const dateStr = db.currentSale.editingDate || (now.toLocaleDateString() + ' ' + now.toLocaleTimeString());
-            const cust = document.getElementById('customerName').value || 'Walk-in Customer';
+            
+            const custId = document.getElementById('posCustomerSelect').value;
+            const paymentMethod = document.getElementById('posPaymentMethod').value;
+            const customerObj = db.customers.find(c => c.id === custId);
+            
+            if (paymentMethod === 'Credit' && custId === 'C-WALKIN') {
+                showToast("Cannot process Udhaar for Walk-in Customer! Please add/select a specific customer.", "danger");
+                return;
+            }
 
             let totalPurchaseCost = 0;
-
             db.currentSale.items.forEach(saleItem => { 
                 const med = db.medicines.find(m => m.id === saleItem.id); 
                 if(med) med.stock -= saleItem.qty; 
                 totalPurchaseCost += saleItem.totalPurchase;
             });
             
-            // Profit Calculation: (Total Sale Value after discount) - (Total Purchase Cost)
-            const netProfit = db.currentSale.total - totalPurchaseCost;
+            // Profit Calculation: (Total Sale Value BEFORE TAX but AFTER DISCOUNT) - (Total Purchase Cost)
+            const revenueForProfit = db.currentSale.subTotal - db.currentSale.discountAmt;
+            const netProfit = revenueForProfit - totalPurchaseCost;
 
             const completedSale = { 
-                id: invId, date: dateStr, customer: cust, 
+                id: invId, date: dateStr, 
+                customerId: customerObj.id, customer: customerObj.name, 
+                paymentMethod: paymentMethod,
                 items: [...db.currentSale.items], 
                 subTotal: db.currentSale.subTotal,
-                discount: db.currentSale.discount,
+                discountAmt: db.currentSale.discountAmt,
+                taxAmt: db.currentSale.taxAmt,
                 total: db.currentSale.total,
-                profit: netProfit
+                profit: netProfit,
+                isReturned: false
             };
+            
+            // Process Ledger if Credit
+            if (paymentMethod === 'Credit') {
+                customerObj.balance += completedSale.total;
+                customerObj.ledger.push({
+                    date: dateStr, desc: `Invoice #${invId}`, type: 'debit', amount: completedSale.total
+                });
+            }
+            
+            // Ensure we override if editing
+            if (db.currentSale.editingId) {
+                db.sales = db.sales.filter(s => s.id !== db.currentSale.editingId);
+            }
             
             db.sales.push(completedSale); saveDB();
             
@@ -1610,19 +1652,18 @@
                 </tr>`; 
             });
             
-            // Subtotal and Discount logic for receipt
-            if (sale.discount > 0) {
-                document.getElementById('invSubTotalRow').innerHTML = `Subtotal: Rs ${sale.subTotal}`;
-                document.getElementById('invDiscountRow').innerHTML = `Discount: -Rs ${sale.discount}`;
-            } else {
-                document.getElementById('invSubTotalRow').innerHTML = '';
-                document.getElementById('invDiscountRow').innerHTML = '';
-            }
-            document.getElementById('invGrandTotal').innerText = `Total: Rs ${sale.total}`;
+            // Display Subtotal, Tax, Discount logic dynamically
+            document.getElementById('invSubTotalRow').innerHTML = `Subtotal: Rs ${parseFloat(sale.subTotal).toFixed(2)}`;
+            if (sale.discountAmt > 0) { document.getElementById('invDiscountRow').innerHTML = `Discount: -Rs ${parseFloat(sale.discountAmt).toFixed(2)}`; } else { document.getElementById('invDiscountRow').innerHTML = ''; }
+            if (sale.taxAmt > 0) { document.getElementById('invTaxRow').innerHTML = `Tax (GST): +Rs ${parseFloat(sale.taxAmt).toFixed(2)}`; } else { document.getElementById('invTaxRow').innerHTML = ''; }
             
-            JsBarcode("#invBarcodeSvg", sale.id, { 
-                format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 0
-            });
+            document.getElementById('invGrandTotal').innerText = `Total: Rs ${parseFloat(sale.total).toFixed(2)}`;
+            document.getElementById('invPaymentMethod').innerText = `Paid via: ${sale.paymentMethod || 'Cash'}`;
+            
+            if(sale.isReturned) { document.getElementById('invReturnMsg').innerText = "*** REFUNDED / RETURNED ***"; }
+            else { document.getElementById('invReturnMsg').innerText = ""; }
+
+            JsBarcode("#invBarcodeSvg", sale.id, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 0 });
 
             document.getElementById('qrPrintSection').classList.add('no-print-section'); 
             document.getElementById('genericPrintSection').classList.add('no-print-section'); 
@@ -1638,59 +1679,120 @@
             }, 1000);
         }
 
-        /* ================= Reports Actions ================= */
+        /* ================= Reports Actions & RETURNS ================= */
         function renderReports() {
             const tbody = document.getElementById('reportsTableBody'); tbody.innerHTML = '';
             db.sales.slice().reverse().forEach(s => { 
+                const isRet = s.isReturned;
+                const rowClass = isRet ? 'returned-row' : '';
+                const retBadge = isRet ? `<br><span class="badge bg-danger returned-badge mt-1">Returned</span>` : '';
+                
+                let actions = `<button class="btn btn-info text-white" onclick="reprintSale('${s.id}')" title="Print"><i class="fas fa-print"></i></button>`;
+                
+                // Hide Edit and Return if already returned
+                if (!isRet) {
+                    actions += `
+                        <button class="btn btn-primary" onclick="editSale('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-warning text-dark" onclick="returnSale('${s.id}')" title="Return Invoice"><i class="fas fa-undo"></i></button>
+                    `;
+                }
+                actions += `<button class="btn btn-danger" onclick="deleteSale('${s.id}')" title="Delete Permanent"><i class="fas fa-trash"></i></button>`;
+
                 tbody.innerHTML += `
-                    <tr>
-                        <td>${s.id}</td><td>${s.date}</td><td>${s.customer}</td>
-                        <td class="text-danger">${s.discount > 0 ? '-Rs '+s.discount : '-'}</td>
+                    <tr class="${rowClass}">
+                        <td>${s.id} ${retBadge}</td><td>${s.date}</td><td>${s.customer} <br><small>(${s.paymentMethod||'Cash'})</small></td>
+                        <td class="text-danger">Disc: ${s.discountAmt>0?s.discountAmt:'0'} | Tax: ${s.taxAmt>0?s.taxAmt:'0'}</td>
                         <td class="fw-bold">Rs ${s.total}</td>
-                        <td class="text-success fw-bold">Rs ${s.profit || 0}</td>
-                        <td class="text-center action-btns">
-                            <button class="btn btn-info text-white" onclick="reprintSale('${s.id}')" title="Print"><i class="fas fa-print"></i></button>
-                            <button class="btn btn-primary" onclick="editSale('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger" onclick="deleteSale('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                        </td>
+                        <td class="text-success fw-bold">Rs ${isRet ? '0 (Void)' : (s.profit || 0)}</td>
+                        <td class="text-center action-btns">${actions}</td>
                     </tr>`; 
             });
         }
         
-        function reprintSale(id) {
-            const sale = db.sales.find(s => s.id === id);
-            if(sale) printInvoice(sale);
-        }
+        function reprintSale(id) { const sale = db.sales.find(s => s.id === id); if(sale) printInvoice(sale); }
 
         function deleteSale(id) {
-            showConfirm('Are you sure you want to delete this report?', () => {
+            showConfirm('Permanently Delete this report? (This will NOT fix stock/ledger. Use Return instead for refunds).', () => {
                 db.sales = db.sales.filter(s => s.id !== id);
-                saveDB(); renderReports(); showToast('Report Deleted Successfully', 'danger');
+                saveDB(); renderReports(); showToast('Report Deleted Permanently', 'danger');
+            });
+        }
+
+        function returnSale(id) {
+            const sale = db.sales.find(s => s.id === id);
+            if(!sale || sale.isReturned) return;
+            
+            showConfirm('Process Return / Refund for this entire invoice? Stock and Udhaar will be reversed.', () => {
+                sale.isReturned = true;
+                
+                // Restore Stock
+                sale.items.forEach(item => {
+                    const med = db.medicines.find(m => m.id === item.id);
+                    if(med) med.stock += item.qty;
+                });
+                
+                // Restore Customer Ledger if Credit
+                if(sale.paymentMethod === 'Credit' && sale.customerId) {
+                    const cust = db.customers.find(c => c.id === sale.customerId);
+                    if(cust) {
+                        cust.balance -= sale.total;
+                        cust.ledger.push({
+                            date: new Date().toLocaleString(),
+                            desc: `Refund / Invoice Reversal #${sale.id}`,
+                            type: 'credit', // Credit back their Udhaar
+                            amount: sale.total
+                        });
+                    }
+                }
+                
+                saveDB(); renderReports(); showToast('Invoice Returned Successfully', 'success');
             });
         }
 
         function editSale(id) {
             const sale = db.sales.find(s => s.id === id);
-            if(!sale) return;
-            showConfirm('Editing this sale will move items back to the POS cart. Proceed?', () => {
-                db.sales = db.sales.filter(s => s.id !== id);
-                sale.items.forEach(item => {
-                    const med = db.medicines.find(m => m.id === item.id);
-                    if(med) med.stock += item.qty;
-                });
+            if(!sale || sale.isReturned) return;
+            
+            showConfirm('Editing this sale will move items back to the POS cart and temporarily reverse its effects. Proceed?', () => {
+                // Completely reverse the old sale exactly like Return, but we keep it in memory to edit
+                sale.isReturned = true; // Temporary tombstone
+                
+                sale.items.forEach(item => { const med = db.medicines.find(m => m.id === item.id); if(med) med.stock += item.qty; });
+                
+                if(sale.paymentMethod === 'Credit' && sale.customerId) {
+                    const cust = db.customers.find(c => c.id === sale.customerId);
+                    if(cust) {
+                        cust.balance -= sale.total;
+                        cust.ledger.push({ date: new Date().toLocaleString(), desc: `Reversal for Edit #${sale.id}`, type: 'credit', amount: sale.total });
+                    }
+                }
+
+                // Load to Cart
                 db.currentSale = { 
-                    items: [...sale.items], subTotal: sale.subTotal || sale.total, 
-                    discount: sale.discount || 0, total: sale.total, 
-                    editingId: sale.id, editingDate: sale.date 
+                    items: [...sale.items], 
+                    subTotal: sale.subTotal || 0,
+                    discountAmt: sale.discountAmt || 0,
+                    discountType: sale.discountType || 'Rs',
+                    discountVal: sale.discountVal || 0,
+                    taxPercent: sale.taxPercent || 0,
+                    taxAmt: sale.taxAmt || 0,
+                    total: sale.total, 
+                    editingId: sale.id, 
+                    editingDate: sale.date 
                 };
-                document.getElementById('customerName').value = sale.customer !== 'Walk-in Customer' ? sale.customer : '';
-                document.getElementById('saleDiscount').value = sale.discount || 0;
+                
+                document.getElementById('posCustomerSelect').value = sale.customerId || 'C-WALKIN';
+                document.getElementById('posPaymentMethod').value = sale.paymentMethod || 'Cash';
+                document.getElementById('saleDiscount').value = sale.discountVal || 0;
+                document.getElementById('saleDiscountType').value = sale.discountType || 'Rs';
+                document.getElementById('saleTax').value = sale.taxPercent || 0;
+                
                 saveDB(); showPage('sales'); showToast('Sale loaded into Cart for editing', 'info');
             });
         }
 
         function exportExcel() {
-            const ws = XLSX.utils.json_to_sheet(db.sales.map(s => ({ 'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Discount': s.discount, 'Total': s.total, 'Profit': s.profit })));
+            const ws = XLSX.utils.json_to_sheet(db.sales.map(s => ({ 'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Discount': s.discountAmt, 'Tax': s.taxAmt, 'Total': s.total, 'Returned': s.isReturned?'Yes':'No' })));
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sales");
             XLSX.writeFile(wb, "Pharmacy_Sales.xlsx"); showToast('Excel Downloaded!');
         }
@@ -1707,7 +1809,6 @@
             document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
         }
 
-        /* --- Suppliers --- */
         function renderSuppliers() {
             const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
             db.suppliers.forEach(s => {
@@ -1719,29 +1820,19 @@
                 </td></tr>`;
             });
         }
-        function openAddSupplierModal() { 
-            document.getElementById('supId').value=''; 
-            document.getElementById('sName').value=''; 
-            document.getElementById('sContact').value=''; 
-            new bootstrap.Modal(document.getElementById('supplierModal')).show(); 
-        }
+        function openAddSupplierModal() { document.getElementById('supId').value=''; document.getElementById('sName').value=''; document.getElementById('sContact').value=''; new bootstrap.Modal(document.getElementById('supplierModal')).show(); }
         function saveSupplier() {
-            const id = document.getElementById('supId').value;
-            const name = document.getElementById('sName').value;
-            const contact = document.getElementById('sContact').value;
-            if(id) { const s = db.suppliers.find(x=>x.id===id); if(s) { s.name = name; s.contact = contact; } }
-            else { db.suppliers.push({ id: 'S'+Date.now(), name, contact }); }
+            const id = document.getElementById('supId').value; const name = document.getElementById('sName').value; const contact = document.getElementById('sContact').value;
+            if(id) { const s = db.suppliers.find(x=>x.id===id); if(s) { s.name = name; s.contact = contact; } } else { db.suppliers.push({ id: 'S'+Date.now(), name, contact }); }
             saveDB(); renderSuppliers(); bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide(); showToast('Saved');
         }
         function editSupplier(id) {
             const s = db.suppliers.find(x=>x.id===id); if(!s) return;
-            document.getElementById('supId').value = s.id; document.getElementById('sName').value = s.name; document.getElementById('sContact').value = s.contact;
-            new bootstrap.Modal(document.getElementById('supplierModal')).show();
+            document.getElementById('supId').value = s.id; document.getElementById('sName').value = s.name; document.getElementById('sContact').value = s.contact; new bootstrap.Modal(document.getElementById('supplierModal')).show();
         }
         function deleteSupplier(id) { showConfirm('Delete supplier?', () => { db.suppliers = db.suppliers.filter(s=>s.id!==id); saveDB(); renderSuppliers(); showToast('Deleted'); }); }
         function printSupplier(id) { const s = db.suppliers.find(x=>x.id===id); if(s) printGenericRecord('Supplier Info', {'Supplier ID': s.id, 'Name': s.name, 'Contact': s.contact}); }
 
-        /* --- Employees --- */
         function renderEmployees() {
             const tbody = document.getElementById('employeesTableBody'); tbody.innerHTML = '';
             db.employees.forEach(e => {
@@ -1753,25 +1844,19 @@
                 </td></tr>`;
             });
         }
-        function openAddEmployeeModal() { 
-            document.getElementById('empId').value=''; document.getElementById('eName').value=''; 
-            new bootstrap.Modal(document.getElementById('employeeModal')).show(); 
-        }
+        function openAddEmployeeModal() { document.getElementById('empId').value=''; document.getElementById('eName').value=''; new bootstrap.Modal(document.getElementById('employeeModal')).show(); }
         function saveEmployee() {
             const id = document.getElementById('empId').value; const name = document.getElementById('eName').value; const role = document.getElementById('eRole').value;
-            if(id) { const e = db.employees.find(x=>x.id===id); if(e) { e.name = name; e.role = role; } }
-            else { db.employees.push({ id: 'E'+Date.now(), name, role }); }
+            if(id) { const e = db.employees.find(x=>x.id===id); if(e) { e.name = name; e.role = role; } } else { db.employees.push({ id: 'E'+Date.now(), name, role }); }
             saveDB(); renderEmployees(); bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide(); showToast('Saved');
         }
         function editEmployee(id) {
             const e = db.employees.find(x=>x.id===id); if(!e) return;
-            document.getElementById('empId').value = e.id; document.getElementById('eName').value = e.name; document.getElementById('eRole').value = e.role;
-            new bootstrap.Modal(document.getElementById('employeeModal')).show();
+            document.getElementById('empId').value = e.id; document.getElementById('eName').value = e.name; document.getElementById('eRole').value = e.role; new bootstrap.Modal(document.getElementById('employeeModal')).show();
         }
         function deleteEmployee(id) { showConfirm('Delete employee?', () => { db.employees = db.employees.filter(e=>e.id!==id); saveDB(); renderEmployees(); showToast('Deleted'); }); }
         function printEmployee(id) { const e = db.employees.find(x=>x.id===id); if(e) printGenericRecord('Employee Info', {'Employee ID': e.id, 'Name': e.name, 'Role': e.role}); }
 
-        /* --- Delivery --- */
         function renderDeliveries() {
             const tbody = document.getElementById('deliveryTableBody'); tbody.innerHTML = '';
             db.deliveries.forEach(d => {
@@ -1785,20 +1870,15 @@
                     </td></tr>`;
             });
         }
-        function openAddDeliveryModal() { 
-            document.getElementById('delId').value=''; document.getElementById('dCust').value=''; document.getElementById('dStatus').value='Pending';
-            new bootstrap.Modal(document.getElementById('deliveryModal')).show(); 
-        }
+        function openAddDeliveryModal() { document.getElementById('delId').value=''; document.getElementById('dCust').value=''; document.getElementById('dStatus').value='Pending'; new bootstrap.Modal(document.getElementById('deliveryModal')).show(); }
         function saveDelivery() {
             const id = document.getElementById('delId').value; const cust = document.getElementById('dCust').value; const status = document.getElementById('dStatus').value;
-            if(id) { const d = db.deliveries.find(x=>x.id===id); if(d) { d.customer = cust; d.status = status; } }
-            else { db.deliveries.push({ id: 'D-'+Date.now().toString().slice(-4), customer: cust, status: status }); }
+            if(id) { const d = db.deliveries.find(x=>x.id===id); if(d) { d.customer = cust; d.status = status; } } else { db.deliveries.push({ id: 'D-'+Date.now().toString().slice(-4), customer: cust, status: status }); }
             saveDB(); renderDeliveries(); bootstrap.Modal.getInstance(document.getElementById('deliveryModal')).hide(); showToast('Delivery Saved');
         }
         function editDelivery(id) {
             const d = db.deliveries.find(x=>x.id===id); if(!d) return;
-            document.getElementById('delId').value = d.id; document.getElementById('dCust').value = d.customer; document.getElementById('dStatus').value = d.status;
-            new bootstrap.Modal(document.getElementById('deliveryModal')).show();
+            document.getElementById('delId').value = d.id; document.getElementById('dCust').value = d.customer; document.getElementById('dStatus').value = d.status; new bootstrap.Modal(document.getElementById('deliveryModal')).show();
         }
         function completeDelivery(id) { const d = db.deliveries.find(x=>x.id===id); if(d) d.status = 'Delivered'; saveDB(); renderDeliveries(); showToast('Delivery completed'); }
         function deleteDelivery(id) { showConfirm('Delete Delivery Order?', () => { db.deliveries = db.deliveries.filter(d=>d.id!==id); saveDB(); renderDeliveries(); showToast('Deleted'); }); }
@@ -1809,9 +1889,7 @@
             const cont = document.getElementById('alertsContainer'); cont.innerHTML = '';
             if(db.alerts.length===0) { cont.innerHTML = '<p class="text-muted text-center">No active alerts.</p>'; return; }
             db.alerts.forEach(a => {
-                cont.innerHTML += `<div class="alert alert-${a.type} d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-info-circle"></i> ${a.msg}</span>
-                    <button class="btn btn-sm btn-outline-dark" onclick="removeAlert(${a.id})"><i class="fas fa-times"></i></button></div>`;
+                cont.innerHTML += `<div class="alert alert-${a.type} d-flex justify-content-between align-items-center"><span><i class="fas fa-info-circle"></i> ${a.msg}</span><button class="btn btn-sm btn-outline-dark" onclick="removeAlert(${a.id})"><i class="fas fa-times"></i></button></div>`;
             });
         }
         function removeAlert(id) { db.alerts = db.alerts.filter(a=>a.id!==id); saveDB(); renderAlerts(); }
