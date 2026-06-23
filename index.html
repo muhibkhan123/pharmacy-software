@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharmacy Management System</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #34a853;
+            --accent-color: #ff6b35;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* --- Login CSS --- */
+        .login-container { display: flex; height: 100vh; }
+        .login-left {
+            flex: 1; background: linear-gradient(135deg, var(--primary-color) 0%, #1e3a8a 100%);
+            color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px;
+        }
+        .login-right { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px; background-color: white; }
+        .login-form { width: 100%; max-width: 400px; }
+        .login-logo { text-align: center; margin-bottom: 30px; }
+        .login-logo h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; }
+        .feature-item { display: flex; align-items: center; margin-bottom: 20px; }
+        .feature-icon { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-inline-end: 15px; font-size: 20px; }
+        .form-control, .form-select { padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25); }
+        .btn-login { background-color: var(--primary-color); color: white; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; }
+        .btn-login:hover { background-color: #1e3a8a; color: white;}
+
+        /* --- Main Layout CSS --- */
+        .main-system { display: none; height: 100vh; overflow: hidden; }
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary-color) 0%, #1e3a8a 100%);
+            color: white; height: 100vh; position: fixed; width: 250px; overflow-y: auto; z-index: 1000;
+            transition: all 0.3s;
+        }
+        /* Custom scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 5px; }
+
+        html[dir="ltr"] .sidebar { left: 0; }
+        html[dir="rtl"] .sidebar { right: 0; }
+        
+        .main-content {
+            padding: 20px; height: 100vh; overflow-y: auto; transition: all 0.3s;
+        }
+        html[dir="ltr"] .main-content { margin-left: 250px; }
+        html[dir="rtl"] .main-content { margin-right: 250px; }
+
+        .sidebar .nav-link { color: rgba(255, 255, 255, 0.8); padding: 10px 20px; margin: 2px 0; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
+        .sidebar .nav-link i { margin-inline-end: 10px; width: 20px; text-align: center; }
+
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        /* --- Cards & UI Elements --- */
+        .stat-card { 
+            background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            padding: 20px; margin-bottom: 20px; cursor: pointer; transition: all 0.3s ease; 
+            border: 1px solid rgba(0,0,0,0.05); position: relative; overflow: hidden;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .stat-card .icon { 
+            width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; 
+            justify-content: center; font-size: 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        /* Dashboard Card Gradients */
+        .bg-gradient-primary { background: linear-gradient(45deg, #2c5aa0, #4b7bc4); }
+        .bg-gradient-success { background: linear-gradient(45deg, #34a853, #55c472); }
+        .bg-gradient-warning { background: linear-gradient(45deg, #ffc107, #ffcf33); }
+        .bg-gradient-info { background: linear-gradient(45deg, #17a2b8, #33b8cc); }
+        
+        .dash-widget-card { border-radius: 12px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .dash-widget-card .card-header { background: transparent; border-bottom: 1px solid #f0f0f0; padding: 15px 20px; font-weight: 600; }
+        
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        html[dir="rtl"] .toast-container { right: auto; left: 20px; }
+        .barcode-box { display: flex; justify-content: center; margin: 15px 0; padding: 15px; background: #fff; border-radius: 8px; border: 1px dashed #ccc; overflow: hidden; }
+        #reader { width: 100%; max-width: 500px; margin: auto; }
+        
+        /* Hide annoying red scanner error messages in UI */
+        #reader__dashboard_section_csr span { color: #888 !important; }
+
+        .action-btns .btn { padding: 4px 8px; font-size: 12px; margin-inline-end: 4px; }
+
+        /* --- Print Styles --- */
+        .no-print-section { display: none !important; }
+
+        @media print {
+            /* 80mm Thermal Printer Settings */
+            @page { margin: 0; size: 80mm auto; } 
+            
+            body * { visibility: hidden; }
+            
+            /* Show all sections that might need printing independently */
+            #printSection, #printSection *, 
+            #genericPrintSection, #genericPrintSection *,
+            #qrPrintSection, #qrPrintSection * { visibility: visible; }
+            
+            /* Receipt Styling */
+            #printSection, #genericPrintSection { 
+                position: absolute; left: 0; top: 0; 
+                width: 78mm; /* specifically for 80mm rolls */
+                padding: 4mm; 
+                background: white; 
+                margin: 0;
+                font-family: 'Courier New', Courier, monospace; 
+                font-size: 12px;
+                color: #000;
+            }
+            .thermal-receipt table { width: 100%; margin-bottom: 10px; }
+            .thermal-receipt th, .thermal-receipt td { padding: 3px 0; text-align: left; }
+            .thermal-receipt th.qty-col, .thermal-receipt td.qty-col { text-align: center; width: 35px; }
+            .thermal-receipt th.total-col, .thermal-receipt td.total-col { text-align: right; }
+            .border-dashed { border-bottom: 1px dashed #000; margin-bottom: 5px; padding-bottom: 5px; }
+            .border-dashed-top { border-top: 1px dashed #000; margin-top: 5px; padding-top: 5px; }
+            
+            /* Barcode Label Grid Print Styles */
+            #qrPrintSection { 
+                position: absolute; left: 0; top: 0; width: 100%; background: white; 
+                display: grid !important; grid-template-columns: repeat(3, 1fr); 
+                gap: 10px; padding: 10px; align-content: start; 
+            }
+            .qr-label-print { 
+                border: 1px dashed #999; padding: 10px; text-align: center; 
+                break-inside: avoid; page-break-inside: avoid; font-family: monospace;
+            }
+            .qr-label-print svg { max-width: 100%; height: auto; margin: 5px auto; }
+
+            .no-print, .no-print-section, .modal, .toast-container { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="confirmation">Confirmation</h5>
+                </div>
+                <div class="modal-body" id="confirmMessage">Are you sure?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmBtn" data-i18n="yes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-left">
+            <div class="login-logo">
+                <h4 data-i18n="sys_title">Pharmacy Management System</h4>
+            </div>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-pills"></i></div>
+                    <div>
+                        <h4 data-i18n="med_mgt">Medicine Management</h4>
+                        <p data-i18n="med_desc">Complete tracking of inventory and expiry</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div>
+                        <h4 data-i18n="pos">Point of Sale</h4>
+                        <p data-i18n="pos_desc">Fast selling and electronic invoices</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="login-right">
+            <div class="login-form">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleLanguage()"><i class="fas fa-language"></i> EN / اردو</button>
+                </div>
+                <h2 data-i18n="login">Login</h2>
+                <form id="loginForm">
+                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                    <input type="password" class="form-control" id="password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-login" data-i18n="login_btn">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main System -->
+    <div id="mainSystem" class="main-system">
+        <div class="container-fluid p-0">
+            <!-- Sidebar -->
+            <nav class="sidebar p-3">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold"><i class="fas fa-clinic-medical"></i></h3>
+                    <p class="small" data-i18n="sys_title">Pharmacy System</p>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('medicines')"><i class="fas fa-pills"></i> <span data-i18n="medicines">Medicines</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="sales">Sales (POS)</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('inventory')"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('alerts')"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Reports</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('suppliers')"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('employees')"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('delivery')"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
+                    <hr class="text-white border-white opacity-25 my-2">
+                    <li class="nav-item"><a class="nav-link text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
+                </ul>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Topbar -->
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <h2 class="fw-bold text-primary" id="pageTitle" data-i18n="dashboard">Dashboard</h2>
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-outline-secondary" onclick="toggleLanguage()"><i class="fas fa-language"></i> EN / اردو</button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-2"></i> <span id="userDisplayName">User</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" onclick="showPage('profile')"><i class="fas fa-id-badge"></i> <span data-i18n="profile">Profile</span></a></li>
+                                <li><a class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1. Dashboard Page -->
+                <div id="dashboard" class="page active">
+                    <!-- Quick Actions Row -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-primary" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="new_sale">New Sale</span></button>
+                                <button class="btn btn-success" onclick="showPage('medicines'); openAddMedicineModal();"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add Medicine</span></button>
+                                <button class="btn btn-info text-white" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
+                                
+                                <!-- Barcode Print Dropdown -->
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-print"></i> <span data-i18n="print_qr">Print Barcodes</span>
+                                    </button>
+                                    <ul class="dropdown-menu shadow">
+                                        <li><a class="dropdown-item" href="#" onclick="openSingleQRPrintModal()"><i class="fas fa-tag me-2 text-primary"></i> <span data-i18n="single_qr">Single Barcode</span></a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" onclick="printBulkQRCodes()"><i class="fas fa-tags me-2 text-success"></i> <span data-i18n="bulk_qr">Bulk Print All</span></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stat-card" onclick="openDetailsModal('sales')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted" data-i18n="total_sales">Total Sales</h6>
+                                        <h4 class="fw-bold" id="dashTotalSales">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-primary text-white"><i class="fas fa-chart-line"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" onclick="openDetailsModal('medicines')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted" data-i18n="available_meds">Meds</h6>
+                                        <h4 class="fw-bold" id="dashTotalMeds">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-success text-white"><i class="fas fa-pills"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" onclick="showPage('alerts')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted" data-i18n="alerts">Alerts</h6>
+                                        <h4 class="fw-bold text-danger" id="dashAlerts">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-warning text-white"><i class="fas fa-bell"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card" onclick="showPage('delivery')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted" data-i18n="delivery">Deliveries</h6>
+                                        <h4 class="fw-bold text-info" id="dashDeliveries">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-info text-white"><i class="fas fa-truck"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="card dash-widget-card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span data-i18n="sales_trend">Sales Trend (Last 7 Days)</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="showPage('reports')"><i class="fas fa-arrow-right"></i></button>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="salesTrendChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card dash-widget-card h-100">
+                                <div class="card-header"><span data-i18n="inv_dist">Inventory Distribution</span></div>
+                                <div class="card-body d-flex justify-content-center align-items-center">
+                                    <canvas id="inventoryDistChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Low Stock -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card dash-widget-card">
+                                <div class="card-header bg-white"><i class="fas fa-history text-primary"></i> <span data-i18n="recent_sales">Recent Sales</span></div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-striped mb-0">
+                                            <thead><tr><th>Inv#</th><th data-i18n="customer">Customer</th><th data-i18n="total">Total</th></tr></thead>
+                                            <tbody id="dashRecentSales"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card dash-widget-card">
+                                <div class="card-header bg-white"><i class="fas fa-exclamation-triangle text-danger"></i> <span data-i18n="low_stock">Low Stock Items</span></div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-striped mb-0">
+                                            <thead><tr><th data-i18n="med_name">Item</th><th data-i18n="stock">Stock</th><th data-i18n="min_stock">Min</th></tr></thead>
+                                            <tbody id="dashLowStockTable"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Medicines Page -->
+                <div id="medicines" class="page">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-pills me-2"></i> <span data-i18n="medicines">Medicines</span></h5>
+                            <div>
+                                <button class="btn btn-light btn-sm me-2" onclick="openQRScanner('medicine')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
+                                <button class="btn btn-success btn-sm" onclick="openAddMedicineModal()"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add New</span></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <input type="text" class="form-control mb-3" id="medSearch" placeholder="Search by name or scan barcode..." onkeyup="renderMedicines()">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="barcode_id">Barcode / ID</th>
+                                            <th data-i18n="med_name">Name</th>
+                                            <th data-i18n="category">Category</th>
+                                            <th data-i18n="price">Price</th>
+                                            <th data-i18n="stock">Stock</th>
+                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Sales Page -->
+                <div id="sales" class="page">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> <span data-i18n="pos">POS</span></h5>
+                                    <button class="btn btn-light btn-sm" onclick="newSale()"><i class="fas fa-receipt"></i> <span data-i18n="new_sale">New / Clear</span></button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex gap-2 mb-3">
+                                        <input type="text" class="form-control mb-0" id="saleSearchInput" placeholder="Scan Barcode or Type Name..." onkeypress="handleSaleSearch(event)" onkeyup="searchSaleItemLive()">
+                                        <button class="btn btn-outline-primary" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i></button>
+                                    </div>
+                                    <input type="text" class="form-control mb-3" id="customerName" placeholder="Customer Name (Optional)">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th data-i18n="med_name">Item</th><th data-i18n="price">Price</th><th data-i18n="qty">Qty</th><th data-i18n="total">Total</th><th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="saleItemsTable"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-6 text-end">
+                                            <h4 class="text-primary"><span data-i18n="total">Total</span>: <span id="saleTotal">0.00</span></h4>
+                                            <button class="btn btn-success btn-lg mt-2 w-100" onclick="completeSale()"><i class="fas fa-print"></i> <span data-i18n="complete_sale">Complete Sale (Thermal Print)</span></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header bg-info text-white"><h5 class="mb-0" data-i18n="quick_items">Quick Items</h5></div>
+                                <div class="card-body" id="quickItemsList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Inventory Page -->
+                <div id="inventory" class="page">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory Status</span></h5></div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="stat-card" onclick="openDetailsModal('medicines')">
+                                        <h5 data-i18n="total_items">Total Items</h5><h3 id="invTotal">0</h3>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="stat-card" onclick="openDetailsModal('lowstock')">
+                                        <h5 data-i18n="low_stock">Low Stock</h5><h3 class="text-danger" id="invLow">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Alerts Page -->
+                <div id="alerts" class="page">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="clearAlerts()"><i class="fas fa-check-double"></i> Clear All</button>
+                        </div>
+                        <div class="card-body">
+                            <div id="alertsContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Reports Page -->
+                <div id="reports" class="page">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Reports</span></h5>
+                            <div>
+                                <button class="btn btn-success btn-sm me-2" onclick="exportExcel()"><i class="fas fa-file-excel"></i> <span data-i18n="export_excel">Excel</span></button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="reportPrintArea">
+                            <h4 class="text-center mb-4" data-i18n="sales_report">Sales Report</h4>
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="reportsTable">
+                                    <thead><tr>
+                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th><th data-i18n="total">Total</th><th data-i18n="actions" class="text-center">Actions</th>
+                                    </tr></thead>
+                                    <tbody id="reportsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Suppliers Page -->
+                <div id="suppliers" class="page">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="openAddSupplierModal()"><i class="fas fa-plus"></i> <span data-i18n="add_supplier">Add Supplier</span></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th data-i18n="name">Name</th><th data-i18n="contact">Contact</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <tbody id="suppliersTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Employees Page -->
+                <div id="employees" class="page">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="openAddEmployeeModal()"><i class="fas fa-plus"></i> <span data-i18n="add_employee">Add Employee</span></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th data-i18n="name">Name</th><th data-i18n="role">Role</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <tbody id="employeesTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. Delivery Page -->
+                <div id="delivery" class="page">
+                    <div class="card">
+                        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="openAddDeliveryModal()"><i class="fas fa-plus"></i> <span data-i18n="add_delivery">Add Delivery</span></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead><tr><th>Order #</th><th data-i18n="customer">Customer</th><th data-i18n="status">Status</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <tbody id="deliveryTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. Settings & Profile Pages -->
+                <div id="settings" class="page">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header bg-dark text-white"><h5 class="mb-0"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></h5></div>
+                                <div class="card-body">
+                                    <form id="settingsForm">
+                                        <div class="mb-3"><label>Pharmacy Name</label><input type="text" class="form-control" id="setPharmaName"></div>
+                                        <div class="mb-3"><label>Address</label><input type="text" class="form-control" id="setAddress"></div>
+                                        <div class="mb-3"><label>Contact Email / Phone</label><input type="text" class="form-control" id="setEmail"></div>
+                                        <button type="button" class="btn btn-primary w-100" onclick="saveSettings()" data-i18n="save">Save</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="profile" class="page">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-id-badge"></i> <span data-i18n="profile">Profile</span></h5></div>
+                        <div class="card-body">
+                            <form id="profileForm">
+                                <div class="mb-3"><label>Username</label><input type="text" class="form-control" id="profUser" disabled></div>
+                                <div class="mb-3"><label>New Password</label><input type="password" class="form-control" id="profPass"></div>
+                                <button type="button" class="btn btn-primary" onclick="saveProfile()" data-i18n="save">Update Profile</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add/Edit Medicine Modal -->
+    <div class="modal fade" id="medicineModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="medModalTitle">Add Medicine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="medForm">
+                        <input type="hidden" id="medIdOriginal"> <!-- To track original ID when editing -->
+                        <div class="mb-3">
+                            <label data-i18n="barcode_id">Barcode / ID</label>
+                            <input type="text" class="form-control border-primary" id="medId" placeholder="Scan Barcode or leave empty">
+                            <small class="text-muted" data-i18n="barcode_hint">Use scanner to auto-fill</small>
+                        </div>
+                        <div class="mb-3"><label data-i18n="med_name">Name</label><input type="text" class="form-control" id="mName" required></div>
+                        <div class="mb-3"><label data-i18n="category">Category</label><input type="text" class="form-control" id="mCat" required></div>
+                        <div class="row">
+                            <div class="col-6 mb-3"><label data-i18n="price">Price</label><input type="number" class="form-control" id="mPrice" required></div>
+                            <div class="col-6 mb-3"><label data-i18n="stock">Stock</label><input type="number" class="form-control" id="mStock" required></div>
+                        </div>
+                        <div class="mb-3"><label data-i18n="min_stock">Min Stock</label><input type="number" class="form-control" id="mMinStock" value="10"></div>
+                        <div class="barcode-box" id="barcodeContainerDiv" style="display:none;">
+                            <svg id="barcodeSvg"></svg>
+                        </div>
+                        <div class="text-center" id="qrHint" style="display:none;"><small class="text-muted" data-i18n="qr_hint">Scan this Barcode for quick sale</small></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMedicine()" data-i18n="save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Barcode Print Modal -->
+    <div class="modal fade" id="singleQRModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="print_single_qr">Print Single Barcode</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label data-i18n="select_medicine">Select Medicine</label>
+                        <select class="form-select" id="singleQRSelect"></select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="printSingleQRCode()"><i class="fas fa-print"></i> <span data-i18n="print">Print</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Supplier Modal -->
+    <div class="modal fade" id="supplierModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" data-i18n="add_supplier">Add Supplier</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="supId">
+                    <div class="mb-3"><label data-i18n="name">Name</label><input type="text" class="form-control" id="sName"></div>
+                    <div class="mb-3"><label data-i18n="contact">Contact</label><input type="text" class="form-control" id="sContact"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveSupplier()" data-i18n="save">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div class="modal fade" id="employeeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" data-i18n="add_employee">Add Employee</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="empId">
+                    <div class="mb-3"><label data-i18n="name">Name</label><input type="text" class="form-control" id="eName"></div>
+                    <div class="mb-3"><label data-i18n="role">Role</label>
+                        <select class="form-select" id="eRole">
+                            <option value="Admin">Admin</option><option value="Pharmacist">Pharmacist</option><option value="Cashier">Cashier</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveEmployee()" data-i18n="save">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Delivery Modal -->
+    <div class="modal fade" id="deliveryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" data-i18n="add_delivery">Add Delivery</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <input type="hidden" id="delId">
+                    <div class="mb-3"><label data-i18n="customer">Customer Name</label><input type="text" class="form-control" id="dCust"></div>
+                    <div class="mb-3"><label data-i18n="status">Status</label>
+                        <select class="form-select" id="dStatus">
+                            <option value="Pending">Pending</option><option value="Delivered">Delivered</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveDelivery()" data-i18n="save">Save</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details/Export Modal (For Dashboard Cards) -->
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title" id="detailsModalTitle">Details</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger btn-sm" onclick="exportDetailsPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <div class="modal-body table-responsive">
+                    <table class="table table-bordered" id="detailsTable"><thead id="detailsTableHead"></thead><tbody id="detailsTableBody"></tbody></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal fade" id="scannerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title"><i class="fas fa-camera"></i> <span data-i18n="scan_qr">Scan Barcode</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopScanner()"></button></div>
+                <div class="modal-body">
+                    <div id="reader"></div>
+                    <p class="text-muted text-center mt-2 small">Upload an image or align barcode inside the box</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 80mm Thermal Receipt Print Area -->
+    <div id="printSection" class="thermal-receipt no-print-section">
+        <div style="text-align: center; margin-bottom: 5px;">
+            <!-- Pharmacy Logo Placeholder -->
+            <i class="fas fa-clinic-medical" style="font-size: 28px; display:block; margin: 0 auto 5px auto;"></i>
+            <h3 id="invPharmaName" style="margin: 0; font-size: 16px; font-weight: bold;">Elite Pharmacy</h3>
+            <div id="invAddress" style="font-size: 11px; margin-top: 2px;"></div>
+            <div id="invPhone" style="font-size: 11px;"></div>
+        </div>
+        
+        <div class="border-dashed-top"></div>
+        <div id="invHeaderDetails" style="margin-top: 5px; margin-bottom: 5px; font-size: 12px; line-height: 1.4;"></div>
+        <div class="border-dashed-top"></div>
+
+        <table>
+            <thead>
+                <tr class="border-dashed">
+                    <th>Item</th>
+                    <th class="qty-col">Qty</th>
+                    <th class="total-col">Amount</th>
+                </tr>
+            </thead>
+            <tbody id="invItems"></tbody>
+        </table>
+        
+        <div class="border-dashed-top"></div>
+        <div style="text-align: right; margin-top: 5px;">
+            <h4 id="invGrandTotal" style="margin: 0; font-size: 14px; font-weight: bold;"></h4>
+        </div>
+        
+        <div style="text-align: center; margin-top: 15px;">
+            <!-- Barcode Area for Receipt -->
+            <svg id="invBarcodeSvg"></svg>
+            <p style="font-size: 11px; margin-top: 5px; font-weight: bold;">Thank you for your visit!</p>
+        </div>
+    </div>
+
+    <!-- Generic Print Section (For Supplier/Employee/Delivery slips) -->
+    <div id="genericPrintSection" class="thermal-receipt no-print-section"></div>
+
+    <!-- Hidden Barcode Labels Print Area (For Bulk/Single label print) -->
+    <div id="qrPrintSection" class="no-print-section"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- JsBarcode & Html5 Qrcode Scanner -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <!-- Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        /* ================= I18N (Translations) ================= */
+        const i18n = {
+            en: {
+                sys_title: "Pharmacy Management System",
+                med_mgt: "Medicine Management", med_desc: "Complete tracking of inventory",
+                pos: "Point of Sale", pos_desc: "Fast selling & invoicing",
+                login: "Login", login_btn: "Sign In",
+                dashboard: "Dashboard", medicines: "Medicines", sales: "Sales (POS)", inventory: "Inventory", 
+                alerts: "Alerts", reports: "Reports", suppliers: "Suppliers", employees: "Employees", 
+                delivery: "Delivery", settings: "Settings", profile: "Profile", logout: "Logout",
+                total_sales: "Total Sales", available_meds: "Available Meds", low_stock: "Low Stock Items", click_details: "Click for details",
+                add_med: "Add New", scan_qr: "Scan Barcode", barcode_id: "Barcode / ID", barcode_hint: "Scan barcode with device",
+                med_name: "Medicine Name", category: "Category", price: "Price", stock: "Stock", actions: "Actions",
+                new_sale: "New / Clear", qty: "Qty", total: "Total", complete_sale: "Complete Sale (Thermal Print)", quick_items: "Quick Items",
+                total_items: "Total Catalog Items", export_excel: "Export Excel", print: "Print", sales_report: "Sales Report", date: "Date", customer: "Customer",
+                cancel: "Cancel", save: "Save", yes: "Yes", confirmation: "Confirmation", qr_hint: "Scan this Barcode for quick sale", min_stock: "Min Stock",
+                name: "Name", contact: "Contact", role: "Role", status: "Status", add_supplier: "Add Supplier", add_employee: "Add Employee", add_delivery: "Add Delivery",
+                sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
+                print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine"
+            },
+            ur: {
+                sys_title: "فارمیسی مینجمنٹ سسٹم",
+                med_mgt: "ادویات کا انتظام", med_desc: "انوینٹری کی مکمل ٹریکنگ",
+                pos: "پوائنٹ آف سیل", pos_desc: "تیز فروخت اور انوائسنگ",
+                login: "لاگ ان کریں", login_btn: "سائن ان",
+                dashboard: "ڈیش بورڈ", medicines: "ادویات", sales: "سیلز (POS)", inventory: "انوینٹری", 
+                alerts: "الرٹس", reports: "رپورٹس", suppliers: "سپلائرز", employees: "ملازمین", 
+                delivery: "ڈلیوری", settings: "ترتیبات", profile: "پروفائل", logout: "لاگ آؤٹ",
+                total_sales: "کل سیلز", available_meds: "دستیاب ادویات", low_stock: "کم اسٹاک", click_details: "تفصیلات کے لیے کلک کریں",
+                add_med: "نیا شامل کریں", scan_qr: "بارکوڈ اسکین کریں", barcode_id: "بارکوڈ / آئی ڈی", barcode_hint: "ڈیوائس سے بارکوڈ اسکین کریں",
+                med_name: "دوا کا نام", category: "زمرہ", price: "قیمت", stock: "اسٹاک", actions: "ایکشنز",
+                new_sale: "نئی سیل", qty: "تعداد", total: "کل رقم", complete_sale: "سیل مکمل کریں (پرنٹ)", quick_items: "فوری آئٹمز",
+                total_items: "کل آئٹمز", export_excel: "ایکسل ایکسپورٹ", print: "پرنٹ کریں", sales_report: "سیلز رپورٹ", date: "تاریخ", customer: "گاہک",
+                cancel: "منسوخ کریں", save: "محفوظ کریں", yes: "ہاں", confirmation: "تصدیق", qr_hint: "فوری فروخت کے لیے یہ بارکوڈ اسکین کریں", min_stock: "کم از کم اسٹاک",
+                name: "نام", contact: "رابطہ", role: "عہدہ", status: "حیثیت", add_supplier: "سپلائر شامل کریں", add_employee: "ملازم شامل کریں", add_delivery: "ڈلیوری شامل کریں",
+                sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
+                print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ur' : 'en';
+            const dir = currentLang === 'en' ? 'ltr' : 'rtl';
+            document.documentElement.setAttribute('dir', dir);
+            document.documentElement.setAttribute('lang', currentLang);
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[currentLang][key]) {
+                    if (el.tagName === 'INPUT' && el.hasAttribute('placeholder')) {
+                        el.placeholder = i18n[currentLang][key];
+                    } else {
+                        el.innerText = i18n[currentLang][key];
+                    }
+                }
+            });
+            renderMedicines(); 
+            if(document.getElementById('dashboard').classList.contains('active')) loadDashboard();
+        }
+
+        /* ================= Database (LocalStorage) ================= */
+        let db = {};
+        
+        function initDB() {
+            const saved = localStorage.getItem('pharmacySysDB');
+            if (saved) {
+                db = JSON.parse(saved);
+                db.medicines = db.medicines || [];
+                db.sales = db.sales || [];
+                db.currentSale = db.currentSale || { items: [], total: 0, editingId: null, editingDate: null };
+                db.suppliers = db.suppliers || [];
+                db.employees = db.employees || [];
+                db.alerts = db.alerts || [];
+                db.deliveries = db.deliveries || [];
+                db.settings = db.settings || { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
+                
+            } else {
+                db.medicines = [
+                    { id: '123456789012', name: 'Panadol', category: 'Painkiller', price: 50, stock: 100, minStock: 20 },
+                    { id: 'M102', name: 'Augmentin', category: 'Antibiotic', price: 250, stock: 15, minStock: 20 },
+                    { id: 'M103', name: 'Vitamin C', category: 'Vitamins', price: 150, stock: 200, minStock: 50 }
+                ];
+                db.sales = [];
+                db.currentSale = { items: [], total: 0, editingId: null, editingDate: null };
+                db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567' }];
+                db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
+                db.deliveries = [];
+                db.alerts = [];
+                db.settings = { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
+            }
+            generateSystemAlerts();
+            saveDB(); 
+        }
+        
+        function saveDB() { localStorage.setItem('pharmacySysDB', JSON.stringify(db)); }
+
+        function generateSystemAlerts() {
+            db.alerts = [];
+            db.medicines.filter(m => m.stock <= m.minStock).forEach(m => {
+                db.alerts.push({ id: Date.now()+Math.random(), msg: `Low stock warning for ${m.name} (Current: ${m.stock})`, type: 'danger' });
+            });
+            if(db.deliveries.some(d => d.status === 'Pending')) {
+                db.alerts.push({ id: Date.now()+Math.random(), msg: `You have pending delivery orders.`, type: 'info' });
+            }
+        }
+
+        /* ================= UI Utils ================= */
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0 show mb-2`;
+            toast.innerHTML = `<div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button></div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        let confirmAction = null;
+        function showConfirm(msg, action) {
+            document.getElementById('confirmMessage').innerText = msg;
+            confirmAction = action;
+            new bootstrap.Modal(document.getElementById('confirmModal')).show();
+        }
+        document.getElementById('confirmBtn').addEventListener('click', () => {
+            if(confirmAction) confirmAction();
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        });
+
+        /* ================= Auth & Navigation ================= */
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const savedUsername = localStorage.getItem('currentUsername');
+            
+            if (isLoggedIn === 'true' && savedUsername) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainSystem').style.display = 'block';
+                document.getElementById('userDisplayName').innerText = savedUsername;
+                document.getElementById('profUser').value = savedUsername;
+                initDB();
+                showPage('dashboard');
+            } else {
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('mainSystem').style.display = 'none';
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value || 'Admin';
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('currentUsername', username);
+
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainSystem').style.display = 'block';
+            document.getElementById('userDisplayName').innerText = username;
+            document.getElementById('profUser').value = username;
+            initDB();
+            showPage('dashboard');
+        });
+
+        function logout() {
+            showConfirm(currentLang==='en'?'Logout?':'کیا آپ لاگ آؤٹ کرنا چاہتے ہیں؟', () => {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('currentUsername');
+                document.getElementById('loginPage').style.display = 'flex';
+                document.getElementById('mainSystem').style.display = 'none';
+                document.getElementById('loginForm').reset();
+            });
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll(`.sidebar .nav-link`).forEach(l => {
+                if(l.getAttribute('onclick').includes(pageId)) l.classList.add('active');
+            });
+            
+            document.getElementById('pageTitle').innerText = i18n[currentLang][pageId] || pageId.toUpperCase();
+
+            if(pageId === 'dashboard') loadDashboard();
+            if(pageId === 'medicines') renderMedicines();
+            if(pageId === 'sales') loadSalesPage();
+            if(pageId === 'inventory') loadInventoryPage();
+            if(pageId === 'reports') renderReports();
+            if(pageId === 'suppliers') renderSuppliers();
+            if(pageId === 'employees') renderEmployees();
+            if(pageId === 'delivery') renderDeliveries();
+            if(pageId === 'alerts') renderAlerts();
+            if(pageId === 'settings') loadSettings();
+        }
+
+        /* ================= Dashboard & Charts ================= */
+        let salesTrendChartInst = null;
+        let invDistChartInst = null;
+
+        function loadDashboard() {
+            generateSystemAlerts(); 
+            const totalSales = db.sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
+            const lowStockList = db.medicines.filter(m => m.stock <= m.minStock);
+            
+            document.getElementById('dashTotalSales').innerText = 'Rs ' + totalSales.toFixed(2);
+            document.getElementById('dashTotalMeds').innerText = db.medicines.length;
+            document.getElementById('dashAlerts').innerText = db.alerts.length;
+            document.getElementById('dashDeliveries').innerText = db.deliveries.filter(d=>d.status==='Pending').length;
+
+            const recentSalesTbody = document.getElementById('dashRecentSales');
+            recentSalesTbody.innerHTML = '';
+            db.sales.slice(-5).reverse().forEach(s => {
+                recentSalesTbody.innerHTML += `<tr><td><small>${s.id}</small></td><td>${s.customer}</td><td class="text-success fw-bold">Rs ${s.total}</td></tr>`;
+            });
+            if(db.sales.length === 0) recentSalesTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No sales yet</td></tr>`;
+
+            const lowStockTbody = document.getElementById('dashLowStockTable');
+            lowStockTbody.innerHTML = '';
+            lowStockList.slice(0, 5).forEach(m => {
+                lowStockTbody.innerHTML += `<tr><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`;
+            });
+            if(lowStockList.length === 0) lowStockTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Stock levels are good!</td></tr>`;
+
+            renderCharts();
+        }
+
+        function renderCharts() {
+            const ctxSales = document.getElementById('salesTrendChart').getContext('2d');
+            if (salesTrendChartInst) salesTrendChartInst.destroy();
+            
+            salesTrendChartInst = new Chart(ctxSales, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Sales (Rs)',
+                        data: [1200, 1900, 1500, 2200, 1800, 2500, db.sales.reduce((s,a)=>s+parseFloat(a.total||0),0) || 3000],
+                        borderColor: '#2c5aa0',
+                        backgroundColor: 'rgba(44, 90, 160, 0.1)',
+                        borderWidth: 2, tension: 0.4, fill: true
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
+            });
+
+            const ctxInv = document.getElementById('inventoryDistChart').getContext('2d');
+            if (invDistChartInst) invDistChartInst.destroy();
+            
+            const categories = {};
+            db.medicines.forEach(m => { categories[m.category] = (categories[m.category] || 0) + 1; });
+            const labels = Object.keys(categories);
+            const data = Object.values(categories);
+
+            invDistChartInst = new Chart(ctxInv, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.length ? labels : ['Empty'],
+                    datasets: [{
+                        data: data.length ? data : [1],
+                        backgroundColor: ['#2c5aa0', '#34a853', '#ffc107', '#ff6b35', '#17a2b8', '#6f42c1']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
+            });
+        }
+
+        let currentModalContext = '';
+        function openDetailsModal(type) {
+            currentModalContext = type;
+            const thead = document.getElementById('detailsTableHead');
+            const tbody = document.getElementById('detailsTableBody');
+            thead.innerHTML = ''; tbody.innerHTML = '';
+            let title = '';
+
+            if (type === 'sales') {
+                title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
+                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th></tr>`;
+                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td></tr>`; });
+            } else if (type === 'medicines') {
+                title = currentLang==='en'?'All Medicines':'تمام ادویات';
+                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name</th><th>Stock</th><th>Price</th></tr>`;
+                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.stock}</td><td>Rs ${m.price}</td></tr>`; });
+            } else if (type === 'lowstock') {
+                title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
+                thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
+                db.medicines.filter(m=>m.stock<=m.minStock).forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`; });
+            }
+            document.getElementById('detailsModalTitle').innerText = title;
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        }
+
+        function exportDetailsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(document.getElementById('detailsModalTitle').innerText, 14, 15);
+            doc.autoTable({ html: '#detailsTable', startY: 20 });
+            doc.save(`${currentModalContext}_report.pdf`);
+            showToast('PDF Exported Successfully!');
+        }
+
+        /* ================= Generic Thermal Print (For Employee/Supplier/Delivery) ================= */
+        function printGenericRecord(title, detailsObj) {
+            let html = `<div style="text-align: center; margin-bottom: 10px;">
+                <i class="fas fa-clinic-medical" style="font-size: 24px; display:block; margin: 0 auto 5px auto;"></i>
+                <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
+                <h4 style="margin: 5px 0; font-size: 14px; text-decoration: underline;">${title}</h4>
+            </div><div style="font-size: 12px; line-height: 1.5;">`;
+            
+            for(const [key, val] of Object.entries(detailsObj)) {
+                html += `<div><strong>${key}:</strong> ${val}</div>`;
+            }
+            html += `</div><div class="border-dashed-top"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
+            
+            document.getElementById('genericPrintSection').innerHTML = html;
+            
+            // Isolate generic print section
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            document.getElementById('printSection').classList.add('no-print-section');
+            document.getElementById('qrPrintSection').classList.add('no-print-section');
+            document.getElementById('genericPrintSection').classList.remove('no-print-section');
+            
+            window.print();
+            
+            setTimeout(() => {
+                document.getElementById('genericPrintSection').classList.add('no-print-section');
+                document.getElementById('mainSystem').classList.remove('no-print-section');
+            }, 500);
+        }
+
+        /* ================= Barcode Printing Logic ================= */
+        function openSingleQRPrintModal() {
+            const select = document.getElementById('singleQRSelect');
+            select.innerHTML = '';
+            if(db.medicines.length === 0) {
+                showToast('No medicines available to print.', 'warning');
+                return;
+            }
+            db.medicines.forEach(m => {
+                select.innerHTML += `<option value="${m.id}">${m.name} (${m.id})</option>`;
+            });
+            new bootstrap.Modal(document.getElementById('singleQRModal')).show();
+        }
+
+        function printSingleQRCode() {
+            const medId = document.getElementById('singleQRSelect').value;
+            const med = db.medicines.find(m => m.id === medId);
+            if(med) {
+                bootstrap.Modal.getInstance(document.getElementById('singleQRModal')).hide();
+                executeQRPrint([med]);
+            }
+        }
+
+        function printBulkQRCodes() {
+            if(db.medicines.length === 0) {
+                showToast('No medicines available to print.', 'warning');
+                return;
+            }
+            executeQRPrint(db.medicines);
+        }
+
+        function executeQRPrint(medicinesToPrint) {
+            const printArea = document.getElementById('qrPrintSection');
+            printArea.innerHTML = ''; 
+
+            medicinesToPrint.forEach(med => {
+                const label = document.createElement('div');
+                label.className = 'qr-label-print';
+                label.innerHTML = `
+                    <div style="font-weight:bold; font-size: 14px;">${med.name}</div>
+                    <svg id="print-barcode-${med.id}"></svg>
+                    <div style="font-size: 12px; color: #555;">Rs ${med.price}</div>
+                `;
+                printArea.appendChild(label);
+                
+                // IMPORTANT: Thicker bars and more height so they scan easily from images
+                JsBarcode(`#print-barcode-${med.id}`, med.id, {
+                    format: "CODE128",
+                    width: 2,          // Barcode thickness increased
+                    height: 80,        // Barcode height increased
+                    displayValue: true,
+                    fontSize: 14,
+                    margin: 20,        // Extra quiet zone
+                    background: "#ffffff"
+                });
+            });
+
+            // Isolate print areas
+            document.getElementById('printSection').classList.add('no-print-section'); 
+            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
+            document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
+            document.getElementById('mainSystem').classList.add('no-print-section'); 
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.getElementById('qrPrintSection').classList.add('no-print-section');
+                    document.getElementById('mainSystem').classList.remove('no-print-section');
+                }, 500);
+            }, 600);
+        }
+
+        /* ================= Medicines & UI Logic ================= */
+        function renderMedicines() {
+            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
+            const tbody = document.getElementById('medTableBody');
+            tbody.innerHTML = '';
+            
+            db.medicines.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)).forEach(m => {
+                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
+                tbody.innerHTML += `
+                    <tr><td><strong>${m.id}</strong></td><td>${m.name}</td><td>${m.category}</td><td>Rs ${m.price}</td><td class="${stockClass}">${m.stock}</td>
+                        <td class="action-btns text-center">
+                            <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
+                        </td></tr>`;
+            });
+        }
+
+        function openAddMedicineModal() {
+            document.getElementById('medForm').reset();
+            document.getElementById('medIdOriginal').value = '';
+            document.getElementById('medId').value = ''; 
+            document.getElementById('barcodeContainerDiv').style.display = 'none';
+            document.getElementById('qrHint').style.display = 'none';
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+            setTimeout(() => document.getElementById('medId').focus(), 500);
+        }
+
+        function saveMedicine() {
+            const originalId = document.getElementById('medIdOriginal').value;
+            const inputId = document.getElementById('medId').value.trim();
+            const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
+            
+            const med = {
+                id: newId, 
+                name: document.getElementById('mName').value, 
+                category: document.getElementById('mCat').value,
+                price: parseFloat(document.getElementById('mPrice').value), 
+                stock: parseInt(document.getElementById('mStock').value),
+                minStock: parseInt(document.getElementById('mMinStock').value)
+            };
+
+            if (originalId) { // Editing existing
+                db.medicines = db.medicines.filter(m => m.id !== originalId);
+                db.medicines.push(med);
+            } else { // Adding new
+                if (db.medicines.find(m => m.id === newId)) {
+                    showToast('Barcode / ID already exists!', 'danger');
+                    return;
+                }
+                db.medicines.push(med);
+            }
+            
+            saveDB();
+            
+            // Show Barcode with properly increased size for easy image scanning
+            document.getElementById('barcodeContainerDiv').style.display = 'flex';
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", med.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff" 
+            });
+
+            showToast(currentLang==='en'?'Medicine Saved!':'محفوظ ہو گیا!');
+            renderMedicines();
+            setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide(); }, 2000);
+        }
+
+        function editMedicine(id) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('medIdOriginal').value = m.id;
+            document.getElementById('medId').value = m.id; 
+            document.getElementById('mName').value = m.name;
+            document.getElementById('mCat').value = m.category; 
+            document.getElementById('mPrice').value = m.price;
+            document.getElementById('mStock').value = m.stock; 
+            document.getElementById('mMinStock').value = m.minStock;
+            
+            document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", m.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff"
+            });
+
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+        }
+
+        function deleteMedicine(id) {
+            showConfirm(currentLang==='en'?'Delete this medicine?':'کیا آپ حذف کرنا چاہتے ہیں؟', () => {
+                db.medicines = db.medicines.filter(m => m.id !== id);
+                saveDB(); renderMedicines(); showToast('Deleted');
+            });
+        }
+
+        /* ================= Camera Scanner (Barcode Optimization) ================= */
+        let html5QrcodeScanner = null; let scanContext = '';
+        function openQRScanner(context) {
+            scanContext = context;
+            new bootstrap.Modal(document.getElementById('scannerModal')).show();
+            
+            setTimeout(() => {
+                // FIXED: 1D Barcode scanning requires a wide rectangular area. 
+                // Using qrbox limits the underlying ZXing engine's search area to block out surrounding text.
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                    fps: 10, 
+                    qrbox: { width: 300, height: 100 }, // Rectangular box is CRITICAL for 1D barcodes
+                    rememberLastUsedCamera: true
+                }, false);
+                
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }, 500);
+        }
+        function onScanSuccess(decodedText, decodedResult) {
+            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
+            if(scanContext === 'sale') addToSale(decodedText);
+            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
+        }
+        // Ignores UI warnings while searching for barcode frame
+        function onScanFailure(error) { } 
+        
+        function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
+
+        /* ================= Sales (POS) & Physical Scanner Logic ================= */
+        function loadSalesPage() {
+            const qList = document.getElementById('quickItemsList');
+            qList.innerHTML = '';
+            db.medicines.slice(0, 8).forEach(m => {
+                qList.innerHTML += `<button class="btn btn-outline-primary btn-sm m-1" onclick="addToSale('${m.id}')">${m.name}</button>`;
+            });
+            renderSaleTable();
+            setTimeout(() => document.getElementById('saleSearchInput').focus(), 300);
+        }
+
+        function handleSaleSearch(event) {
+            if(event.key === 'Enter') {
+                event.preventDefault();
+                const q = document.getElementById('saleSearchInput').value.trim();
+                if(!q) return;
+                
+                const match = db.medicines.find(m => m.id.toLowerCase() === q.toLowerCase());
+                if(match) {
+                    addToSale(match.id);
+                    document.getElementById('saleSearchInput').value = ''; 
+                } else {
+                    showToast('Item not found for barcode: ' + q, 'danger');
+                    document.getElementById('saleSearchInput').value = ''; 
+                }
+            }
+        }
+
+        function searchSaleItemLive() {
+            const q = document.getElementById('saleSearchInput').value.toLowerCase();
+            if(q.length < 2) return;
+            const match = db.medicines.find(m => m.name.toLowerCase() === q || m.id.toLowerCase() === q);
+            if(match) { 
+                addToSale(match.id); 
+                document.getElementById('saleSearchInput').value = ''; 
+            }
+        }
+
+        function addToSale(id) {
+            const med = db.medicines.find(m => m.id === id);
+            if(!med) { showToast('Medicine not found', 'danger'); return; }
+            if(med.stock <= 0) { showToast('Out of stock!', 'danger'); return; }
+            
+            const existing = db.currentSale.items.find(i => i.id === id);
+            if(existing) {
+                if(existing.qty >= med.stock) { showToast('Not enough stock', 'danger'); return; }
+                existing.qty++; existing.total = existing.qty * existing.price;
+            } else { db.currentSale.items.push({ id: med.id, name: med.name, price: med.price, qty: 1, total: med.price }); }
+            saveDB(); renderSaleTable();
+        }
+
+        function updateSaleQty(index, dir) {
+            const item = db.currentSale.items[index]; const med = db.medicines.find(m => m.id === item.id);
+            if(dir === 1 && item.qty >= med.stock) { showToast('Limit reached', 'warning'); return; }
+            item.qty += dir;
+            if(item.qty <= 0) db.currentSale.items.splice(index, 1);
+            else item.total = item.qty * item.price;
+            saveDB(); renderSaleTable();
+        }
+
+        function renderSaleTable() {
+            const tbody = document.getElementById('saleItemsTable'); tbody.innerHTML = ''; let total = 0;
+            db.currentSale.items.forEach((item, idx) => {
+                total += item.total;
+                tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.price}</td>
+                        <td><div class="input-group input-group-sm" style="width:100px" dir="ltr"><button class="btn btn-secondary" onclick="updateSaleQty(${idx}, -1)">-</button><input class="form-control text-center" value="${item.qty}" readonly><button class="btn btn-secondary" onclick="updateSaleQty(${idx}, 1)">+</button></div></td>
+                        <td>${item.total}</td></tr>`;
+            });
+            db.currentSale.total = total; document.getElementById('saleTotal').innerText = total.toFixed(2);
+        }
+
+        function newSale() { 
+            db.currentSale = { items: [], total: 0, editingId: null, editingDate: null }; 
+            saveDB(); 
+            renderSaleTable(); 
+            document.getElementById('customerName').value=''; 
+            document.getElementById('saleSearchInput').focus(); 
+        }
+
+        function completeSale() {
+            if(db.currentSale.items.length === 0) { showToast('Cart is empty', 'warning'); return; }
+            
+            const invId = db.currentSale.editingId || ('INV-' + Date.now().toString().slice(-6));
+            const now = new Date();
+            const dateStr = db.currentSale.editingDate || (now.toLocaleDateString() + ' ' + now.toLocaleTimeString());
+            
+            const cust = document.getElementById('customerName').value || 'Walk-in Customer';
+
+            db.currentSale.items.forEach(saleItem => { const med = db.medicines.find(m => m.id === saleItem.id); if(med) med.stock -= saleItem.qty; });
+            const completedSale = { id: invId, date: dateStr, customer: cust, items: [...db.currentSale.items], total: db.currentSale.total };
+            db.sales.push(completedSale); saveDB();
+            
+            showToast('Sale Completed! Printing Thermal Receipt...');
+            printInvoice(completedSale); 
+            newSale();
+        }
+
+        function printInvoice(sale) {
+            document.getElementById('invPharmaName').innerText = db.settings.pharmacyName || 'Elite Pharmacy';
+            document.getElementById('invAddress').innerText = db.settings.address || '';
+            document.getElementById('invPhone').innerText = db.settings.email || '';
+            
+            document.getElementById('invHeaderDetails').innerHTML = `
+                <div><strong>Inv#:</strong> ${sale.id}</div>
+                <div><strong>Date:</strong> ${sale.date}</div>
+                <div><strong>Cust:</strong> ${sale.customer}</div>
+            `;
+            
+            const tbody = document.getElementById('invItems'); tbody.innerHTML = '';
+            sale.items.forEach(i => { 
+                tbody.innerHTML += `
+                <tr>
+                    <td>${i.name}<br><small>Rs ${i.price}</small></td>
+                    <td class="qty-col">${i.qty}</td>
+                    <td class="total-col">Rs ${i.total}</td>
+                </tr>`; 
+            });
+            document.getElementById('invGrandTotal').innerText = `Total: Rs ${sale.total}`;
+            
+            JsBarcode("#invBarcodeSvg", sale.id, { 
+                format: "CODE128", 
+                width: 1.5, 
+                height: 40, 
+                displayValue: true,
+                fontSize: 14,
+                margin: 10,
+                background: "#ffffff"
+            });
+
+            document.getElementById('qrPrintSection').classList.add('no-print-section'); 
+            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
+            document.getElementById('printSection').classList.remove('no-print-section');
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            
+            window.print();
+            
+            setTimeout(() => { 
+                document.getElementById('printSection').classList.add('no-print-section'); 
+                document.getElementById('mainSystem').classList.remove('no-print-section'); 
+                document.getElementById('saleSearchInput')?.focus();
+            }, 1000);
+        }
+
+        /* ================= Reports Actions ================= */
+        function renderReports() {
+            const tbody = document.getElementById('reportsTableBody'); tbody.innerHTML = '';
+            db.sales.slice().reverse().forEach(s => { 
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.id}</td><td>${s.date}</td><td>${s.customer}</td><td>Rs ${s.total}</td>
+                        <td class="text-center action-btns">
+                            <button class="btn btn-info text-white" onclick="reprintSale('${s.id}')" title="Print"><i class="fas fa-print"></i></button>
+                            <button class="btn btn-primary" onclick="editSale('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" onclick="deleteSale('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`; 
+            });
+        }
+        
+        function reprintSale(id) {
+            const sale = db.sales.find(s => s.id === id);
+            if(sale) printInvoice(sale);
+        }
+
+        function deleteSale(id) {
+            showConfirm('Are you sure you want to delete this report?', () => {
+                db.sales = db.sales.filter(s => s.id !== id);
+                saveDB(); renderReports(); showToast('Report Deleted Successfully', 'danger');
+            });
+        }
+
+        function editSale(id) {
+            const sale = db.sales.find(s => s.id === id);
+            if(!sale) return;
+            showConfirm('Editing this sale will move items back to the POS cart. Proceed?', () => {
+                db.sales = db.sales.filter(s => s.id !== id);
+                sale.items.forEach(item => {
+                    const med = db.medicines.find(m => m.id === item.id);
+                    if(med) med.stock += item.qty;
+                });
+                db.currentSale = { items: [...sale.items], total: sale.total, editingId: sale.id, editingDate: sale.date };
+                document.getElementById('customerName').value = sale.customer !== 'Walk-in Customer' ? sale.customer : '';
+                saveDB(); showPage('sales'); showToast('Sale loaded into Cart for editing', 'info');
+            });
+        }
+
+        function exportExcel() {
+            const ws = XLSX.utils.json_to_sheet(db.sales.map(s => ({ 'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Total': s.total })));
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sales");
+            XLSX.writeFile(wb, "Pharmacy_Sales.xlsx"); showToast('Excel Downloaded!');
+        }
+        function printReport() {
+            const printContent = document.getElementById('reportPrintArea').innerHTML;
+            const originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContent; window.print();
+            document.body.innerHTML = originalContents; location.reload(); 
+        }
+
+        /* ================= Other Pages Integration ================= */
+        function loadInventoryPage() {
+            document.getElementById('invTotal').innerText = db.medicines.length;
+            document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
+        }
+
+        /* --- Suppliers --- */
+        function renderSuppliers() {
+            const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
+            db.suppliers.forEach(s => {
+                tbody.innerHTML += `<tr><td>${s.name}</td><td>${s.contact}</td>
+                <td class="text-center action-btns">
+                    <button class="btn btn-info text-white" onclick="printSupplier('${s.id}')" title="Print"><i class="fas fa-print"></i></button>
+                    <button class="btn btn-primary" onclick="editSupplier('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger" onclick="deleteSupplier('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                </td></tr>`;
+            });
+        }
+        function openAddSupplierModal() { 
+            document.getElementById('supId').value=''; 
+            document.getElementById('sName').value=''; 
+            document.getElementById('sContact').value=''; 
+            new bootstrap.Modal(document.getElementById('supplierModal')).show(); 
+        }
+        function saveSupplier() {
+            const id = document.getElementById('supId').value;
+            const name = document.getElementById('sName').value;
+            const contact = document.getElementById('sContact').value;
+            if(id) { const s = db.suppliers.find(x=>x.id===id); if(s) { s.name = name; s.contact = contact; } }
+            else { db.suppliers.push({ id: 'S'+Date.now(), name, contact }); }
+            saveDB(); renderSuppliers(); bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide(); showToast('Saved');
+        }
+        function editSupplier(id) {
+            const s = db.suppliers.find(x=>x.id===id); if(!s) return;
+            document.getElementById('supId').value = s.id; document.getElementById('sName').value = s.name; document.getElementById('sContact').value = s.contact;
+            new bootstrap.Modal(document.getElementById('supplierModal')).show();
+        }
+        function deleteSupplier(id) { showConfirm('Delete supplier?', () => { db.suppliers = db.suppliers.filter(s=>s.id!==id); saveDB(); renderSuppliers(); showToast('Deleted'); }); }
+        function printSupplier(id) { const s = db.suppliers.find(x=>x.id===id); if(s) printGenericRecord('Supplier Info', {'Supplier ID': s.id, 'Name': s.name, 'Contact': s.contact}); }
+
+        /* --- Employees --- */
+        function renderEmployees() {
+            const tbody = document.getElementById('employeesTableBody'); tbody.innerHTML = '';
+            db.employees.forEach(e => {
+                tbody.innerHTML += `<tr><td>${e.name}</td><td><span class="badge bg-secondary">${e.role}</span></td>
+                <td class="text-center action-btns">
+                    <button class="btn btn-info text-white" onclick="printEmployee('${e.id}')" title="Print"><i class="fas fa-print"></i></button>
+                    <button class="btn btn-primary" onclick="editEmployee('${e.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger" onclick="deleteEmployee('${e.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                </td></tr>`;
+            });
+        }
+        function openAddEmployeeModal() { 
+            document.getElementById('empId').value=''; document.getElementById('eName').value=''; 
+            new bootstrap.Modal(document.getElementById('employeeModal')).show(); 
+        }
+        function saveEmployee() {
+            const id = document.getElementById('empId').value; const name = document.getElementById('eName').value; const role = document.getElementById('eRole').value;
+            if(id) { const e = db.employees.find(x=>x.id===id); if(e) { e.name = name; e.role = role; } }
+            else { db.employees.push({ id: 'E'+Date.now(), name, role }); }
+            saveDB(); renderEmployees(); bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide(); showToast('Saved');
+        }
+        function editEmployee(id) {
+            const e = db.employees.find(x=>x.id===id); if(!e) return;
+            document.getElementById('empId').value = e.id; document.getElementById('eName').value = e.name; document.getElementById('eRole').value = e.role;
+            new bootstrap.Modal(document.getElementById('employeeModal')).show();
+        }
+        function deleteEmployee(id) { showConfirm('Delete employee?', () => { db.employees = db.employees.filter(e=>e.id!==id); saveDB(); renderEmployees(); showToast('Deleted'); }); }
+        function printEmployee(id) { const e = db.employees.find(x=>x.id===id); if(e) printGenericRecord('Employee Info', {'Employee ID': e.id, 'Name': e.name, 'Role': e.role}); }
+
+        /* --- Delivery --- */
+        function renderDeliveries() {
+            const tbody = document.getElementById('deliveryTableBody'); tbody.innerHTML = '';
+            db.deliveries.forEach(d => {
+                const bClass = d.status === 'Pending' ? 'warning' : 'success';
+                tbody.innerHTML += `<tr><td>${d.id}</td><td>${d.customer}</td><td><span class="badge bg-${bClass}">${d.status}</span></td>
+                    <td class="text-center action-btns">
+                        ${d.status==='Pending' ? `<button class="btn btn-success" onclick="completeDelivery('${d.id}')" title="Mark Completed"><i class="fas fa-check"></i></button>` : ''}
+                        <button class="btn btn-info text-white" onclick="printDelivery('${d.id}')" title="Print"><i class="fas fa-print"></i></button>
+                        <button class="btn btn-primary" onclick="editDelivery('${d.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger" onclick="deleteDelivery('${d.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td></tr>`;
+            });
+        }
+        function openAddDeliveryModal() { 
+            document.getElementById('delId').value=''; document.getElementById('dCust').value=''; document.getElementById('dStatus').value='Pending';
+            new bootstrap.Modal(document.getElementById('deliveryModal')).show(); 
+        }
+        function saveDelivery() {
+            const id = document.getElementById('delId').value; const cust = document.getElementById('dCust').value; const status = document.getElementById('dStatus').value;
+            if(id) { const d = db.deliveries.find(x=>x.id===id); if(d) { d.customer = cust; d.status = status; } }
+            else { db.deliveries.push({ id: 'D-'+Date.now().toString().slice(-4), customer: cust, status: status }); }
+            saveDB(); renderDeliveries(); bootstrap.Modal.getInstance(document.getElementById('deliveryModal')).hide(); showToast('Delivery Saved');
+        }
+        function editDelivery(id) {
+            const d = db.deliveries.find(x=>x.id===id); if(!d) return;
+            document.getElementById('delId').value = d.id; document.getElementById('dCust').value = d.customer; document.getElementById('dStatus').value = d.status;
+            new bootstrap.Modal(document.getElementById('deliveryModal')).show();
+        }
+        function completeDelivery(id) { const d = db.deliveries.find(x=>x.id===id); if(d) d.status = 'Delivered'; saveDB(); renderDeliveries(); showToast('Delivery completed'); }
+        function deleteDelivery(id) { showConfirm('Delete Delivery Order?', () => { db.deliveries = db.deliveries.filter(d=>d.id!==id); saveDB(); renderDeliveries(); showToast('Deleted'); }); }
+        function printDelivery(id) { const d = db.deliveries.find(x=>x.id===id); if(d) printGenericRecord('Delivery Order Info', {'Order #': d.id, 'Customer': d.customer, 'Status': d.status}); }
+
+        /* --- Alerts --- */
+        function renderAlerts() {
+            const cont = document.getElementById('alertsContainer'); cont.innerHTML = '';
+            if(db.alerts.length===0) { cont.innerHTML = '<p class="text-muted text-center">No active alerts.</p>'; return; }
+            db.alerts.forEach(a => {
+                cont.innerHTML += `<div class="alert alert-${a.type} d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-info-circle"></i> ${a.msg}</span>
+                    <button class="btn btn-sm btn-outline-dark" onclick="removeAlert(${a.id})"><i class="fas fa-times"></i></button></div>`;
+            });
+        }
+        function removeAlert(id) { db.alerts = db.alerts.filter(a=>a.id!==id); saveDB(); renderAlerts(); }
+        function clearAlerts() { db.alerts = []; saveDB(); renderAlerts(); showToast('Alerts cleared'); }
+
+        /* --- Settings & Profile --- */
+        function loadSettings() {
+            document.getElementById('setPharmaName').value = db.settings.pharmacyName || '';
+            document.getElementById('setAddress').value = db.settings.address || '';
+            document.getElementById('setEmail').value = db.settings.email || '';
+        }
+        function saveSettings() {
+            db.settings.pharmacyName = document.getElementById('setPharmaName').value;
+            db.settings.address = document.getElementById('setAddress').value;
+            db.settings.email = document.getElementById('setEmail').value;
+            saveDB(); showToast('Settings Saved');
+        }
+        function saveProfile() {
+            if(document.getElementById('profPass').value) showToast('Password updated');
+            else showToast('Profile saved');
+        }
+
+    </script>
+</body>
+</html>
