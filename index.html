@@ -262,7 +262,6 @@
                     <li class="nav-item"><a class="nav-link" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Reports</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('suppliers')"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('employees')"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('delivery')"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
                     <hr class="text-white border-white opacity-25 my-2">
                     <li class="nav-item"><a class="nav-link text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
@@ -354,13 +353,13 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" onclick="showPage('delivery')">
+                            <div class="stat-card" onclick="showPage('reports')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="text-muted" data-i18n="delivery">Deliveries</h6>
-                                        <h4 class="fw-bold text-info" id="dashDeliveries">0</h4>
+                                        <h6 class="text-muted" data-i18n="net_profit">Net Profit</h6>
+                                        <h4 class="fw-bold text-info" id="dashNetProfit">0</h4>
                                     </div>
-                                    <div class="icon bg-gradient-info text-white"><i class="fas fa-truck"></i></div>
+                                    <div class="icon bg-gradient-info text-white"><i class="fas fa-wallet"></i></div>
                                 </div>
                             </div>
                         </div>
@@ -406,11 +405,11 @@
                         </div>
                         <div class="col-md-6">
                             <div class="card dash-widget-card">
-                                <div class="card-header bg-white"><i class="fas fa-exclamation-triangle text-danger"></i> <span data-i18n="low_stock">Low Stock Items</span></div>
+                                <div class="card-header bg-white"><i class="fas fa-exclamation-triangle text-danger"></i> <span data-i18n="low_stock">Low Stock & Expiry</span></div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-borderless table-striped mb-0">
-                                            <thead><tr><th data-i18n="med_name">Item</th><th data-i18n="stock">Stock</th><th data-i18n="min_stock">Min</th></tr></thead>
+                                            <thead><tr><th data-i18n="med_name">Item</th><th data-i18n="stock">Stock</th><th data-i18n="expiry_date">Expiry</th></tr></thead>
                                             <tbody id="dashLowStockTable"></tbody>
                                         </table>
                                     </div>
@@ -439,8 +438,9 @@
                                             <th data-i18n="barcode_id">Barcode / ID</th>
                                             <th data-i18n="med_name">Name</th>
                                             <th data-i18n="category">Category</th>
-                                            <th data-i18n="price">Price</th>
+                                            <th data-i18n="sale_price">Sale Price</th>
                                             <th data-i18n="stock">Stock</th>
+                                            <th data-i18n="expiry_date">Expiry</th>
                                             <th data-i18n="actions" class="text-center">Actions</th>
                                         </tr>
                                     </thead>
@@ -467,7 +467,7 @@
                                     </div>
                                     <input type="text" class="form-control mb-3" id="customerName" placeholder="Customer Name (Optional)">
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table table-sm align-middle">
                                             <thead>
                                                 <tr>
                                                     <th data-i18n="med_name">Item</th><th data-i18n="price">Price</th><th data-i18n="qty">Qty</th><th data-i18n="total">Total</th><th></th>
@@ -476,10 +476,19 @@
                                             <tbody id="saleItemsTable"></tbody>
                                         </table>
                                     </div>
-                                    <div class="row mt-3">
+                                    <hr>
+                                    <div class="row mt-3 align-items-end">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <label class="form-label text-muted small fw-bold" data-i18n="discount">Discount (Rs)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="fas fa-minus-circle"></i></span>
+                                                <input type="number" class="form-control form-control-lg" id="saleDiscount" value="0" min="0" oninput="renderSaleTable()">
+                                            </div>
+                                        </div>
                                         <div class="col-md-6 text-end">
-                                            <h4 class="text-primary"><span data-i18n="total">Total</span>: <span id="saleTotal">0.00</span></h4>
-                                            <button class="btn btn-success btn-lg mt-2 w-100" onclick="completeSale()"><i class="fas fa-print"></i> <span data-i18n="complete_sale">Complete Sale (Thermal Print)</span></button>
+                                            <h6 class="text-muted mb-1"><span data-i18n="subtotal">Subtotal</span>: Rs <span id="saleSubTotal">0.00</span></h6>
+                                            <h3 class="text-primary fw-bold mb-2"><span data-i18n="total">Grand Total</span>: Rs <span id="saleGrandTotal">0.00</span></h3>
+                                            <button class="btn btn-success btn-lg w-100" onclick="completeSale()"><i class="fas fa-print"></i> <span data-i18n="complete_sale">Complete Sale (Thermal Print)</span></button>
                                         </div>
                                     </div>
                                 </div>
@@ -540,9 +549,9 @@
                         <div class="card-body" id="reportPrintArea">
                             <h4 class="text-center mb-4" data-i18n="sales_report">Sales Report</h4>
                             <div class="table-responsive">
-                                <table class="table table-striped" id="reportsTable">
+                                <table class="table table-striped align-middle" id="reportsTable">
                                     <thead><tr>
-                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th><th data-i18n="total">Total</th><th data-i18n="actions" class="text-center">Actions</th>
+                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th><th data-i18n="discount">Disc.</th><th data-i18n="total">Total</th><th data-i18n="net_profit" class="text-success">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
                                     </tr></thead>
                                     <tbody id="reportsTableBody"></tbody>
                                 </table>
@@ -644,7 +653,7 @@
     <!-- Modals -->
     <!-- Add/Edit Medicine Modal -->
     <div class="modal fade" id="medicineModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="medModalTitle">Add Medicine</h5>
@@ -658,13 +667,19 @@
                             <input type="text" class="form-control border-primary" id="medId" placeholder="Scan Barcode or leave empty">
                             <small class="text-muted" data-i18n="barcode_hint">Use scanner to auto-fill</small>
                         </div>
-                        <div class="mb-3"><label data-i18n="med_name">Name</label><input type="text" class="form-control" id="mName" required></div>
-                        <div class="mb-3"><label data-i18n="category">Category</label><input type="text" class="form-control" id="mCat" required></div>
                         <div class="row">
-                            <div class="col-6 mb-3"><label data-i18n="price">Price</label><input type="number" class="form-control" id="mPrice" required></div>
-                            <div class="col-6 mb-3"><label data-i18n="stock">Stock</label><input type="number" class="form-control" id="mStock" required></div>
+                            <div class="col-md-6 mb-3"><label data-i18n="med_name">Name</label><input type="text" class="form-control" id="mName" required></div>
+                            <div class="col-md-6 mb-3"><label data-i18n="category">Category</label><input type="text" class="form-control" id="mCat" required></div>
                         </div>
-                        <div class="mb-3"><label data-i18n="min_stock">Min Stock</label><input type="number" class="form-control" id="mMinStock" value="10"></div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3"><label data-i18n="purchase_price">Purchase Price (Khareed)</label><input type="number" class="form-control" id="mPurchasePrice" required></div>
+                            <div class="col-md-6 mb-3"><label data-i18n="sale_price">Sale Price (Farokht)</label><input type="number" class="form-control" id="mPrice" required></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3"><label data-i18n="stock">Stock Qty</label><input type="number" class="form-control" id="mStock" required></div>
+                            <div class="col-md-4 mb-3"><label data-i18n="min_stock">Min Stock</label><input type="number" class="form-control" id="mMinStock" value="10"></div>
+                            <div class="col-md-4 mb-3"><label class="text-danger fw-bold" data-i18n="expiry_date">Expiry Date</label><input type="date" class="form-control border-danger" id="mExpiryDate" required></div>
+                        </div>
                         <div class="barcode-box" id="barcodeContainerDiv" style="display:none;">
                             <svg id="barcodeSvg"></svg>
                         </div>
@@ -788,7 +803,6 @@
     <!-- 80mm Thermal Receipt Print Area -->
     <div id="printSection" class="thermal-receipt no-print-section">
         <div style="text-align: center; margin-bottom: 5px;">
-            <!-- Pharmacy Logo Placeholder -->
             <i class="fas fa-clinic-medical" style="font-size: 28px; display:block; margin: 0 auto 5px auto;"></i>
             <h3 id="invPharmaName" style="margin: 0; font-size: 16px; font-weight: bold;">Elite Pharmacy</h3>
             <div id="invAddress" style="font-size: 11px; margin-top: 2px;"></div>
@@ -812,6 +826,8 @@
         
         <div class="border-dashed-top"></div>
         <div style="text-align: right; margin-top: 5px;">
+            <div id="invSubTotalRow" style="font-size: 12px; color:#333;"></div>
+            <div id="invDiscountRow" style="font-size: 12px; color:#333; margin-bottom: 4px;"></div>
             <h4 id="invGrandTotal" style="margin: 0; font-size: 14px; font-weight: bold;"></h4>
         </div>
         
@@ -858,7 +874,9 @@
                 cancel: "Cancel", save: "Save", yes: "Yes", confirmation: "Confirmation", qr_hint: "Scan this Barcode for quick sale", min_stock: "Min Stock",
                 name: "Name", contact: "Contact", role: "Role", status: "Status", add_supplier: "Add Supplier", add_employee: "Add Employee", add_delivery: "Add Delivery",
                 sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
-                print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine"
+                print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine",
+                purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", subtotal: "Subtotal", net_profit: "Net Profit",
+                expiring_soon: "Expiring Soon", expired: "Expired!"
             },
             ur: {
                 sys_title: "فارمیسی مینجمنٹ سسٹم",
@@ -876,7 +894,9 @@
                 cancel: "منسوخ کریں", save: "محفوظ کریں", yes: "ہاں", confirmation: "تصدیق", qr_hint: "فوری فروخت کے لیے یہ بارکوڈ اسکین کریں", min_stock: "کم از کم اسٹاک",
                 name: "نام", contact: "رابطہ", role: "عہدہ", status: "حیثیت", add_supplier: "سپلائر شامل کریں", add_employee: "ملازم شامل کریں", add_delivery: "ڈلیوری شامل کریں",
                 sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
-                print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں"
+                print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں",
+                purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
+                expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!"
             }
         };
 
@@ -899,7 +919,6 @@
                 }
             });
 
-            // FIXED: Using Array.isArray allows safely calling .filter and prevents "undefined" errors
             if (db && Array.isArray(db.medicines)) {
                 renderMedicines(); 
                 if(document.getElementById('dashboard').classList.contains('active')) loadDashboard();
@@ -915,7 +934,7 @@
                 db = JSON.parse(saved);
                 db.medicines = db.medicines || [];
                 db.sales = db.sales || [];
-                db.currentSale = db.currentSale || { items: [], total: 0, editingId: null, editingDate: null };
+                db.currentSale = db.currentSale || { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = db.suppliers || [];
                 db.employees = db.employees || [];
                 db.alerts = db.alerts || [];
@@ -924,12 +943,12 @@
                 
             } else {
                 db.medicines = [
-                    { id: '123456789012', name: 'Panadol', category: 'Painkiller', price: 50, stock: 100, minStock: 20 },
-                    { id: 'M102', name: 'Augmentin', category: 'Antibiotic', price: 250, stock: 15, minStock: 20 },
-                    { id: 'M103', name: 'Vitamin C', category: 'Vitamins', price: 150, stock: 200, minStock: 50 }
+                    { id: '123456789012', name: 'Panadol', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
+                    { id: 'M102', name: 'Augmentin', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
+                    { id: 'M103', name: 'Vitamin C', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
                 ];
                 db.sales = [];
-                db.currentSale = { items: [], total: 0, editingId: null, editingDate: null };
+                db.currentSale = { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567' }];
                 db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
                 db.deliveries = [];
@@ -944,9 +963,25 @@
 
         function generateSystemAlerts() {
             db.alerts = [];
-            db.medicines.filter(m => m.stock <= m.minStock).forEach(m => {
-                db.alerts.push({ id: Date.now()+Math.random(), msg: `Low stock warning for ${m.name} (Current: ${m.stock})`, type: 'danger' });
+            const today = new Date();
+            const next90Days = new Date(today.getTime() + (90 * 24 * 60 * 60 * 1000));
+
+            db.medicines.forEach(m => {
+                // Low Stock Check
+                if (m.stock <= m.minStock) {
+                    db.alerts.push({ id: Date.now()+Math.random(), msg: `Low stock warning for ${m.name} (Current: ${m.stock})`, type: 'warning' });
+                }
+                // Expiry Check
+                if (m.expiryDate) {
+                    const expDate = new Date(m.expiryDate);
+                    if (expDate < today) {
+                        db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} has EXPIRED on ${m.expiryDate}!`, type: 'danger' });
+                    } else if (expDate <= next90Days) {
+                        db.alerts.push({ id: Date.now()+Math.random(), msg: `${m.name} is expiring soon (${m.expiryDate}).`, type: 'warning' });
+                    }
+                }
             });
+
             if(db.deliveries.some(d => d.status === 'Pending')) {
                 db.alerts.push({ id: Date.now()+Math.random(), msg: `You have pending delivery orders.`, type: 'info' });
             }
@@ -1039,7 +1074,7 @@
             
             document.getElementById('pageTitle').innerText = i18n[currentLang][pageId] || pageId.toUpperCase();
 
-            closeSidebar(); // Auto-close sidebar on mobile after clicking
+            closeSidebar(); 
 
             if(pageId === 'dashboard') loadDashboard();
             if(pageId === 'medicines') renderMedicines();
@@ -1060,12 +1095,13 @@
         function loadDashboard() {
             generateSystemAlerts(); 
             const totalSales = db.sales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
-            const lowStockList = db.medicines.filter(m => m.stock <= m.minStock);
+            const netProfit = db.sales.reduce((sum, s) => sum + parseFloat(s.profit || 0), 0);
+            const lowStockList = db.medicines.filter(m => m.stock <= m.minStock || (m.expiryDate && new Date(m.expiryDate) < new Date(new Date().getTime() + 90*24*60*60*1000)));
             
             document.getElementById('dashTotalSales').innerText = 'Rs ' + totalSales.toFixed(2);
             document.getElementById('dashTotalMeds').innerText = db.medicines.length;
             document.getElementById('dashAlerts').innerText = db.alerts.length;
-            document.getElementById('dashDeliveries').innerText = db.deliveries.filter(d=>d.status==='Pending').length;
+            document.getElementById('dashNetProfit').innerText = 'Rs ' + netProfit.toFixed(2);
 
             const recentSalesTbody = document.getElementById('dashRecentSales');
             recentSalesTbody.innerHTML = '';
@@ -1076,10 +1112,11 @@
 
             const lowStockTbody = document.getElementById('dashLowStockTable');
             lowStockTbody.innerHTML = '';
-            lowStockList.slice(0, 5).forEach(m => {
-                lowStockTbody.innerHTML += `<tr><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`;
+            lowStockList.slice(0, 6).forEach(m => {
+                const isExp = m.expiryDate && new Date(m.expiryDate) < new Date() ? 'text-danger' : '';
+                lowStockTbody.innerHTML += `<tr><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td class="${isExp}">${m.expiryDate || 'N/A'}</td></tr>`;
             });
-            if(lowStockList.length === 0) lowStockTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Stock levels are good!</td></tr>`;
+            if(lowStockList.length === 0) lowStockTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Stock & Expiry levels are good!</td></tr>`;
 
             renderCharts();
         }
@@ -1134,12 +1171,12 @@
 
             if (type === 'sales') {
                 title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
-                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th></tr>`;
-                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td></tr>`; });
+                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th><th>Profit</th></tr>`;
+                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success">Rs ${s.profit||0}</td></tr>`; });
             } else if (type === 'medicines') {
                 title = currentLang==='en'?'All Medicines':'تمام ادویات';
-                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name</th><th>Stock</th><th>Price</th></tr>`;
-                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.stock}</td><td>Rs ${m.price}</td></tr>`; });
+                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
+                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
             } else if (type === 'lowstock') {
                 title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
                 thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
@@ -1233,19 +1270,17 @@
                 `;
                 printArea.appendChild(label);
                 
-                // IMPORTANT: Thicker bars and more height so they scan easily from images
                 JsBarcode(`#print-barcode-${med.id}`, med.id, {
                     format: "CODE128",
-                    width: 2,          // Barcode thickness increased
-                    height: 80,        // Barcode height increased
+                    width: 2,          
+                    height: 80,        
                     displayValue: true,
                     fontSize: 14,
-                    margin: 20,        // Extra quiet zone
+                    margin: 20,        
                     background: "#ffffff"
                 });
             });
 
-            // Isolate print areas
             document.getElementById('printSection').classList.add('no-print-section'); 
             document.getElementById('genericPrintSection').classList.add('no-print-section'); 
             document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
@@ -1262,7 +1297,6 @@
 
         /* ================= Medicines & UI Logic ================= */
         function renderMedicines() {
-            // FIXED: Added Array.isArray check to prevent filter mapping errors
             if (!db || !Array.isArray(db.medicines)) return; 
 
             const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
@@ -1271,12 +1305,21 @@
             
             db.medicines.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)).forEach(m => {
                 const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
+                const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
+                
                 tbody.innerHTML += `
-                    <tr><td><strong>${m.id}</strong></td><td>${m.name}</td><td>${m.category}</td><td>Rs ${m.price}</td><td class="${stockClass}">${m.stock}</td>
+                    <tr>
+                        <td><strong>${m.id}</strong></td>
+                        <td>${m.name}</td>
+                        <td>${m.category}</td>
+                        <td>Rs ${m.price} <br><small class="text-muted">(Purch: Rs ${m.purchasePrice || 0})</small></td>
+                        <td class="${stockClass}">${m.stock}</td>
+                        <td class="${expClass}">${m.expiryDate || '-'}</td>
                         <td class="action-btns text-center">
                             <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
-                        </td></tr>`;
+                        </td>
+                    </tr>`;
             });
         }
 
@@ -1300,9 +1343,11 @@
                 id: newId, 
                 name: document.getElementById('mName').value, 
                 category: document.getElementById('mCat').value,
+                purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value || 0),
                 price: parseFloat(document.getElementById('mPrice').value), 
                 stock: parseInt(document.getElementById('mStock').value),
-                minStock: parseInt(document.getElementById('mMinStock').value)
+                minStock: parseInt(document.getElementById('mMinStock').value),
+                expiryDate: document.getElementById('mExpiryDate').value
             };
 
             if (originalId) { // Editing existing
@@ -1317,8 +1362,8 @@
             }
             
             saveDB();
+            generateSystemAlerts(); // Re-check expiries
             
-            // Show Barcode with properly increased size for easy image scanning
             document.getElementById('barcodeContainerDiv').style.display = 'flex';
             document.getElementById('qrHint').style.display = 'block';
             JsBarcode("#barcodeSvg", med.id, { 
@@ -1337,9 +1382,11 @@
             document.getElementById('medId').value = m.id; 
             document.getElementById('mName').value = m.name;
             document.getElementById('mCat').value = m.category; 
+            document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
             document.getElementById('mPrice').value = m.price;
             document.getElementById('mStock').value = m.stock; 
             document.getElementById('mMinStock').value = m.minStock;
+            document.getElementById('mExpiryDate').value = m.expiryDate || '';
             
             document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
             document.getElementById('qrHint').style.display = 'block';
@@ -1365,12 +1412,11 @@
             new bootstrap.Modal(document.getElementById('scannerModal')).show();
             
             setTimeout(() => {
-                // FIXED: 1D Barcode scanning requires a wide rectangular area. 
-                // Using qrbox limits the underlying ZXing engine's search area to block out surrounding text.
                 html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
                     fps: 10, 
-                    qrbox: { width: 300, height: 100 }, // Rectangular box is CRITICAL for 1D barcodes
-                    rememberLastUsedCamera: true
+                    rememberLastUsedCamera: true,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE ],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
                 }, false);
                 
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
@@ -1381,9 +1427,7 @@
             if(scanContext === 'sale') addToSale(decodedText);
             else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
         }
-        // Ignores UI warnings while searching for barcode frame
         function onScanFailure(error) { } 
-        
         function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
 
         /* ================= Sales (POS) & Physical Scanner Logic ================= */
@@ -1432,8 +1476,15 @@
             const existing = db.currentSale.items.find(i => i.id === id);
             if(existing) {
                 if(existing.qty >= med.stock) { showToast('Not enough stock', 'danger'); return; }
-                existing.qty++; existing.total = existing.qty * existing.price;
-            } else { db.currentSale.items.push({ id: med.id, name: med.name, price: med.price, qty: 1, total: med.price }); }
+                existing.qty++; 
+                existing.total = existing.qty * existing.price;
+                existing.totalPurchase = existing.qty * existing.purchasePrice;
+            } else { 
+                db.currentSale.items.push({ 
+                    id: med.id, name: med.name, price: med.price, purchasePrice: med.purchasePrice || 0, 
+                    qty: 1, total: med.price, totalPurchase: med.purchasePrice || 0 
+                }); 
+            }
             saveDB(); renderSaleTable();
         }
 
@@ -1442,23 +1493,39 @@
             if(dir === 1 && item.qty >= med.stock) { showToast('Limit reached', 'warning'); return; }
             item.qty += dir;
             if(item.qty <= 0) db.currentSale.items.splice(index, 1);
-            else item.total = item.qty * item.price;
+            else {
+                item.total = item.qty * item.price;
+                item.totalPurchase = item.qty * item.purchasePrice;
+            }
             saveDB(); renderSaleTable();
         }
 
         function renderSaleTable() {
-            const tbody = document.getElementById('saleItemsTable'); tbody.innerHTML = ''; let total = 0;
+            const tbody = document.getElementById('saleItemsTable'); tbody.innerHTML = ''; 
+            let subTotal = 0;
             db.currentSale.items.forEach((item, idx) => {
-                total += item.total;
+                subTotal += item.total;
                 tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.price}</td>
                         <td><div class="input-group input-group-sm" style="width:100px" dir="ltr"><button class="btn btn-secondary" onclick="updateSaleQty(${idx}, -1)">-</button><input class="form-control text-center" value="${item.qty}" readonly><button class="btn btn-secondary" onclick="updateSaleQty(${idx}, 1)">+</button></div></td>
                         <td>${item.total}</td></tr>`;
             });
-            db.currentSale.total = total; document.getElementById('saleTotal').innerText = total.toFixed(2);
+            
+            db.currentSale.subTotal = subTotal;
+            
+            const discountInput = document.getElementById('saleDiscount');
+            let discount = parseFloat(discountInput.value) || 0;
+            if(discount > subTotal) { discount = subTotal; discountInput.value = subTotal; }
+            
+            db.currentSale.discount = discount;
+            db.currentSale.total = subTotal - discount; 
+            
+            document.getElementById('saleSubTotal').innerText = subTotal.toFixed(2);
+            document.getElementById('saleGrandTotal').innerText = db.currentSale.total.toFixed(2);
         }
 
         function newSale() { 
-            db.currentSale = { items: [], total: 0, editingId: null, editingDate: null }; 
+            db.currentSale = { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null }; 
+            document.getElementById('saleDiscount').value = '0';
             saveDB(); 
             renderSaleTable(); 
             document.getElementById('customerName').value=''; 
@@ -1471,11 +1538,28 @@
             const invId = db.currentSale.editingId || ('INV-' + Date.now().toString().slice(-6));
             const now = new Date();
             const dateStr = db.currentSale.editingDate || (now.toLocaleDateString() + ' ' + now.toLocaleTimeString());
-            
             const cust = document.getElementById('customerName').value || 'Walk-in Customer';
 
-            db.currentSale.items.forEach(saleItem => { const med = db.medicines.find(m => m.id === saleItem.id); if(med) med.stock -= saleItem.qty; });
-            const completedSale = { id: invId, date: dateStr, customer: cust, items: [...db.currentSale.items], total: db.currentSale.total };
+            let totalPurchaseCost = 0;
+
+            db.currentSale.items.forEach(saleItem => { 
+                const med = db.medicines.find(m => m.id === saleItem.id); 
+                if(med) med.stock -= saleItem.qty; 
+                totalPurchaseCost += saleItem.totalPurchase;
+            });
+            
+            // Profit Calculation: (Total Sale Value after discount) - (Total Purchase Cost)
+            const netProfit = db.currentSale.total - totalPurchaseCost;
+
+            const completedSale = { 
+                id: invId, date: dateStr, customer: cust, 
+                items: [...db.currentSale.items], 
+                subTotal: db.currentSale.subTotal,
+                discount: db.currentSale.discount,
+                total: db.currentSale.total,
+                profit: netProfit
+            };
+            
             db.sales.push(completedSale); saveDB();
             
             showToast('Sale Completed! Printing Thermal Receipt...');
@@ -1503,16 +1587,19 @@
                     <td class="total-col">Rs ${i.total}</td>
                 </tr>`; 
             });
+            
+            // Subtotal and Discount logic for receipt
+            if (sale.discount > 0) {
+                document.getElementById('invSubTotalRow').innerHTML = `Subtotal: Rs ${sale.subTotal}`;
+                document.getElementById('invDiscountRow').innerHTML = `Discount: -Rs ${sale.discount}`;
+            } else {
+                document.getElementById('invSubTotalRow').innerHTML = '';
+                document.getElementById('invDiscountRow').innerHTML = '';
+            }
             document.getElementById('invGrandTotal').innerText = `Total: Rs ${sale.total}`;
             
             JsBarcode("#invBarcodeSvg", sale.id, { 
-                format: "CODE128", 
-                width: 1.5, 
-                height: 40, 
-                displayValue: true,
-                fontSize: 14,
-                margin: 10,
-                background: "#ffffff"
+                format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 0
             });
 
             document.getElementById('qrPrintSection').classList.add('no-print-section'); 
@@ -1535,7 +1622,10 @@
             db.sales.slice().reverse().forEach(s => { 
                 tbody.innerHTML += `
                     <tr>
-                        <td>${s.id}</td><td>${s.date}</td><td>${s.customer}</td><td>Rs ${s.total}</td>
+                        <td>${s.id}</td><td>${s.date}</td><td>${s.customer}</td>
+                        <td class="text-danger">${s.discount > 0 ? '-Rs '+s.discount : '-'}</td>
+                        <td class="fw-bold">Rs ${s.total}</td>
+                        <td class="text-success fw-bold">Rs ${s.profit || 0}</td>
                         <td class="text-center action-btns">
                             <button class="btn btn-info text-white" onclick="reprintSale('${s.id}')" title="Print"><i class="fas fa-print"></i></button>
                             <button class="btn btn-primary" onclick="editSale('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
@@ -1566,14 +1656,19 @@
                     const med = db.medicines.find(m => m.id === item.id);
                     if(med) med.stock += item.qty;
                 });
-                db.currentSale = { items: [...sale.items], total: sale.total, editingId: sale.id, editingDate: sale.date };
+                db.currentSale = { 
+                    items: [...sale.items], subTotal: sale.subTotal || sale.total, 
+                    discount: sale.discount || 0, total: sale.total, 
+                    editingId: sale.id, editingDate: sale.date 
+                };
                 document.getElementById('customerName').value = sale.customer !== 'Walk-in Customer' ? sale.customer : '';
+                document.getElementById('saleDiscount').value = sale.discount || 0;
                 saveDB(); showPage('sales'); showToast('Sale loaded into Cart for editing', 'info');
             });
         }
 
         function exportExcel() {
-            const ws = XLSX.utils.json_to_sheet(db.sales.map(s => ({ 'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Total': s.total })));
+            const ws = XLSX.utils.json_to_sheet(db.sales.map(s => ({ 'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Discount': s.discount, 'Total': s.total, 'Profit': s.profit })));
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sales");
             XLSX.writeFile(wb, "Pharmacy_Sales.xlsx"); showToast('Excel Downloaded!');
         }
