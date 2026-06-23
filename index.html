@@ -840,19 +840,47 @@
             <div class="modal-content">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title"><i class="fas fa-book"></i> Ledger: <span id="ledgerCustName" class="text-primary"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div>
+                        <button class="btn btn-sm btn-info text-white me-2" onclick="printCustomerLedger()"><i class="fas fa-print"></i> Print</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded">
-                        <h4 class="mb-0">Balance: <span id="ledgerBalance" class="text-danger fw-bold">0</span></h4>
-                        <div class="input-group" style="width: 250px;">
-                            <input type="number" class="form-control" id="ledgerReceiveAmt" placeholder="Amount...">
-                            <button class="btn btn-success" onclick="receiveLedgerPayment()">Receive</button>
+                    <!-- Manual Entry Row -->
+                    <div class="row g-2 mb-3 bg-white p-3 border rounded shadow-sm">
+                        <div class="col-12"><small class="text-muted fw-bold mb-1 d-block">Add Manual Entry (Baqaya / Return / Payment)</small></div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm" id="cLedgerDesc" placeholder="Description (e.g. Return/Cash)">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control form-control-sm" id="cLedgerAmt" placeholder="Amount">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="cLedgerType">
+                                <option value="credit">Jama (Received/Return)</option>
+                                <option value="debit">Udhaar (Given)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-success btn-sm w-100" onclick="addCustomerLedgerEntry()">Add</button>
                         </div>
                     </div>
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table table-sm table-striped">
-                            <thead><tr><th>Date</th><th>Description</th><th class="text-danger">Debit (Udhaar)</th><th class="text-success">Credit (Jama)</th></tr></thead>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">Current Balance: <span id="ledgerBalance" class="text-danger fw-bold">0</span></h4>
+                    </div>
+                    
+                    <div class="table-responsive" style="max-height: 350px;">
+                        <table class="table table-sm table-striped table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th class="text-danger">Debit (Udhaar)</th>
+                                    <th class="text-success">Credit (Jama)</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody id="ledgerTableBody"></tbody>
                         </table>
                     </div>
@@ -867,22 +895,82 @@
             <div class="modal-content">
                 <div class="modal-header bg-light">
                     <h5 class="modal-title"><i class="fas fa-book"></i> Supplier Ledger: <span id="supLedgerName" class="text-primary"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div>
+                        <button class="btn btn-sm btn-info text-white me-2" onclick="printSupplierLedger()"><i class="fas fa-print"></i> Print</button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
                 </div>
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded">
-                        <h4 class="mb-0">Payable Balance: <span id="supLedgerBalance" class="text-danger fw-bold">0</span></h4>
-                        <div class="input-group" style="width: 250px;">
-                            <input type="number" class="form-control" id="supLedgerPayAmt" placeholder="Amount Paid...">
-                            <button class="btn btn-success" onclick="paySupplierLedger()">Pay</button>
+                    <!-- Manual Entry Row -->
+                    <div class="row g-2 mb-3 bg-white p-3 border rounded shadow-sm">
+                        <div class="col-12"><small class="text-muted fw-bold mb-1 d-block">Add Manual Entry</small></div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm" id="sLedgerDesc" placeholder="Description (e.g. Paid Cash)">
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control form-control-sm" id="sLedgerAmt" placeholder="Amount">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select form-select-sm" id="sLedgerType">
+                                <option value="debit">Payment Paid (Debit)</option>
+                                <option value="credit">Maal Aya / Bill (Credit)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-success btn-sm w-100" onclick="addSupplierLedgerEntry()">Add</button>
                         </div>
                     </div>
-                    <div class="table-responsive" style="max-height: 300px;">
-                        <table class="table table-sm table-striped">
-                            <thead><tr><th>Date</th><th>Description</th><th class="text-danger">Credit (Maal Aya)</th><th class="text-success">Debit (Payment Ki)</th></tr></thead>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="mb-0">Payable Balance: <span id="supLedgerBalance" class="text-danger fw-bold">0</span></h4>
+                    </div>
+                    
+                    <div class="table-responsive" style="max-height: 350px;">
+                        <table class="table table-sm table-striped table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th class="text-danger">Credit (Bill/Maal)</th>
+                                    <th class="text-success">Debit (Paid)</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
                             <tbody id="supLedgerTableBody"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Ledger Entry Modal -->
+    <div class="modal fade" id="editLedgerEntryModal" tabindex="-1" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Edit Ledger Entry</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editLedgerContext">
+                    <input type="hidden" id="editLedgerIndex">
+                    <div class="mb-2">
+                        <label>Description</label>
+                        <input type="text" class="form-control form-control-sm" id="editLedgerDesc">
+                    </div>
+                    <div class="mb-2">
+                        <label>Amount</label>
+                        <input type="number" class="form-control form-control-sm" id="editLedgerAmt">
+                    </div>
+                    <div class="mb-3">
+                        <label>Type</label>
+                        <select class="form-select form-select-sm" id="editLedgerType">
+                            <option value="debit">Debit (Udhaar / Payment Ki)</option>
+                            <option value="credit">Credit (Jama / Maal Aya)</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-sm w-100" onclick="saveEditedLedgerEntry()">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -1099,7 +1187,7 @@
         </div>
     </div>
 
-    <!-- Generic Print Section (For Supplier/Employee/Delivery slips) -->
+    <!-- Generic Print Section (For Supplier/Employee/Delivery slips & Khata Print) -->
     <div id="genericPrintSection" class="thermal-receipt no-print-section"></div>
 
     <!-- Hidden Barcode Labels Print Area (For Bulk/Single label print) -->
@@ -1213,7 +1301,6 @@
                 db.customers = db.customers || [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
                 db.heldBills = db.heldBills || [];
 
-                // NEW: Ensure all existing suppliers have balance and ledger properties
                 db.suppliers.forEach(s => {
                     if(s.balance === undefined) s.balance = 0;
                     if(!s.ledger) s.ledger = [];
@@ -1227,7 +1314,7 @@
                 db.sales = [];
                 db.currentSale = { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567', balance: 0, ledger: [] }];
-                db.purchases = []; // NEW
+                db.purchases = []; 
                 db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
                 db.deliveries = [];
                 db.alerts = [];
@@ -1348,7 +1435,7 @@
             if(pageId === 'dashboard') loadDashboard();
             if(pageId === 'medicines') renderMedicines();
             if(pageId === 'sales') loadSalesPage();
-            if(pageId === 'purchases') renderPurchases(); // NEW
+            if(pageId === 'purchases') renderPurchases();
             if(pageId === 'inventory') loadInventoryPage();
             if(pageId === 'reports') renderReports();
             if(pageId === 'suppliers') renderSuppliers();
@@ -1437,13 +1524,14 @@
             });
         }
 
-        /* ================= Customers & Khata (Udhaar) ================= */
+        /* ================= Customers & Khata (Udhaar) & Manual Entries ================= */
         function renderCustomers() {
             const q = document.getElementById('custSearch')?.value.toLowerCase() || '';
             const tbody = document.getElementById('customersTableBody');
             tbody.innerHTML = '';
             
             db.customers.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)).forEach(c => {
+                recalculateCustomerBalance(c.id); // Ensure automatic correctness
                 const balClass = c.balance > 0 ? 'text-danger fw-bold' : 'text-success';
                 const actionBtns = c.id === 'C-WALKIN' ? '' : `
                     <button class="btn btn-sm btn-info text-white" onclick="openLedger('${c.id}')"><i class="fas fa-book"></i> Ledger</button>
@@ -1502,46 +1590,123 @@
             });
         }
 
+        /* --- Customer Ledger Core --- */
         let activeLedgerCustomer = null;
         function openLedger(id) {
             activeLedgerCustomer = db.customers.find(c => c.id === id);
             if(!activeLedgerCustomer) return;
             
             document.getElementById('ledgerCustName').innerText = activeLedgerCustomer.name;
-            document.getElementById('ledgerReceiveAmt').value = '';
+            document.getElementById('cLedgerAmt').value = '';
+            document.getElementById('cLedgerDesc').value = '';
             
             renderLedgerTable();
             new bootstrap.Modal(document.getElementById('ledgerModal')).show();
         }
 
+        function recalculateCustomerBalance(custId) {
+            const cust = db.customers.find(c => c.id === custId);
+            if(!cust) return;
+            let bal = 0;
+            // Debit = Udhaar diya, Credit = Jama / Return aya
+            cust.ledger.forEach(l => {
+                if(l.type === 'debit') bal += parseFloat(l.amount);
+                else if(l.type === 'credit') bal -= parseFloat(l.amount);
+            });
+            cust.balance = bal;
+            saveDB();
+        }
+
         function renderLedgerTable() {
+            recalculateCustomerBalance(activeLedgerCustomer.id);
             document.getElementById('ledgerBalance').innerText = 'Rs ' + parseFloat(activeLedgerCustomer.balance).toFixed(2);
+            
             const tbody = document.getElementById('ledgerTableBody');
             tbody.innerHTML = '';
             
-            activeLedgerCustomer.ledger.slice().reverse().forEach(entry => {
+            // Map with original index so we can safely edit/delete
+            const entriesWithIndex = activeLedgerCustomer.ledger.map((e, i) => ({...e, origIdx: i})).reverse();
+            
+            entriesWithIndex.forEach(entry => {
                 const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
                 const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
-                tbody.innerHTML += `<tr><td><small>${entry.date}</small></td><td>${entry.desc}</td><td class="text-danger">${debit}</td><td class="text-success">${credit}</td></tr>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${entry.date}</small></td>
+                        <td>${entry.desc}</td>
+                        <td class="text-danger fw-bold">${debit}</td>
+                        <td class="text-success fw-bold">${credit}</td>
+                        <td class="text-center action-btns">
+                            <button class="btn btn-sm btn-primary py-0 px-2" onclick="openEditLedgerEntry('customer', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteCustomerLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
             });
-            if(activeLedgerCustomer.ledger.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center">No transaction history</td></tr>`;
+            if(entriesWithIndex.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="text-center">No transaction history</td></tr>`;
         }
 
-        function receiveLedgerPayment() {
-            const amt = parseFloat(document.getElementById('ledgerReceiveAmt').value);
-            if(!amt || amt <= 0) return;
+        function addCustomerLedgerEntry() {
+            const desc = document.getElementById('cLedgerDesc').value || 'Manual Entry';
+            const amt = parseFloat(document.getElementById('cLedgerAmt').value);
+            const type = document.getElementById('cLedgerType').value;
             
-            activeLedgerCustomer.balance -= amt;
+            if(!amt || amt <= 0) { showToast('Enter a valid amount', 'warning'); return; }
+            
             activeLedgerCustomer.ledger.push({
                 date: new Date().toLocaleString(),
-                desc: 'Payment Received',
-                type: 'credit',
+                desc: desc,
+                type: type,
                 amount: amt
             });
             
             saveDB(); renderLedgerTable(); renderCustomers();
-            document.getElementById('ledgerReceiveAmt').value = '';
-            showToast('Payment Received successfully!');
+            document.getElementById('cLedgerAmt').value = '';
+            document.getElementById('cLedgerDesc').value = '';
+            showToast('Entry added successfully!');
+        }
+
+        function deleteCustomerLedgerEntry(index) {
+            showConfirm('Delete this ledger entry? (Balance will auto-update)', () => {
+                activeLedgerCustomer.ledger.splice(index, 1);
+                saveDB(); renderLedgerTable(); renderCustomers();
+                showToast('Entry deleted & Balance updated');
+            });
+        }
+
+        function printCustomerLedger() {
+            let html = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
+                    <h4 style="margin: 5px 0; font-size: 14px; text-decoration:underline;">Customer Khata Report</h4>
+                </div>
+                <div style="font-size: 12px; margin-bottom: 8px;">
+                    <strong>Name:</strong> ${activeLedgerCustomer.name} (${activeLedgerCustomer.phone || 'N/A'})<br>
+                    <strong>Current Balance:</strong> Rs ${parseFloat(activeLedgerCustomer.balance).toFixed(2)}
+                </div>
+                <div class="border-dashed-top"></div>
+                <table style="width: 100%; font-size: 11px; margin-top: 5px; text-align: left;">
+                    <thead><tr class="border-dashed"><th>Date</th><th>Description</th><th>Udhaar(Dr)</th><th>Jama(Cr)</th></tr></thead>
+                    <tbody>
+            `;
+            activeLedgerCustomer.ledger.forEach(entry => {
+                const dr = entry.type === 'debit' ? entry.amount : '-';
+                const cr = entry.type === 'credit' ? entry.amount : '-';
+                html += `<tr><td style="padding:3px 0;">${entry.date.split(',')[0]}</td><td>${entry.desc.substring(0,15)}</td><td>${dr}</td><td>${cr}</td></tr>`;
+            });
+            html += `</tbody></table>
+            <div class="border-dashed-top"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
+            
+            document.getElementById('genericPrintSection').innerHTML = html;
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            document.getElementById('genericPrintSection').classList.remove('no-print-section');
+            
+            window.print();
+            setTimeout(() => {
+                document.getElementById('genericPrintSection').classList.add('no-print-section');
+                document.getElementById('mainSystem').classList.remove('no-print-section');
+            }, 500);
         }
 
         /* ================= Purchases (GRN) & Suppliers Khata ================= */
@@ -1602,7 +1767,7 @@
             } else { 
                 currentPurchaseCart.push({ 
                     id: med.id, name: med.name, 
-                    purchasePrice: med.purchasePrice || 0, // default khareed
+                    purchasePrice: med.purchasePrice || 0,
                     qty: 1, total: med.purchasePrice || 0 
                 }); 
             }
@@ -1655,94 +1820,207 @@
             
             let grandTotal = 0;
             
-            // Update Medicines Stock & Purchase Price
             currentPurchaseCart.forEach(item => {
                 const med = db.medicines.find(m => m.id === item.id);
                 if(med) {
-                    med.stock += item.qty; // Add to stock
-                    med.purchasePrice = item.purchasePrice; // Update unit cost
+                    med.stock += item.qty;
+                    med.purchasePrice = item.purchasePrice;
                 }
                 grandTotal += item.total;
             });
 
-            // Update Supplier Ledger if Udhaar
             if(paymentMethod === 'Credit') {
-                supplier.balance += grandTotal;
                 supplier.ledger.push({
                     date: dateStr, desc: `Purchase Invoice #${grnId}`, type: 'credit', amount: grandTotal
                 });
+                recalculateSupplierBalance(supplier.id); // Auto-calculate logic applies
             }
 
-            // Save Purchase Record
             db.purchases.push({
                 id: grnId, date: dateStr, supplierId: supId, supplierName: supplier.name,
                 paymentMethod: paymentMethod, items: currentPurchaseCart, total: grandTotal
             });
 
             saveDB();
-            renderPurchases();
-            renderMedicines(); // Refresh UI to show new stock
-            renderSuppliers();
-            
+            renderPurchases(); renderMedicines(); renderSuppliers();
             showToast('Purchase Completed! Stock Updated.');
             bootstrap.Modal.getInstance(document.getElementById('newPurchaseModal')).hide();
         }
 
+        /* --- Supplier Ledger Core --- */
         let activeSupplierForLedger = null;
         function openSupplierLedger(id) {
             activeSupplierForLedger = db.suppliers.find(s => s.id === id);
             if(!activeSupplierForLedger) return;
             
             document.getElementById('supLedgerName').innerText = activeSupplierForLedger.name;
-            document.getElementById('supLedgerPayAmt').value = '';
+            document.getElementById('sLedgerAmt').value = '';
+            document.getElementById('sLedgerDesc').value = '';
             
             renderSupplierLedgerTable();
             new bootstrap.Modal(document.getElementById('supplierLedgerModal')).show();
         }
 
+        function recalculateSupplierBalance(supId) {
+            const sup = db.suppliers.find(s => s.id === supId);
+            if(!sup) return;
+            let bal = 0;
+            // Credit = Maal Aya (Liability barhi), Debit = Payment Ki (Liability kam hui)
+            sup.ledger.forEach(l => {
+                if(l.type === 'credit') bal += parseFloat(l.amount);
+                else if(l.type === 'debit') bal -= parseFloat(l.amount);
+            });
+            sup.balance = bal;
+            saveDB();
+        }
+
         function renderSupplierLedgerTable() {
+            recalculateSupplierBalance(activeSupplierForLedger.id);
             document.getElementById('supLedgerBalance').innerText = 'Rs ' + parseFloat(activeSupplierForLedger.balance).toFixed(2);
+            
             const tbody = document.getElementById('supLedgerTableBody');
             tbody.innerHTML = '';
             
-            activeSupplierForLedger.ledger.slice().reverse().forEach(entry => {
-                const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Udhaar lia
-                const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Payment ki
-                tbody.innerHTML += `<tr><td><small>${entry.date}</small></td><td>${entry.desc}</td><td class="text-danger">${credit}</td><td class="text-success">${debit}</td></tr>`;
+            const entriesWithIndex = activeSupplierForLedger.ledger.map((e, i) => ({...e, origIdx: i})).reverse();
+            
+            entriesWithIndex.forEach(entry => {
+                const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Bill/Maal
+                const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Paid
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><small>${entry.date}</small></td>
+                        <td>${entry.desc}</td>
+                        <td class="text-danger fw-bold">${credit}</td>
+                        <td class="text-success fw-bold">${debit}</td>
+                        <td class="text-center action-btns">
+                            <button class="btn btn-sm btn-primary py-0 px-2" onclick="openEditLedgerEntry('supplier', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteSupplierLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
             });
-            if(activeSupplierForLedger.ledger.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center">No transaction history</td></tr>`;
+            if(entriesWithIndex.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="text-center">No transaction history</td></tr>`;
         }
 
-        function paySupplierLedger() {
-            const amt = parseFloat(document.getElementById('supLedgerPayAmt').value);
-            if(!amt || amt <= 0) return;
+        function addSupplierLedgerEntry() {
+            const desc = document.getElementById('sLedgerDesc').value || 'Manual Adjustment';
+            const amt = parseFloat(document.getElementById('sLedgerAmt').value);
+            const type = document.getElementById('sLedgerType').value;
             
-            activeSupplierForLedger.balance -= amt; // Kam karna udhaar
+            if(!amt || amt <= 0) { showToast('Enter valid amount', 'warning'); return; }
+            
             activeSupplierForLedger.ledger.push({
                 date: new Date().toLocaleString(),
-                desc: 'Payment Paid to Supplier',
-                type: 'debit',
+                desc: desc,
+                type: type,
                 amount: amt
             });
             
             saveDB(); renderSupplierLedgerTable(); renderSuppliers();
-            document.getElementById('supLedgerPayAmt').value = '';
-            showToast('Payment sent to supplier successfully!');
+            document.getElementById('sLedgerAmt').value = '';
+            document.getElementById('sLedgerDesc').value = '';
+            showToast('Entry Added successfully!');
+        }
+
+        function deleteSupplierLedgerEntry(index) {
+            showConfirm('Delete this ledger entry? (Balance will auto-update)', () => {
+                activeSupplierForLedger.ledger.splice(index, 1);
+                saveDB(); renderSupplierLedgerTable(); renderSuppliers();
+                showToast('Entry deleted & Balance updated');
+            });
+        }
+
+        function printSupplierLedger() {
+            let html = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
+                    <h4 style="margin: 5px 0; font-size: 14px; text-decoration:underline;">Supplier Ledger Report</h4>
+                </div>
+                <div style="font-size: 12px; margin-bottom: 8px;">
+                    <strong>Supplier:</strong> ${activeSupplierForLedger.name} (${activeSupplierForLedger.contact || 'N/A'})<br>
+                    <strong>Payable Balance:</strong> Rs ${parseFloat(activeSupplierForLedger.balance).toFixed(2)}
+                </div>
+                <div class="border-dashed-top"></div>
+                <table style="width: 100%; font-size: 11px; margin-top: 5px; text-align: left;">
+                    <thead><tr class="border-dashed"><th>Date</th><th>Description</th><th>Maal(Cr)</th><th>Paid(Dr)</th></tr></thead>
+                    <tbody>
+            `;
+            activeSupplierForLedger.ledger.forEach(entry => {
+                const cr = entry.type === 'credit' ? entry.amount : '-';
+                const dr = entry.type === 'debit' ? entry.amount : '-';
+                html += `<tr><td style="padding:3px 0;">${entry.date.split(',')[0]}</td><td>${entry.desc.substring(0,15)}</td><td>${cr}</td><td>${dr}</td></tr>`;
+            });
+            html += `</tbody></table>
+            <div class="border-dashed-top"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
+            
+            document.getElementById('genericPrintSection').innerHTML = html;
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            document.getElementById('genericPrintSection').classList.remove('no-print-section');
+            
+            window.print();
+            setTimeout(() => {
+                document.getElementById('genericPrintSection').classList.add('no-print-section');
+                document.getElementById('mainSystem').classList.remove('no-print-section');
+            }, 500);
+        }
+
+        /* --- Generic Edit Ledger Modal Logic --- */
+        function openEditLedgerEntry(context, index) {
+            let entry = null;
+            if (context === 'customer') { entry = activeLedgerCustomer.ledger[index]; } 
+            else if (context === 'supplier') { entry = activeSupplierForLedger.ledger[index]; }
+            
+            if(!entry) return;
+
+            document.getElementById('editLedgerContext').value = context;
+            document.getElementById('editLedgerIndex').value = index;
+            document.getElementById('editLedgerDesc').value = entry.desc;
+            document.getElementById('editLedgerAmt').value = entry.amount;
+            document.getElementById('editLedgerType').value = entry.type;
+            
+            new bootstrap.Modal(document.getElementById('editLedgerEntryModal')).show();
+        }
+
+        function saveEditedLedgerEntry() {
+            const context = document.getElementById('editLedgerContext').value;
+            const index = document.getElementById('editLedgerIndex').value;
+            const desc = document.getElementById('editLedgerDesc').value;
+            const amt = parseFloat(document.getElementById('editLedgerAmt').value);
+            const type = document.getElementById('editLedgerType').value;
+
+            if(!amt || amt <= 0) { showToast('Invalid amount', 'danger'); return; }
+
+            if (context === 'customer') {
+                activeLedgerCustomer.ledger[index].desc = desc;
+                activeLedgerCustomer.ledger[index].amount = amt;
+                activeLedgerCustomer.ledger[index].type = type;
+                saveDB(); renderLedgerTable(); renderCustomers();
+            } else if (context === 'supplier') {
+                activeSupplierForLedger.ledger[index].desc = desc;
+                activeSupplierForLedger.ledger[index].amount = amt;
+                activeSupplierForLedger.ledger[index].type = type;
+                saveDB(); renderSupplierLedgerTable(); renderSuppliers();
+            }
+            
+            bootstrap.Modal.getInstance(document.getElementById('editLedgerEntryModal')).hide();
+            showToast('Entry Edited & Auto-Calculated Successfully');
         }
 
         /* --- Suppliers Main Functions --- */
         function renderSuppliers() {
             const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
             db.suppliers.forEach(s => {
+                recalculateSupplierBalance(s.id); // Auto compute
                 const balClass = s.balance > 0 ? 'text-danger fw-bold' : 'text-success';
                 tbody.innerHTML += `<tr>
                     <td><strong>${s.name}</strong></td>
                     <td>${s.contact}</td>
                     <td class="${balClass}">Rs ${parseFloat(s.balance || 0).toFixed(2)}</td>
                     <td class="text-center action-btns">
-                        <button class="btn btn-info text-white" onclick="openSupplierLedger('${s.id}')" title="Ledger / Khata"><i class="fas fa-book"></i> Ledger</button>
-                        <button class="btn btn-primary" onclick="editSupplier('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger" onclick="deleteSupplier('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-sm btn-info text-white" onclick="openSupplierLedger('${s.id}')" title="Ledger / Khata"><i class="fas fa-book"></i> Ledger</button>
+                        <button class="btn btn-sm btn-primary" onclick="editSupplier('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             });
@@ -2234,10 +2512,10 @@
             };
             
             if (paymentMethod === 'Credit') {
-                customerObj.balance += completedSale.total;
                 customerObj.ledger.push({
                     date: dateStr, desc: `Invoice #${invId}`, type: 'debit', amount: completedSale.total
                 });
+                recalculateCustomerBalance(customerObj.id);
             }
             
             if (db.currentSale.editingId) {
@@ -2358,8 +2636,8 @@
                 if(sale.paymentMethod === 'Credit' && sale.customerId) {
                     const cust = db.customers.find(c => c.id === sale.customerId);
                     if(cust) {
-                        cust.balance -= sale.total;
                         cust.ledger.push({ date: new Date().toLocaleString(), desc: `Refund / Invoice Reversal #${sale.id}`, type: 'credit', amount: sale.total });
+                        recalculateCustomerBalance(cust.id);
                     }
                 }
                 saveDB(); renderReports(); showToast('Invoice Returned Successfully', 'success');
@@ -2378,8 +2656,8 @@
                 if(sale.paymentMethod === 'Credit' && sale.customerId) {
                     const cust = db.customers.find(c => c.id === sale.customerId);
                     if(cust) {
-                        cust.balance -= sale.total;
                         cust.ledger.push({ date: new Date().toLocaleString(), desc: `Reversal for Edit #${sale.id}`, type: 'credit', amount: sale.total });
+                        recalculateCustomerBalance(cust.id);
                     }
                 }
 
