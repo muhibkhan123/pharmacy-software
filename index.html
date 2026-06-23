@@ -436,11 +436,11 @@
                                     <thead>
                                         <tr>
                                             <th data-i18n="barcode_id">Barcode / ID</th>
-                                            <th data-i18n="med_name">Name</th>
+                                            <th data-i18n="med_name">Name & Formula</th>
                                             <th data-i18n="category">Category</th>
                                             <th data-i18n="sale_price">Sale Price</th>
                                             <th data-i18n="stock">Stock</th>
-                                            <th data-i18n="expiry_date">Expiry</th>
+                                            <th data-i18n="batch_expiry">Batch & Expiry</th>
                                             <th data-i18n="actions" class="text-center">Actions</th>
                                         </tr>
                                     </thead>
@@ -672,6 +672,10 @@
                             <div class="col-md-6 mb-3"><label data-i18n="category">Category</label><input type="text" class="form-control" id="mCat" required></div>
                         </div>
                         <div class="row">
+                            <div class="col-md-6 mb-3"><label data-i18n="formula">Formula / Generic Name</label><input type="text" class="form-control" id="mFormula" placeholder="e.g. Paracetamol"></div>
+                            <div class="col-md-6 mb-3"><label data-i18n="batch_no">Batch / Lot No</label><input type="text" class="form-control" id="mBatch" placeholder="e.g. B-101"></div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6 mb-3"><label data-i18n="purchase_price">Purchase Price (Khareed)</label><input type="number" class="form-control" id="mPurchasePrice" required></div>
                             <div class="col-md-6 mb-3"><label data-i18n="sale_price">Sale Price (Farokht)</label><input type="number" class="form-control" id="mPrice" required></div>
                         </div>
@@ -873,6 +877,7 @@
                 total_items: "Total Catalog Items", export_excel: "Export Excel", print: "Print", sales_report: "Sales Report", date: "Date", customer: "Customer",
                 cancel: "Cancel", save: "Save", yes: "Yes", confirmation: "Confirmation", qr_hint: "Scan this Barcode for quick sale", min_stock: "Min Stock",
                 name: "Name", contact: "Contact", role: "Role", status: "Status", add_supplier: "Add Supplier", add_employee: "Add Employee", add_delivery: "Add Delivery",
+                batch_no: "Batch / Lot No", formula: "Formula / Generic", batch_expiry: "Batch & Expiry",
                 sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
                 print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine",
                 purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", subtotal: "Subtotal", net_profit: "Net Profit",
@@ -893,6 +898,7 @@
                 total_items: "کل آئٹمز", export_excel: "ایکسل ایکسپورٹ", print: "پرنٹ کریں", sales_report: "سیلز رپورٹ", date: "تاریخ", customer: "گاہک",
                 cancel: "منسوخ کریں", save: "محفوظ کریں", yes: "ہاں", confirmation: "تصدیق", qr_hint: "فوری فروخت کے لیے یہ بارکوڈ اسکین کریں", min_stock: "کم از کم اسٹاک",
                 name: "نام", contact: "رابطہ", role: "عہدہ", status: "حیثیت", add_supplier: "سپلائر شامل کریں", add_employee: "ملازم شامل کریں", add_delivery: "ڈلیوری شامل کریں",
+                batch_no: "بیچ نمبر", formula: "فارمولا / جنرک", batch_expiry: "بیچ اور ایکسپائری",
                 sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
                 print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں",
                 purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
@@ -943,9 +949,9 @@
                 
             } else {
                 db.medicines = [
-                    { id: '123456789012', name: 'Panadol', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
-                    { id: 'M102', name: 'Augmentin', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
-                    { id: 'M103', name: 'Vitamin C', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
+                    { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
+                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
+                    { id: 'M103', name: 'Vitamin C', formula: 'Ascorbic Acid', batchNumber: 'B-003', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
                 ];
                 db.sales = [];
                 db.currentSale = { items: [], subTotal: 0, discount: 0, total: 0, editingId: null, editingDate: null };
@@ -1175,8 +1181,8 @@
                 db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success">Rs ${s.profit||0}</td></tr>`; });
             } else if (type === 'medicines') {
                 title = currentLang==='en'?'All Medicines':'تمام ادویات';
-                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
-                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
+                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name & Formula</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
+                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class="text-muted">${m.formula||''}</small></td><td>${m.batchNumber||'-'}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
             } else if (type === 'lowstock') {
                 title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
                 thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
@@ -1303,18 +1309,23 @@
             const tbody = document.getElementById('medTableBody');
             tbody.innerHTML = '';
             
-            db.medicines.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)).forEach(m => {
+            db.medicines.filter(m => 
+                m.name.toLowerCase().includes(q) || 
+                m.id.toLowerCase().includes(q) || 
+                (m.formula && m.formula.toLowerCase().includes(q)) ||
+                (m.batchNumber && m.batchNumber.toLowerCase().includes(q))
+            ).forEach(m => {
                 const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
                 const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
                 
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${m.id}</strong></td>
-                        <td>${m.name}</td>
+                        <td>${m.name} <br><small class="text-muted">${m.formula || ''}</small></td>
                         <td>${m.category}</td>
                         <td>Rs ${m.price} <br><small class="text-muted">(Purch: Rs ${m.purchasePrice || 0})</small></td>
                         <td class="${stockClass}">${m.stock}</td>
-                        <td class="${expClass}">${m.expiryDate || '-'}</td>
+                        <td><span class="badge bg-secondary mb-1">${m.batchNumber || 'N/A'}</span><br><span class="${expClass}">${m.expiryDate || '-'}</span></td>
                         <td class="action-btns text-center">
                             <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
@@ -1327,6 +1338,8 @@
             document.getElementById('medForm').reset();
             document.getElementById('medIdOriginal').value = '';
             document.getElementById('medId').value = ''; 
+            document.getElementById('mFormula').value = ''; 
+            document.getElementById('mBatch').value = ''; 
             document.getElementById('barcodeContainerDiv').style.display = 'none';
             document.getElementById('qrHint').style.display = 'none';
             document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
@@ -1342,6 +1355,8 @@
             const med = {
                 id: newId, 
                 name: document.getElementById('mName').value, 
+                formula: document.getElementById('mFormula').value,
+                batchNumber: document.getElementById('mBatch').value,
                 category: document.getElementById('mCat').value,
                 purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value || 0),
                 price: parseFloat(document.getElementById('mPrice').value), 
@@ -1381,6 +1396,8 @@
             document.getElementById('medIdOriginal').value = m.id;
             document.getElementById('medId').value = m.id; 
             document.getElementById('mName').value = m.name;
+            document.getElementById('mFormula').value = m.formula || '';
+            document.getElementById('mBatch').value = m.batchNumber || '';
             document.getElementById('mCat').value = m.category; 
             document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
             document.getElementById('mPrice').value = m.price;
@@ -1461,7 +1478,12 @@
         function searchSaleItemLive() {
             const q = document.getElementById('saleSearchInput').value.toLowerCase();
             if(q.length < 2) return;
-            const match = db.medicines.find(m => m.name.toLowerCase() === q || m.id.toLowerCase() === q);
+            const match = db.medicines.find(m => 
+                m.name.toLowerCase() === q || 
+                m.id.toLowerCase() === q || 
+                (m.formula && m.formula.toLowerCase() === q) || 
+                (m.batchNumber && m.batchNumber.toLowerCase() === q)
+            );
             if(match) { 
                 addToSale(match.id); 
                 document.getElementById('saleSearchInput').value = ''; 
