@@ -262,6 +262,7 @@
                     <li class="nav-item"><a class="nav-link active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('medicines')"><i class="fas fa-pills"></i> <span data-i18n="medicines">Medicines</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="sales">Sales (POS)</span></a></li>
+                    <li class="nav-item"><a class="nav-link" onclick="showPage('purchases')"><i class="fas fa-file-invoice-dollar"></i> <span data-i18n="purchases">Purchases (GRN)</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('inventory')"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('customers')"><i class="fas fa-user-friends"></i> <span data-i18n="customers">Customers (Khata)</span></a></li>
                     <li class="nav-item"><a class="nav-link" onclick="showPage('alerts')"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></a></li>
@@ -308,6 +309,7 @@
                                 <button class="btn btn-primary" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="new_sale">New Sale</span></button>
                                 <button class="btn btn-success" onclick="showPage('medicines'); openAddMedicineModal();"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add Medicine</span></button>
                                 <button class="btn btn-info text-white" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
+                                <button class="btn btn-warning text-dark" onclick="showPage('purchases'); openNewPurchaseModal();"><i class="fas fa-box-open"></i> <span data-i18n="new_purchase">New Purchase</span></button>
                                 
                                 <!-- Barcode Print Dropdown -->
                                 <div class="dropdown d-inline-block">
@@ -546,6 +548,32 @@
                     </div>
                 </div>
 
+                <!-- 3.5 Purchases Page -->
+                <div id="purchases" class="page">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> <span data-i18n="purchases">Purchases (GRN)</span></h5>
+                            <button class="btn btn-light btn-sm" onclick="openNewPurchaseModal()"><i class="fas fa-plus"></i> <span data-i18n="new_purchase">New Purchase</span></button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>GRN #</th>
+                                            <th data-i18n="date">Date</th>
+                                            <th data-i18n="supplier">Supplier</th>
+                                            <th data-i18n="payment_type">Payment Type</th>
+                                            <th data-i18n="total">Total Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="purchasesTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Customers Page -->
                 <div id="customers" class="page">
                     <div class="card">
@@ -641,7 +669,14 @@
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover">
-                                    <thead><tr><th data-i18n="name">Name</th><th data-i18n="contact">Contact</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <thead>
+                                        <tr>
+                                            <th data-i18n="name">Name</th>
+                                            <th data-i18n="contact">Contact</th>
+                                            <th data-i18n="balance">Balance (Payable)</th>
+                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="suppliersTableBody"></tbody>
                                 </table>
                             </div>
@@ -723,6 +758,61 @@
 
     <!-- Modals -->
 
+    <!-- New Purchase / GRN Modal -->
+    <div class="modal fade" id="newPurchaseModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-box-open"></i> <span data-i18n="new_purchase">New Purchase (GRN)</span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" data-i18n="supplier">Select Supplier</label>
+                            <select class="form-select" id="purchaseSupplierSelect"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold" data-i18n="payment_type">Payment Method</label>
+                            <select class="form-select" id="purchasePaymentMethod">
+                                <option value="Cash" data-i18n="cash">Cash Paid</option>
+                                <option value="Credit" data-i18n="credit">Credit (Udhaar / Pay Later)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex gap-2 mb-3">
+                                <input type="text" class="form-control" id="purchaseSearchInput" placeholder="Scan Barcode or Type Medicine Name..." onkeyup="searchPurchaseItemLive()">
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm align-middle bg-white">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th data-i18n="med_name">Item</th>
+                                            <th style="width: 150px;">Purchase Price (Cost)</th>
+                                            <th style="width: 120px;" data-i18n="qty">Qty Received</th>
+                                            <th data-i18n="total">Total Cost</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="purchaseItemsTable"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end">
+                        <h4 class="fw-bold mb-3"><span data-i18n="total">Grand Total</span>: Rs <span id="purchaseGrandTotal" class="text-primary">0.00</span></h4>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                        <button class="btn btn-success btn-lg px-5" onclick="completePurchase()"><i class="fas fa-check-circle"></i> <span data-i18n="save">Save Purchase</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add/Edit Customer Modal -->
     <div class="modal fade" id="customerModal" tabindex="-1">
         <div class="modal-dialog">
@@ -764,6 +854,33 @@
                         <table class="table table-sm table-striped">
                             <thead><tr><th>Date</th><th>Description</th><th class="text-danger">Debit (Udhaar)</th><th class="text-success">Credit (Jama)</th></tr></thead>
                             <tbody id="ledgerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Ledger Modal -->
+    <div class="modal fade" id="supplierLedgerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title"><i class="fas fa-book"></i> Supplier Ledger: <span id="supLedgerName" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white border rounded">
+                        <h4 class="mb-0">Payable Balance: <span id="supLedgerBalance" class="text-danger fw-bold">0</span></h4>
+                        <div class="input-group" style="width: 250px;">
+                            <input type="number" class="form-control" id="supLedgerPayAmt" placeholder="Amount Paid...">
+                            <button class="btn btn-success" onclick="paySupplierLedger()">Pay</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height: 300px;">
+                        <table class="table table-sm table-striped">
+                            <thead><tr><th>Date</th><th>Description</th><th class="text-danger">Credit (Maal Aya)</th><th class="text-success">Debit (Payment Ki)</th></tr></thead>
+                            <tbody id="supLedgerTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -1023,7 +1140,8 @@
                 sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
                 print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine",
                 purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", tax: "Tax / GST (%)", subtotal: "Subtotal", net_profit: "Net Profit",
-                balance: "Balance (Udhaar)", expiring_soon: "Expiring Soon", expired: "Expired!"
+                balance: "Balance (Udhaar)", expiring_soon: "Expiring Soon", expired: "Expired!",
+                purchases: "Purchases (GRN)", new_purchase: "New Purchase", supplier: "Supplier", payment_type: "Payment Type"
             },
             ur: {
                 sys_title: "فارمیسی مینجمنٹ سسٹم",
@@ -1046,7 +1164,8 @@
                 sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
                 print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں",
                 purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", tax: "ٹیکس (%)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
-                balance: "بقایا (ادھار)", expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!"
+                balance: "بقایا", expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!",
+                purchases: "خریداری (Purchases)", new_purchase: "نئی خریداری", supplier: "سپلائر", payment_type: "ادائیگی کا طریقہ"
             }
         };
 
@@ -1086,12 +1205,19 @@
                 db.sales = db.sales || [];
                 db.currentSale = db.currentSale || { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = db.suppliers || [];
+                db.purchases = db.purchases || []; // NEW: Purchases Data
                 db.employees = db.employees || [];
                 db.alerts = db.alerts || [];
                 db.deliveries = db.deliveries || [];
                 db.settings = db.settings || { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
                 db.customers = db.customers || [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
                 db.heldBills = db.heldBills || [];
+
+                // NEW: Ensure all existing suppliers have balance and ledger properties
+                db.suppliers.forEach(s => {
+                    if(s.balance === undefined) s.balance = 0;
+                    if(!s.ledger) s.ledger = [];
+                });
             } else {
                 db.medicines = [
                     { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
@@ -1100,7 +1226,8 @@
                 ];
                 db.sales = [];
                 db.currentSale = { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
-                db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567' }];
+                db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567', balance: 0, ledger: [] }];
+                db.purchases = []; // NEW
                 db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
                 db.deliveries = [];
                 db.alerts = [];
@@ -1221,6 +1348,7 @@
             if(pageId === 'dashboard') loadDashboard();
             if(pageId === 'medicines') renderMedicines();
             if(pageId === 'sales') loadSalesPage();
+            if(pageId === 'purchases') renderPurchases(); // NEW
             if(pageId === 'inventory') loadInventoryPage();
             if(pageId === 'reports') renderReports();
             if(pageId === 'suppliers') renderSuppliers();
@@ -1246,7 +1374,6 @@
             
             document.getElementById('dashTotalSales').innerText = 'Rs ' + totalSales.toFixed(2);
             document.getElementById('dashTotalMeds').innerText = db.medicines.length;
-            document.getElementById('dashAlerts').innerText = db.alerts.length;
             document.getElementById('dashNetProfit').innerText = 'Rs ' + netProfit.toFixed(2);
             document.getElementById('dashUdhaar').innerText = 'Rs ' + totalUdhaar.toFixed(2);
 
@@ -1417,39 +1544,222 @@
             showToast('Payment Received successfully!');
         }
 
-        let currentModalContext = '';
-        function openDetailsModal(type) {
-            currentModalContext = type;
-            const thead = document.getElementById('detailsTableHead');
-            const tbody = document.getElementById('detailsTableBody');
-            thead.innerHTML = ''; tbody.innerHTML = '';
-            let title = '';
-
-            if (type === 'sales') {
-                title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
-                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th><th>Profit</th></tr>`;
-                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success">Rs ${s.profit||0}</td></tr>`; });
-            } else if (type === 'medicines') {
-                title = currentLang==='en'?'All Medicines':'تمام ادویات';
-                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name & Formula</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
-                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class="text-muted">${m.formula||''}</small></td><td>${m.batchNumber||'-'}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
-            } else if (type === 'lowstock') {
-                title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
-                thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
-                db.medicines.filter(m=>m.stock<=m.minStock).forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`; });
+        /* ================= Purchases (GRN) & Suppliers Khata ================= */
+        let currentPurchaseCart = [];
+        
+        function renderPurchases() {
+            const tbody = document.getElementById('purchasesTableBody');
+            tbody.innerHTML = '';
+            db.purchases.slice().reverse().forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${p.id}</strong></td>
+                        <td>${p.date}</td>
+                        <td>${p.supplierName}</td>
+                        <td><span class="badge ${p.paymentMethod === 'Cash' ? 'bg-success' : 'bg-danger'}">${p.paymentMethod}</span></td>
+                        <td class="fw-bold">Rs ${parseFloat(p.total).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            if(db.purchases.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No purchases recorded yet</td></tr>`;
             }
-            document.getElementById('detailsModalTitle').innerText = title;
-            new bootstrap.Modal(document.getElementById('detailsModal')).show();
         }
 
-        function exportDetailsPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(document.getElementById('detailsModalTitle').innerText, 14, 15);
-            doc.autoTable({ html: '#detailsTable', startY: 20 });
-            doc.save(`${currentModalContext}_report.pdf`);
-            showToast('PDF Exported Successfully!');
+        function openNewPurchaseModal() {
+            currentPurchaseCart = [];
+            const supSelect = document.getElementById('purchaseSupplierSelect');
+            supSelect.innerHTML = '';
+            db.suppliers.forEach(s => {
+                supSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+            });
+            
+            document.getElementById('purchaseSearchInput').value = '';
+            document.getElementById('purchasePaymentMethod').value = 'Cash';
+            renderPurchaseTable();
+            new bootstrap.Modal(document.getElementById('newPurchaseModal')).show();
         }
+
+        function searchPurchaseItemLive() {
+            const q = document.getElementById('purchaseSearchInput').value.toLowerCase();
+            if(q.length < 2) return;
+            
+            const match = db.medicines.find(m => m.name.toLowerCase() === q || m.id.toLowerCase() === q);
+            if(match) { 
+                addToPurchase(match.id); 
+                document.getElementById('purchaseSearchInput').value = ''; 
+            }
+        }
+
+        function addToPurchase(id) {
+            const med = db.medicines.find(m => m.id === id);
+            if(!med) return;
+            
+            const existing = currentPurchaseCart.find(i => i.id === id);
+            if(existing) {
+                existing.qty++; 
+                existing.total = existing.qty * existing.purchasePrice;
+            } else { 
+                currentPurchaseCart.push({ 
+                    id: med.id, name: med.name, 
+                    purchasePrice: med.purchasePrice || 0, // default khareed
+                    qty: 1, total: med.purchasePrice || 0 
+                }); 
+            }
+            renderPurchaseTable();
+        }
+
+        function updatePurchaseItem(index, field, value) {
+            const item = currentPurchaseCart[index];
+            if(field === 'qty') item.qty = parseFloat(value) || 1;
+            if(field === 'price') item.purchasePrice = parseFloat(value) || 0;
+            
+            item.total = item.qty * item.purchasePrice;
+            renderPurchaseTable();
+        }
+
+        function removePurchaseItem(index) {
+            currentPurchaseCart.splice(index, 1);
+            renderPurchaseTable();
+        }
+
+        function renderPurchaseTable() {
+            const tbody = document.getElementById('purchaseItemsTable');
+            tbody.innerHTML = ''; 
+            let total = 0;
+            
+            currentPurchaseCart.forEach((item, idx) => {
+                total += item.total;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.purchasePrice}" onchange="updatePurchaseItem(${idx}, 'price', this.value)"></td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.qty}" onchange="updatePurchaseItem(${idx}, 'qty', this.value)"></td>
+                        <td class="fw-bold text-success">Rs ${item.total}</td>
+                        <td><button class="btn btn-sm btn-danger" onclick="removePurchaseItem(${idx})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('purchaseGrandTotal').innerText = total.toFixed(2);
+        }
+
+        function completePurchase() {
+            if(currentPurchaseCart.length === 0) { showToast('No items added to purchase', 'warning'); return; }
+            if(db.suppliers.length === 0) { showToast('Please add a supplier first', 'danger'); return; }
+            
+            const supId = document.getElementById('purchaseSupplierSelect').value;
+            const supplier = db.suppliers.find(s => s.id === supId);
+            const paymentMethod = document.getElementById('purchasePaymentMethod').value;
+            const dateStr = new Date().toLocaleString();
+            const grnId = 'GRN-' + Date.now().toString().slice(-6);
+            
+            let grandTotal = 0;
+            
+            // Update Medicines Stock & Purchase Price
+            currentPurchaseCart.forEach(item => {
+                const med = db.medicines.find(m => m.id === item.id);
+                if(med) {
+                    med.stock += item.qty; // Add to stock
+                    med.purchasePrice = item.purchasePrice; // Update unit cost
+                }
+                grandTotal += item.total;
+            });
+
+            // Update Supplier Ledger if Udhaar
+            if(paymentMethod === 'Credit') {
+                supplier.balance += grandTotal;
+                supplier.ledger.push({
+                    date: dateStr, desc: `Purchase Invoice #${grnId}`, type: 'credit', amount: grandTotal
+                });
+            }
+
+            // Save Purchase Record
+            db.purchases.push({
+                id: grnId, date: dateStr, supplierId: supId, supplierName: supplier.name,
+                paymentMethod: paymentMethod, items: currentPurchaseCart, total: grandTotal
+            });
+
+            saveDB();
+            renderPurchases();
+            renderMedicines(); // Refresh UI to show new stock
+            renderSuppliers();
+            
+            showToast('Purchase Completed! Stock Updated.');
+            bootstrap.Modal.getInstance(document.getElementById('newPurchaseModal')).hide();
+        }
+
+        let activeSupplierForLedger = null;
+        function openSupplierLedger(id) {
+            activeSupplierForLedger = db.suppliers.find(s => s.id === id);
+            if(!activeSupplierForLedger) return;
+            
+            document.getElementById('supLedgerName').innerText = activeSupplierForLedger.name;
+            document.getElementById('supLedgerPayAmt').value = '';
+            
+            renderSupplierLedgerTable();
+            new bootstrap.Modal(document.getElementById('supplierLedgerModal')).show();
+        }
+
+        function renderSupplierLedgerTable() {
+            document.getElementById('supLedgerBalance').innerText = 'Rs ' + parseFloat(activeSupplierForLedger.balance).toFixed(2);
+            const tbody = document.getElementById('supLedgerTableBody');
+            tbody.innerHTML = '';
+            
+            activeSupplierForLedger.ledger.slice().reverse().forEach(entry => {
+                const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Udhaar lia
+                const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-'; // Payment ki
+                tbody.innerHTML += `<tr><td><small>${entry.date}</small></td><td>${entry.desc}</td><td class="text-danger">${credit}</td><td class="text-success">${debit}</td></tr>`;
+            });
+            if(activeSupplierForLedger.ledger.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center">No transaction history</td></tr>`;
+        }
+
+        function paySupplierLedger() {
+            const amt = parseFloat(document.getElementById('supLedgerPayAmt').value);
+            if(!amt || amt <= 0) return;
+            
+            activeSupplierForLedger.balance -= amt; // Kam karna udhaar
+            activeSupplierForLedger.ledger.push({
+                date: new Date().toLocaleString(),
+                desc: 'Payment Paid to Supplier',
+                type: 'debit',
+                amount: amt
+            });
+            
+            saveDB(); renderSupplierLedgerTable(); renderSuppliers();
+            document.getElementById('supLedgerPayAmt').value = '';
+            showToast('Payment sent to supplier successfully!');
+        }
+
+        /* --- Suppliers Main Functions --- */
+        function renderSuppliers() {
+            const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
+            db.suppliers.forEach(s => {
+                const balClass = s.balance > 0 ? 'text-danger fw-bold' : 'text-success';
+                tbody.innerHTML += `<tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.contact}</td>
+                    <td class="${balClass}">Rs ${parseFloat(s.balance || 0).toFixed(2)}</td>
+                    <td class="text-center action-btns">
+                        <button class="btn btn-info text-white" onclick="openSupplierLedger('${s.id}')" title="Ledger / Khata"><i class="fas fa-book"></i> Ledger</button>
+                        <button class="btn btn-primary" onclick="editSupplier('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger" onclick="deleteSupplier('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+        function openAddSupplierModal() { document.getElementById('supId').value=''; document.getElementById('sName').value=''; document.getElementById('sContact').value=''; new bootstrap.Modal(document.getElementById('supplierModal')).show(); }
+        function saveSupplier() {
+            const id = document.getElementById('supId').value; const name = document.getElementById('sName').value; const contact = document.getElementById('sContact').value;
+            if(id) { const s = db.suppliers.find(x=>x.id===id); if(s) { s.name = name; s.contact = contact; } } 
+            else { db.suppliers.push({ id: 'S'+Date.now(), name, contact, balance: 0, ledger: [] }); }
+            saveDB(); renderSuppliers(); bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide(); showToast('Saved');
+        }
+        function editSupplier(id) {
+            const s = db.suppliers.find(x=>x.id===id); if(!s) return;
+            document.getElementById('supId').value = s.id; document.getElementById('sName').value = s.name; document.getElementById('sContact').value = s.contact; new bootstrap.Modal(document.getElementById('supplierModal')).show();
+        }
+        function deleteSupplier(id) { showConfirm('Delete supplier?', () => { db.suppliers = db.suppliers.filter(s=>s.id!==id); saveDB(); renderSuppliers(); showToast('Deleted'); }); }
+
 
         /* ================= Generic Thermal Print (For Employee/Supplier/Delivery) ================= */
         function printGenericRecord(title, detailsObj) {
@@ -1674,7 +1984,6 @@
             new bootstrap.Modal(document.getElementById('scannerModal')).show();
             
             setTimeout(() => {
-                // FIXED: Used proper qrbox width/height and format support
                 html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
                     fps: 10, 
                     qrbox: { width: 300, height: 100 }, 
@@ -2107,31 +2416,6 @@
             document.getElementById('invTotal').innerText = db.medicines.length;
             document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
         }
-
-        /* --- Suppliers --- */
-        function renderSuppliers() {
-            const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
-            db.suppliers.forEach(s => {
-                tbody.innerHTML += `<tr><td>${s.name}</td><td>${s.contact}</td>
-                <td class="text-center action-btns">
-                    <button class="btn btn-info text-white" onclick="printSupplier('${s.id}')" title="Print"><i class="fas fa-print"></i></button>
-                    <button class="btn btn-primary" onclick="editSupplier('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger" onclick="deleteSupplier('${s.id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                </td></tr>`;
-            });
-        }
-        function openAddSupplierModal() { document.getElementById('supId').value=''; document.getElementById('sName').value=''; document.getElementById('sContact').value=''; new bootstrap.Modal(document.getElementById('supplierModal')).show(); }
-        function saveSupplier() {
-            const id = document.getElementById('supId').value; const name = document.getElementById('sName').value; const contact = document.getElementById('sContact').value;
-            if(id) { const s = db.suppliers.find(x=>x.id===id); if(s) { s.name = name; s.contact = contact; } } else { db.suppliers.push({ id: 'S'+Date.now(), name, contact }); }
-            saveDB(); renderSuppliers(); bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide(); showToast('Saved');
-        }
-        function editSupplier(id) {
-            const s = db.suppliers.find(x=>x.id===id); if(!s) return;
-            document.getElementById('supId').value = s.id; document.getElementById('sName').value = s.name; document.getElementById('sContact').value = s.contact; new bootstrap.Modal(document.getElementById('supplierModal')).show();
-        }
-        function deleteSupplier(id) { showConfirm('Delete supplier?', () => { db.suppliers = db.suppliers.filter(s=>s.id!==id); saveDB(); renderSuppliers(); showToast('Deleted'); }); }
-        function printSupplier(id) { const s = db.suppliers.find(x=>x.id===id); if(s) printGenericRecord('Supplier Info', {'Supplier ID': s.id, 'Name': s.name, 'Contact': s.contact}); }
 
         /* --- Employees --- */
         function renderEmployees() {
