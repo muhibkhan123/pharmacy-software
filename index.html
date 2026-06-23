@@ -41,6 +41,7 @@
         .login-logo h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 10px; }
         .feature-item { display: flex; align-items: center; margin-bottom: 20px; }
         .feature-icon { width: 50px; height: 50px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-inline-end: 15px; font-size: 20px; }
+        
         .form-control, .form-select { padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd; }
         .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25); }
         .btn-login { background-color: var(--primary-color); color: white; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; }
@@ -48,7 +49,6 @@
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
 
-        /* --- Main Layout CSS --- */
         .main-system { display: none; height: 100vh; overflow: hidden; position: relative; }
         .sidebar {
             background: linear-gradient(180deg, var(--primary-color) 0%, #1e3a8a 100%);
@@ -92,6 +92,7 @@
         
         .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
         html[dir="rtl"] .toast-container { right: auto; left: 20px; }
+        
         .barcode-box { display: flex; justify-content: center; margin: 15px 0; padding: 15px; background: #fff; border-radius: 8px; border: 1px dashed #ccc; overflow: hidden; }
         #reader { width: 100%; max-width: 500px; margin: auto; }
         #reader__dashboard_section_csr span { color: #888 !important; }
@@ -171,7 +172,6 @@
 </head>
 <body>
 
-    <!-- Toast Notifications -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Custom Confirm Modal -->
@@ -228,7 +228,6 @@
         </div>
     </div>
 
-    <!-- Main System -->
     <div id="mainSystem" class="main-system">
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
         
@@ -281,7 +280,6 @@
                     </div>
                 </div>
 
-                <!-- 1. Dashboard Page -->
                 <div id="dashboard" class="page active">
                     <div class="row mb-3">
                         <div class="col-12">
@@ -403,7 +401,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Medicines Page -->
                 <div id="medicines" class="page">
                     <div class="card">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -435,7 +432,6 @@
                     </div>
                 </div>
 
-                <!-- 3. Sales Page (Advanced POS) -->
                 <div id="sales" class="page">
                     <div class="row">
                         <div class="col-md-8">
@@ -523,7 +519,6 @@
                     </div>
                 </div>
 
-                <!-- 3.5 Customers & Khata Page -->
                 <div id="customers" class="page">
                     <div class="card">
                         <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center" style="background-color: #6f42c1;">
@@ -549,7 +544,6 @@
                     </div>
                 </div>
 
-                <!-- 4. Inventory Page -->
                 <div id="inventory" class="page">
                     <div class="card">
                         <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory Status</span></h5></div>
@@ -570,7 +564,6 @@
                     </div>
                 </div>
 
-                <!-- 5. Alerts Page -->
                 <div id="alerts" class="page">
                     <div class="card">
                         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
@@ -583,7 +576,6 @@
                     </div>
                 </div>
 
-                <!-- 6. Reports Page (Updated with Return logic) -->
                 <div id="reports" class="page">
                     <div class="card">
                         <div class="card-header bg-dark text-white d-flex justify-content-between">
@@ -608,7 +600,6 @@
                     </div>
                 </div>
 
-                <!-- 7. Suppliers Page -->
                 <div id="suppliers" class="page">
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
@@ -626,7 +617,6 @@
                     </div>
                 </div>
 
-                <!-- 8. Employees Page -->
                 <div id="employees" class="page">
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
@@ -644,7 +634,6 @@
                     </div>
                 </div>
 
-                <!-- 9. Delivery Page -->
                 <div id="delivery" class="page">
                     <div class="card">
                         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
@@ -697,8 +686,6 @@
             </main>
         </div>
     </div>
-
-    <!-- Modals -->
 
     <!-- Add/Edit Customer Modal -->
     <div class="modal fade" id="customerModal" tabindex="-1">
@@ -905,7 +892,7 @@
         </div>
     </div>
 
-    <!-- Scanner Modal -->
+    <!-- Scanner Modal (Configured for CODE128 Image Upload) -->
     <div class="modal fade" id="scannerModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -921,7 +908,6 @@
     <!-- 80mm Thermal Receipt Print Area -->
     <div id="printSection" class="thermal-receipt no-print-section">
         <div style="text-align: center; margin-bottom: 5px;">
-            <!-- Pharmacy Logo Placeholder -->
             <i class="fas fa-clinic-medical" style="font-size: 28px; display:block; margin: 0 auto 5px auto;"></i>
             <h3 id="invPharmaName" style="margin: 0; font-size: 16px; font-weight: bold;">Elite Pharmacy</h3>
             <div id="invAddress" style="font-size: 11px; margin-top: 2px;"></div>
@@ -954,6 +940,7 @@
         
         <div style="text-align: center; margin-top: 15px;">
             <div id="invReturnMsg" style="font-weight:bold; font-size: 14px; margin-bottom: 5px; color: red;"></div>
+            <!-- Barcode Area for Receipt -->
             <svg id="invBarcodeSvg"></svg>
             <p style="font-size: 11px; margin-top: 5px; font-weight: bold;">Thank you for your visit!</p>
         </div>
@@ -1474,7 +1461,6 @@
                         <td>${item.total}</td></tr>`;
             });
             
-            // Handle Advanced Math (Discount & Tax)
             const discountInput = document.getElementById('saleDiscount');
             let discountVal = parseFloat(discountInput.value) || 0;
             let discountType = document.getElementById('saleDiscountType').value;
@@ -1483,13 +1469,12 @@
             let discountAmt = 0;
             if (discountType === '%') { discountAmt = subTotal * (discountVal / 100); } 
             else { discountAmt = discountVal; }
-            if (discountAmt > subTotal) discountAmt = subTotal; // Cap discount
+            if (discountAmt > subTotal) discountAmt = subTotal; 
 
             let totalAfterDisc = subTotal - discountAmt;
             let taxAmt = totalAfterDisc * (taxPercent / 100);
             let grandTotal = totalAfterDisc + taxAmt;
 
-            // Save state
             db.currentSale.subTotal = subTotal;
             db.currentSale.discountAmt = discountAmt;
             db.currentSale.discountType = discountType;
@@ -1546,7 +1531,6 @@
             db.currentSale = db.heldBills[index].cart;
             deleteHeldCart(index, true);
             
-            // Restore inputs
             document.getElementById('saleDiscount').value = db.currentSale.discountVal || 0;
             document.getElementById('saleDiscountType').value = db.currentSale.discountType || 'Rs';
             document.getElementById('saleTax').value = db.currentSale.taxPercent || 0;
@@ -1594,7 +1578,6 @@
                 totalPurchaseCost += saleItem.totalPurchase;
             });
             
-            // Profit Calculation: (Total Sale Value BEFORE TAX but AFTER DISCOUNT) - (Total Purchase Cost)
             const revenueForProfit = db.currentSale.subTotal - db.currentSale.discountAmt;
             const netProfit = revenueForProfit - totalPurchaseCost;
 
@@ -1611,7 +1594,6 @@
                 isReturned: false
             };
             
-            // Process Ledger if Credit
             if (paymentMethod === 'Credit') {
                 customerObj.balance += completedSale.total;
                 customerObj.ledger.push({
@@ -1619,7 +1601,6 @@
                 });
             }
             
-            // Ensure we override if editing
             if (db.currentSale.editingId) {
                 db.sales = db.sales.filter(s => s.id !== db.currentSale.editingId);
             }
@@ -1652,7 +1633,6 @@
                 </tr>`; 
             });
             
-            // Display Subtotal, Tax, Discount logic dynamically
             document.getElementById('invSubTotalRow').innerHTML = `Subtotal: Rs ${parseFloat(sale.subTotal).toFixed(2)}`;
             if (sale.discountAmt > 0) { document.getElementById('invDiscountRow').innerHTML = `Discount: -Rs ${parseFloat(sale.discountAmt).toFixed(2)}`; } else { document.getElementById('invDiscountRow').innerHTML = ''; }
             if (sale.taxAmt > 0) { document.getElementById('invTaxRow').innerHTML = `Tax (GST): +Rs ${parseFloat(sale.taxAmt).toFixed(2)}`; } else { document.getElementById('invTaxRow').innerHTML = ''; }
@@ -1663,7 +1643,15 @@
             if(sale.isReturned) { document.getElementById('invReturnMsg').innerText = "*** REFUNDED / RETURNED ***"; }
             else { document.getElementById('invReturnMsg').innerText = ""; }
 
-            JsBarcode("#invBarcodeSvg", sale.id, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 0 });
+            // Using JsBarcode for genuine linear barcode printing on receipt
+            JsBarcode("#invBarcodeSvg", sale.id, { 
+                format: "CODE128", 
+                width: 1.5, 
+                height: 40, 
+                displayValue: true, 
+                fontSize: 14, 
+                margin: 0 
+            });
 
             document.getElementById('qrPrintSection').classList.add('no-print-section'); 
             document.getElementById('genericPrintSection').classList.add('no-print-section'); 
@@ -1679,7 +1667,201 @@
             }, 1000);
         }
 
-        /* ================= Reports Actions & RETURNS ================= */
+        function printGenericRecord(title, detailsObj) {
+            let html = `<div style="text-align: center; margin-bottom: 10px;">
+                <i class="fas fa-clinic-medical" style="font-size: 24px; display:block; margin: 0 auto 5px auto;"></i>
+                <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
+                <h4 style="margin: 5px 0; font-size: 14px; text-decoration: underline;">${title}</h4>
+            </div><div style="font-size: 12px; line-height: 1.5;">`;
+            
+            for(const [key, val] of Object.entries(detailsObj)) {
+                html += `<div><strong>${key}:</strong> ${val}</div>`;
+            }
+            html += `</div><div class="border-dashed-top"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
+            
+            document.getElementById('genericPrintSection').innerHTML = html;
+            
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            document.getElementById('printSection').classList.add('no-print-section');
+            document.getElementById('qrPrintSection').classList.add('no-print-section');
+            document.getElementById('genericPrintSection').classList.remove('no-print-section');
+            
+            window.print();
+            
+            setTimeout(() => {
+                document.getElementById('genericPrintSection').classList.add('no-print-section');
+                document.getElementById('mainSystem').classList.remove('no-print-section');
+            }, 500);
+        }
+
+        /* ================= Medicine Management & JsBarcode ================= */
+        function renderMedicines() {
+            if (!db || !Array.isArray(db.medicines)) return; 
+            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
+            const tbody = document.getElementById('medTableBody');
+            tbody.innerHTML = '';
+            
+            db.medicines.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || (m.formula && m.formula.toLowerCase().includes(q))).forEach(m => {
+                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
+                tbody.innerHTML += `
+                    <tr><td><strong>${m.id}</strong></td>
+                        <td>${m.name}<br><small class="text-muted">${m.formula||'-'}</small></td>
+                        <td>${m.category}</td><td>Rs ${m.price}</td><td class="${stockClass}">${m.stock}</td>
+                        <td>${m.batchNumber||'-'} <br><small class="${m.expiryDate && new Date(m.expiryDate)<new Date()?'text-danger':''}">${m.expiryDate||'-'}</small></td>
+                        <td class="action-btns text-center">
+                            <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
+                        </td></tr>`;
+            });
+        }
+
+        function openAddMedicineModal() {
+            document.getElementById('medForm').reset();
+            document.getElementById('medIdOriginal').value = '';
+            document.getElementById('medId').value = ''; 
+            document.getElementById('barcodeContainerDiv').style.display = 'none';
+            document.getElementById('qrHint').style.display = 'none';
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+            setTimeout(() => document.getElementById('medId').focus(), 500);
+        }
+
+        function saveMedicine() {
+            const originalId = document.getElementById('medIdOriginal').value;
+            const inputId = document.getElementById('medId').value.trim();
+            const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
+            
+            const med = {
+                id: newId, 
+                name: document.getElementById('mName').value, 
+                category: document.getElementById('mCat').value,
+                formula: document.getElementById('mFormula').value,
+                batchNumber: document.getElementById('mBatch').value,
+                purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value),
+                price: parseFloat(document.getElementById('mPrice').value), 
+                stock: parseInt(document.getElementById('mStock').value),
+                minStock: parseInt(document.getElementById('mMinStock').value),
+                expiryDate: document.getElementById('mExpiryDate').value
+            };
+
+            if (originalId) {
+                db.medicines = db.medicines.filter(m => m.id !== originalId);
+                db.medicines.push(med);
+            } else {
+                if (db.medicines.find(m => m.id === newId)) {
+                    showToast('Barcode / ID already exists!', 'danger');
+                    return;
+                }
+                db.medicines.push(med);
+            }
+            
+            saveDB();
+            
+            document.getElementById('barcodeContainerDiv').style.display = 'flex';
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", med.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff" 
+            });
+
+            showToast(currentLang==='en'?'Medicine Saved!':'محفوظ ہو گیا!');
+            renderMedicines();
+            setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide(); }, 2000);
+        }
+
+        function editMedicine(id) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('medIdOriginal').value = m.id;
+            document.getElementById('medId').value = m.id; 
+            document.getElementById('mName').value = m.name;
+            document.getElementById('mCat').value = m.category; 
+            document.getElementById('mFormula').value = m.formula || '';
+            document.getElementById('mBatch').value = m.batchNumber || '';
+            document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
+            document.getElementById('mPrice').value = m.price;
+            document.getElementById('mStock').value = m.stock; 
+            document.getElementById('mMinStock').value = m.minStock;
+            document.getElementById('mExpiryDate').value = m.expiryDate || '';
+            
+            document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", m.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff"
+            });
+
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+        }
+
+        function deleteMedicine(id) {
+            showConfirm(currentLang==='en'?'Delete this medicine?':'کیا آپ حذف کرنا چاہتے ہیں؟', () => {
+                db.medicines = db.medicines.filter(m => m.id !== id);
+                saveDB(); renderMedicines(); showToast('Deleted');
+            });
+        }
+
+        function executeQRPrint(medicinesToPrint) {
+            const printArea = document.getElementById('qrPrintSection');
+            printArea.innerHTML = ''; 
+
+            medicinesToPrint.forEach(med => {
+                const label = document.createElement('div');
+                label.className = 'qr-label-print';
+                label.innerHTML = `
+                    <div style="font-weight:bold; font-size: 14px;">${med.name}</div>
+                    <svg id="print-barcode-${med.id}"></svg>
+                    <div style="font-size: 12px; color: #555;">Rs ${med.price}</div>
+                `;
+                printArea.appendChild(label);
+                
+                JsBarcode(`#print-barcode-${med.id}`, med.id, {
+                    format: "CODE128", width: 2, height: 80, displayValue: true, fontSize: 14, margin: 20, background: "#ffffff"
+                });
+            });
+
+            document.getElementById('printSection').classList.add('no-print-section'); 
+            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
+            document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
+            document.getElementById('mainSystem').classList.add('no-print-section'); 
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.getElementById('qrPrintSection').classList.add('no-print-section');
+                    document.getElementById('mainSystem').classList.remove('no-print-section');
+                }, 500);
+            }, 600);
+        }
+
+        /* ================= Camera Scanner (Barcode Optimization) ================= */
+        let html5QrcodeScanner = null; let scanContext = '';
+        function openQRScanner(context) {
+            scanContext = context;
+            new bootstrap.Modal(document.getElementById('scannerModal')).show();
+            
+            setTimeout(() => {
+                // FIXED: Explicitly added formatsToSupport and useBarCodeDetectorIfSupported for better accuracy
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                    fps: 10, 
+                    qrbox: { width: 300, height: 100 }, 
+                    rememberLastUsedCamera: true,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13 ],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                }, false);
+                
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }, 500);
+        }
+        function onScanSuccess(decodedText, decodedResult) {
+            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
+            if(scanContext === 'sale') addToSale(decodedText);
+            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
+        }
+        function onScanFailure(error) { } 
+        function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
+
+        /* ================= Reports Actions & Returns ================= */
         function renderReports() {
             const tbody = document.getElementById('reportsTableBody'); tbody.innerHTML = '';
             db.sales.slice().reverse().forEach(s => { 
@@ -1689,7 +1871,6 @@
                 
                 let actions = `<button class="btn btn-info text-white" onclick="reprintSale('${s.id}')" title="Print"><i class="fas fa-print"></i></button>`;
                 
-                // Hide Edit and Return if already returned
                 if (!isRet) {
                     actions += `
                         <button class="btn btn-primary" onclick="editSale('${s.id}')" title="Edit"><i class="fas fa-edit"></i></button>
@@ -1725,26 +1906,18 @@
             showConfirm('Process Return / Refund for this entire invoice? Stock and Udhaar will be reversed.', () => {
                 sale.isReturned = true;
                 
-                // Restore Stock
                 sale.items.forEach(item => {
                     const med = db.medicines.find(m => m.id === item.id);
                     if(med) med.stock += item.qty;
                 });
                 
-                // Restore Customer Ledger if Credit
                 if(sale.paymentMethod === 'Credit' && sale.customerId) {
                     const cust = db.customers.find(c => c.id === sale.customerId);
                     if(cust) {
                         cust.balance -= sale.total;
-                        cust.ledger.push({
-                            date: new Date().toLocaleString(),
-                            desc: `Refund / Invoice Reversal #${sale.id}`,
-                            type: 'credit', // Credit back their Udhaar
-                            amount: sale.total
-                        });
+                        cust.ledger.push({ date: new Date().toLocaleString(), desc: `Refund / Invoice Reversal #${sale.id}`, type: 'credit', amount: sale.total });
                     }
                 }
-                
                 saveDB(); renderReports(); showToast('Invoice Returned Successfully', 'success');
             });
         }
@@ -1754,8 +1927,7 @@
             if(!sale || sale.isReturned) return;
             
             showConfirm('Editing this sale will move items back to the POS cart and temporarily reverse its effects. Proceed?', () => {
-                // Completely reverse the old sale exactly like Return, but we keep it in memory to edit
-                sale.isReturned = true; // Temporary tombstone
+                sale.isReturned = true; 
                 
                 sale.items.forEach(item => { const med = db.medicines.find(m => m.id === item.id); if(med) med.stock += item.qty; });
                 
@@ -1767,18 +1939,10 @@
                     }
                 }
 
-                // Load to Cart
                 db.currentSale = { 
-                    items: [...sale.items], 
-                    subTotal: sale.subTotal || 0,
-                    discountAmt: sale.discountAmt || 0,
-                    discountType: sale.discountType || 'Rs',
-                    discountVal: sale.discountVal || 0,
-                    taxPercent: sale.taxPercent || 0,
-                    taxAmt: sale.taxAmt || 0,
-                    total: sale.total, 
-                    editingId: sale.id, 
-                    editingDate: sale.date 
+                    items: [...sale.items], subTotal: sale.subTotal || 0, discountAmt: sale.discountAmt || 0,
+                    discountType: sale.discountType || 'Rs', discountVal: sale.discountVal || 0, taxPercent: sale.taxPercent || 0,
+                    taxAmt: sale.taxAmt || 0, total: sale.total, editingId: sale.id, editingDate: sale.date 
                 };
                 
                 document.getElementById('posCustomerSelect').value = sale.customerId || 'C-WALKIN';
@@ -1803,12 +1967,7 @@
             document.body.innerHTML = originalContents; location.reload(); 
         }
 
-        /* ================= Other Pages Integration ================= */
-        function loadInventoryPage() {
-            document.getElementById('invTotal').innerText = db.medicines.length;
-            document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
-        }
-
+        /* --- Suppliers, Employees, Deliveries UI Actions --- */
         function renderSuppliers() {
             const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
             db.suppliers.forEach(s => {
@@ -1910,6 +2069,24 @@
         function saveProfile() {
             if(document.getElementById('profPass').value) showToast('Password updated');
             else showToast('Profile saved');
+        }
+
+        /* Miscellaneous utilities */
+        function openSingleQRPrintModal() {
+            const select = document.getElementById('singleQRSelect');
+            select.innerHTML = '';
+            if(db.medicines.length === 0) { showToast('No medicines available to print.', 'warning'); return; }
+            db.medicines.forEach(m => { select.innerHTML += `<option value="${m.id}">${m.name} (${m.id})</option>`; });
+            new bootstrap.Modal(document.getElementById('singleQRModal')).show();
+        }
+        function printSingleQRCode() {
+            const medId = document.getElementById('singleQRSelect').value;
+            const med = db.medicines.find(m => m.id === medId);
+            if(med) { bootstrap.Modal.getInstance(document.getElementById('singleQRModal')).hide(); executeQRPrint([med]); }
+        }
+        function printBulkQRCodes() {
+            if(db.medicines.length === 0) { showToast('No medicines available to print.', 'warning'); return; }
+            executeQRPrint(db.medicines);
         }
 
     </script>
