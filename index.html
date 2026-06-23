@@ -987,7 +987,7 @@
                 sales_trend: "Sales Trend (Last 7 Days)", inv_dist: "Inventory Distribution", recent_sales: "Recent Sales",
                 print_qr: "Print Barcodes", single_qr: "Single Barcode", bulk_qr: "Bulk Print All", print_single_qr: "Print Single Barcode", select_medicine: "Select Medicine",
                 purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", tax: "Tax / GST (%)", subtotal: "Subtotal", net_profit: "Net Profit",
-                balance: "Balance (Udhaar)"
+                balance: "Balance (Udhaar)", expiring_soon: "Expiring Soon", expired: "Expired!"
             },
             ur: {
                 sys_title: "فارمیسی مینجمنٹ سسٹم",
@@ -1009,8 +1009,8 @@
                 batch_no: "بیچ نمبر", formula: "فارمولا / جنرک", batch_expiry: "بیچ اور ایکسپائری",
                 sales_trend: "سیلز کا رجحان (پچھلے 7 دن)", inv_dist: "انوینٹری کی تقسیم", recent_sales: "حالیہ سیلز",
                 print_qr: "بارکوڈ پرنٹ کریں", single_qr: "سنگل بارکوڈ", bulk_qr: "سب پرنٹ کریں", print_single_qr: "ایک بارکوڈ پرنٹ کریں", select_medicine: "دوا منتخب کریں",
-                purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ", tax: "ٹیکس (%)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
-                balance: "بقایا (ادھار)"
+                purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", tax: "ٹیکس (%)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
+                balance: "بقایا (ادھار)", expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!"
             }
         };
 
@@ -1048,7 +1048,7 @@
                 db = JSON.parse(saved);
                 db.medicines = db.medicines || [];
                 db.sales = db.sales || [];
-                db.currentSale = db.currentSale || { items: [], subTotal: 0, discount: 0, discountType: 'Rs', taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
+                db.currentSale = db.currentSale || { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = db.suppliers || [];
                 db.employees = db.employees || [];
                 db.alerts = db.alerts || [];
@@ -1059,10 +1059,11 @@
             } else {
                 db.medicines = [
                     { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
-                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' }
+                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
+                    { id: 'M103', name: 'Vitamin C', formula: 'Ascorbic Acid', batchNumber: 'B-003', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
                 ];
                 db.sales = [];
-                db.currentSale = { items: [], subTotal: 0, discount: 0, discountType: 'Rs', taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
+                db.currentSale = { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
                 db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567' }];
                 db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
                 db.deliveries = [];
@@ -1200,7 +1201,6 @@
 
         function loadDashboard() {
             generateSystemAlerts(); 
-            // Calculate sales ONLY for non-returned items
             const activeSales = db.sales.filter(s => !s.isReturned);
             const totalSales = activeSales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
             const netProfit = activeSales.reduce((sum, s) => sum + parseFloat(s.profit || 0), 0);
@@ -1381,7 +1381,283 @@
             showToast('Payment Received successfully!');
         }
 
-        /* ================= Sales (POS) & Hold Cart Logic ================= */
+        let currentModalContext = '';
+        function openDetailsModal(type) {
+            currentModalContext = type;
+            const thead = document.getElementById('detailsTableHead');
+            const tbody = document.getElementById('detailsTableBody');
+            thead.innerHTML = ''; tbody.innerHTML = '';
+            let title = '';
+
+            if (type === 'sales') {
+                title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
+                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th><th>Profit</th></tr>`;
+                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success">Rs ${s.profit||0}</td></tr>`; });
+            } else if (type === 'medicines') {
+                title = currentLang==='en'?'All Medicines':'تمام ادویات';
+                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name & Formula</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
+                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class="text-muted">${m.formula||''}</small></td><td>${m.batchNumber||'-'}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
+            } else if (type === 'lowstock') {
+                title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
+                thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
+                db.medicines.filter(m=>m.stock<=m.minStock).forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td class="text-danger fw-bold">${m.stock}</td><td>${m.minStock}</td></tr>`; });
+            }
+            document.getElementById('detailsModalTitle').innerText = title;
+            new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        }
+
+        function exportDetailsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(document.getElementById('detailsModalTitle').innerText, 14, 15);
+            doc.autoTable({ html: '#detailsTable', startY: 20 });
+            doc.save(`${currentModalContext}_report.pdf`);
+            showToast('PDF Exported Successfully!');
+        }
+
+        /* ================= Generic Thermal Print (For Employee/Supplier/Delivery) ================= */
+        function printGenericRecord(title, detailsObj) {
+            let html = `<div style="text-align: center; margin-bottom: 10px;">
+                <i class="fas fa-clinic-medical" style="font-size: 24px; display:block; margin: 0 auto 5px auto;"></i>
+                <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
+                <h4 style="margin: 5px 0; font-size: 14px; text-decoration: underline;">${title}</h4>
+            </div><div style="font-size: 12px; line-height: 1.5;">`;
+            
+            for(const [key, val] of Object.entries(detailsObj)) {
+                html += `<div><strong>${key}:</strong> ${val}</div>`;
+            }
+            html += `</div><div class="border-dashed-top"></div>
+            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
+            
+            document.getElementById('genericPrintSection').innerHTML = html;
+            
+            document.getElementById('mainSystem').classList.add('no-print-section');
+            document.getElementById('printSection').classList.add('no-print-section');
+            document.getElementById('qrPrintSection').classList.add('no-print-section');
+            document.getElementById('genericPrintSection').classList.remove('no-print-section');
+            
+            window.print();
+            
+            setTimeout(() => {
+                document.getElementById('genericPrintSection').classList.add('no-print-section');
+                document.getElementById('mainSystem').classList.remove('no-print-section');
+            }, 500);
+        }
+
+        /* ================= Barcode Printing Logic ================= */
+        function openSingleQRPrintModal() {
+            const select = document.getElementById('singleQRSelect');
+            select.innerHTML = '';
+            if(db.medicines.length === 0) {
+                showToast('No medicines available to print.', 'warning');
+                return;
+            }
+            db.medicines.forEach(m => {
+                select.innerHTML += `<option value="${m.id}">${m.name} (${m.id})</option>`;
+            });
+            new bootstrap.Modal(document.getElementById('singleQRModal')).show();
+        }
+
+        function printSingleQRCode() {
+            const medId = document.getElementById('singleQRSelect').value;
+            const med = db.medicines.find(m => m.id === medId);
+            if(med) {
+                bootstrap.Modal.getInstance(document.getElementById('singleQRModal')).hide();
+                executeQRPrint([med]);
+            }
+        }
+
+        function printBulkQRCodes() {
+            if(db.medicines.length === 0) {
+                showToast('No medicines available to print.', 'warning');
+                return;
+            }
+            executeQRPrint(db.medicines);
+        }
+
+        function executeQRPrint(medicinesToPrint) {
+            const printArea = document.getElementById('qrPrintSection');
+            printArea.innerHTML = ''; 
+
+            medicinesToPrint.forEach(med => {
+                const label = document.createElement('div');
+                label.className = 'qr-label-print';
+                label.innerHTML = `
+                    <div style="font-weight:bold; font-size: 14px;">${med.name}</div>
+                    <svg id="print-barcode-${med.id}"></svg>
+                    <div style="font-size: 12px; color: #555;">Rs ${med.price}</div>
+                `;
+                printArea.appendChild(label);
+                
+                JsBarcode(`#print-barcode-${med.id}`, med.id, {
+                    format: "CODE128", width: 2, height: 80, displayValue: true, fontSize: 14, margin: 20, background: "#ffffff"
+                });
+            });
+
+            document.getElementById('printSection').classList.add('no-print-section'); 
+            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
+            document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
+            document.getElementById('mainSystem').classList.add('no-print-section'); 
+            
+            setTimeout(() => {
+                window.print();
+                setTimeout(() => {
+                    document.getElementById('qrPrintSection').classList.add('no-print-section');
+                    document.getElementById('mainSystem').classList.remove('no-print-section');
+                }, 500);
+            }, 600);
+        }
+
+        /* ================= Medicines & UI Logic ================= */
+        function renderMedicines() {
+            if (!db || !Array.isArray(db.medicines)) return; 
+
+            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
+            const tbody = document.getElementById('medTableBody');
+            tbody.innerHTML = '';
+            
+            db.medicines.filter(m => 
+                m.name.toLowerCase().includes(q) || 
+                m.id.toLowerCase().includes(q) || 
+                (m.formula && m.formula.toLowerCase().includes(q)) ||
+                (m.batchNumber && m.batchNumber.toLowerCase().includes(q))
+            ).forEach(m => {
+                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
+                const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${m.id}</strong></td>
+                        <td>${m.name} <br><small class="text-muted">${m.formula || ''}</small></td>
+                        <td>${m.category}</td>
+                        <td>Rs ${m.price} <br><small class="text-muted">(Purch: Rs ${m.purchasePrice || 0})</small></td>
+                        <td class="${stockClass}">${m.stock}</td>
+                        <td><span class="badge bg-secondary mb-1">${m.batchNumber || 'N/A'}</span><br><span class="${expClass}">${m.expiryDate || '-'}</span></td>
+                        <td class="action-btns text-center">
+                            <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function openAddMedicineModal() {
+            document.getElementById('medForm').reset();
+            document.getElementById('medIdOriginal').value = '';
+            document.getElementById('medId').value = ''; 
+            document.getElementById('mFormula').value = ''; 
+            document.getElementById('mBatch').value = ''; 
+            document.getElementById('mPurchasePrice').value = ''; 
+            document.getElementById('mExpiryDate').value = ''; 
+            document.getElementById('barcodeContainerDiv').style.display = 'none';
+            document.getElementById('qrHint').style.display = 'none';
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+            setTimeout(() => document.getElementById('medId').focus(), 500);
+        }
+
+        function saveMedicine() {
+            const originalId = document.getElementById('medIdOriginal').value;
+            const inputId = document.getElementById('medId').value.trim();
+            const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
+            
+            const med = {
+                id: newId, 
+                name: document.getElementById('mName').value, 
+                formula: document.getElementById('mFormula').value,
+                batchNumber: document.getElementById('mBatch').value,
+                category: document.getElementById('mCat').value,
+                purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value || 0),
+                price: parseFloat(document.getElementById('mPrice').value), 
+                stock: parseInt(document.getElementById('mStock').value),
+                minStock: parseInt(document.getElementById('mMinStock').value),
+                expiryDate: document.getElementById('mExpiryDate').value
+            };
+
+            if (originalId) {
+                db.medicines = db.medicines.filter(m => m.id !== originalId);
+                db.medicines.push(med);
+            } else {
+                if (db.medicines.find(m => m.id === newId)) {
+                    showToast('Barcode / ID already exists!', 'danger');
+                    return;
+                }
+                db.medicines.push(med);
+            }
+            
+            saveDB();
+            generateSystemAlerts();
+            
+            document.getElementById('barcodeContainerDiv').style.display = 'flex';
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", med.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff" 
+            });
+
+            showToast(currentLang==='en'?'Medicine Saved!':'محفوظ ہو گیا!');
+            renderMedicines();
+            setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide(); }, 2000);
+        }
+
+        function editMedicine(id) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            document.getElementById('medIdOriginal').value = m.id;
+            document.getElementById('medId').value = m.id; 
+            document.getElementById('mName').value = m.name;
+            document.getElementById('mFormula').value = m.formula || '';
+            document.getElementById('mBatch').value = m.batchNumber || '';
+            document.getElementById('mCat').value = m.category; 
+            document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
+            document.getElementById('mPrice').value = m.price;
+            document.getElementById('mStock').value = m.stock; 
+            document.getElementById('mMinStock').value = m.minStock;
+            document.getElementById('mExpiryDate').value = m.expiryDate || '';
+            
+            document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
+            document.getElementById('qrHint').style.display = 'block';
+            JsBarcode("#barcodeSvg", m.id, { 
+                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff"
+            });
+
+            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
+            new bootstrap.Modal(document.getElementById('medicineModal')).show();
+        }
+
+        function deleteMedicine(id) {
+            showConfirm(currentLang==='en'?'Delete this medicine?':'کیا آپ حذف کرنا چاہتے ہیں؟', () => {
+                db.medicines = db.medicines.filter(m => m.id !== id);
+                saveDB(); renderMedicines(); showToast('Deleted');
+            });
+        }
+
+        /* ================= Camera Scanner (Barcode Optimization) ================= */
+        let html5QrcodeScanner = null; let scanContext = '';
+        function openQRScanner(context) {
+            scanContext = context;
+            new bootstrap.Modal(document.getElementById('scannerModal')).show();
+            
+            setTimeout(() => {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+                    fps: 10, 
+                    qrbox: { width: 300, height: 100 }, 
+                    rememberLastUsedCamera: true,
+                    formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13 ],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+                }, false);
+                
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            }, 500);
+        }
+        function onScanSuccess(decodedText, decodedResult) {
+            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
+            if(scanContext === 'sale') addToSale(decodedText);
+            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
+        }
+        function onScanFailure(error) { } 
+        function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
+
+        /* ================= Sales (POS) & Physical Scanner Logic ================= */
         function loadSalesPage() {
             const qList = document.getElementById('quickItemsList');
             qList.innerHTML = '';
@@ -1409,22 +1685,36 @@
                 event.preventDefault();
                 const q = document.getElementById('saleSearchInput').value.trim();
                 if(!q) return;
+                
                 const match = db.medicines.find(m => m.id.toLowerCase() === q.toLowerCase());
-                if(match) { addToSale(match.id); document.getElementById('saleSearchInput').value = ''; } 
-                else { showToast('Item not found: ' + q, 'danger'); document.getElementById('saleSearchInput').value = ''; }
+                if(match) {
+                    addToSale(match.id);
+                    document.getElementById('saleSearchInput').value = ''; 
+                } else {
+                    showToast('Item not found for barcode: ' + q, 'danger');
+                    document.getElementById('saleSearchInput').value = ''; 
+                }
             }
         }
 
         function searchSaleItemLive() {
             const q = document.getElementById('saleSearchInput').value.toLowerCase();
             if(q.length < 2) return;
-            const match = db.medicines.find(m => m.name.toLowerCase() === q || m.id.toLowerCase() === q || (m.formula && m.formula.toLowerCase() === q) || (m.batchNumber && m.batchNumber.toLowerCase() === q));
-            if(match) { addToSale(match.id); document.getElementById('saleSearchInput').value = ''; }
+            const match = db.medicines.find(m => 
+                m.name.toLowerCase() === q || 
+                m.id.toLowerCase() === q || 
+                (m.formula && m.formula.toLowerCase() === q) || 
+                (m.batchNumber && m.batchNumber.toLowerCase() === q)
+            );
+            if(match) { 
+                addToSale(match.id); 
+                document.getElementById('saleSearchInput').value = ''; 
+            }
         }
 
         function addToSale(id) {
             const med = db.medicines.find(m => m.id === id);
-            if(!med) return;
+            if(!med) { showToast('Medicine not found', 'danger'); return; }
             if(med.stock <= 0) { showToast('Out of stock!', 'danger'); return; }
             
             const existing = db.currentSale.items.find(i => i.id === id);
@@ -1444,10 +1734,13 @@
 
         function updateSaleQty(index, dir) {
             const item = db.currentSale.items[index]; const med = db.medicines.find(m => m.id === item.id);
-            if(dir === 1 && item.qty >= med.stock) return;
+            if(dir === 1 && item.qty >= med.stock) { showToast('Limit reached', 'warning'); return; }
             item.qty += dir;
             if(item.qty <= 0) db.currentSale.items.splice(index, 1);
-            else { item.total = item.qty * item.price; item.totalPurchase = item.qty * item.purchasePrice; }
+            else { 
+                item.total = item.qty * item.price; 
+                item.totalPurchase = item.qty * item.purchasePrice; 
+            }
             saveDB(); renderSaleTable();
         }
 
@@ -1643,7 +1936,6 @@
             if(sale.isReturned) { document.getElementById('invReturnMsg').innerText = "*** REFUNDED / RETURNED ***"; }
             else { document.getElementById('invReturnMsg').innerText = ""; }
 
-            // Using JsBarcode for genuine linear barcode printing on receipt
             JsBarcode("#invBarcodeSvg", sale.id, { 
                 format: "CODE128", 
                 width: 1.5, 
@@ -1666,200 +1958,6 @@
                 document.getElementById('saleSearchInput')?.focus();
             }, 1000);
         }
-
-        function printGenericRecord(title, detailsObj) {
-            let html = `<div style="text-align: center; margin-bottom: 10px;">
-                <i class="fas fa-clinic-medical" style="font-size: 24px; display:block; margin: 0 auto 5px auto;"></i>
-                <h3 style="margin: 0; font-size: 16px; font-weight: bold;">${db.settings.pharmacyName || 'Elite Pharmacy'}</h3>
-                <h4 style="margin: 5px 0; font-size: 14px; text-decoration: underline;">${title}</h4>
-            </div><div style="font-size: 12px; line-height: 1.5;">`;
-            
-            for(const [key, val] of Object.entries(detailsObj)) {
-                html += `<div><strong>${key}:</strong> ${val}</div>`;
-            }
-            html += `</div><div class="border-dashed-top"></div>
-            <div style="text-align: center; margin-top: 10px; font-size: 10px;">Printed on: ${new Date().toLocaleString()}</div>`;
-            
-            document.getElementById('genericPrintSection').innerHTML = html;
-            
-            document.getElementById('mainSystem').classList.add('no-print-section');
-            document.getElementById('printSection').classList.add('no-print-section');
-            document.getElementById('qrPrintSection').classList.add('no-print-section');
-            document.getElementById('genericPrintSection').classList.remove('no-print-section');
-            
-            window.print();
-            
-            setTimeout(() => {
-                document.getElementById('genericPrintSection').classList.add('no-print-section');
-                document.getElementById('mainSystem').classList.remove('no-print-section');
-            }, 500);
-        }
-
-        /* ================= Medicine Management & JsBarcode ================= */
-        function renderMedicines() {
-            if (!db || !Array.isArray(db.medicines)) return; 
-            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
-            const tbody = document.getElementById('medTableBody');
-            tbody.innerHTML = '';
-            
-            db.medicines.filter(m => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || (m.formula && m.formula.toLowerCase().includes(q))).forEach(m => {
-                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
-                tbody.innerHTML += `
-                    <tr><td><strong>${m.id}</strong></td>
-                        <td>${m.name}<br><small class="text-muted">${m.formula||'-'}</small></td>
-                        <td>${m.category}</td><td>Rs ${m.price}</td><td class="${stockClass}">${m.stock}</td>
-                        <td>${m.batchNumber||'-'} <br><small class="${m.expiryDate && new Date(m.expiryDate)<new Date()?'text-danger':''}">${m.expiryDate||'-'}</small></td>
-                        <td class="action-btns text-center">
-                            <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
-                        </td></tr>`;
-            });
-        }
-
-        function openAddMedicineModal() {
-            document.getElementById('medForm').reset();
-            document.getElementById('medIdOriginal').value = '';
-            document.getElementById('medId').value = ''; 
-            document.getElementById('barcodeContainerDiv').style.display = 'none';
-            document.getElementById('qrHint').style.display = 'none';
-            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
-            new bootstrap.Modal(document.getElementById('medicineModal')).show();
-            setTimeout(() => document.getElementById('medId').focus(), 500);
-        }
-
-        function saveMedicine() {
-            const originalId = document.getElementById('medIdOriginal').value;
-            const inputId = document.getElementById('medId').value.trim();
-            const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
-            
-            const med = {
-                id: newId, 
-                name: document.getElementById('mName').value, 
-                category: document.getElementById('mCat').value,
-                formula: document.getElementById('mFormula').value,
-                batchNumber: document.getElementById('mBatch').value,
-                purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value),
-                price: parseFloat(document.getElementById('mPrice').value), 
-                stock: parseInt(document.getElementById('mStock').value),
-                minStock: parseInt(document.getElementById('mMinStock').value),
-                expiryDate: document.getElementById('mExpiryDate').value
-            };
-
-            if (originalId) {
-                db.medicines = db.medicines.filter(m => m.id !== originalId);
-                db.medicines.push(med);
-            } else {
-                if (db.medicines.find(m => m.id === newId)) {
-                    showToast('Barcode / ID already exists!', 'danger');
-                    return;
-                }
-                db.medicines.push(med);
-            }
-            
-            saveDB();
-            
-            document.getElementById('barcodeContainerDiv').style.display = 'flex';
-            document.getElementById('qrHint').style.display = 'block';
-            JsBarcode("#barcodeSvg", med.id, { 
-                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff" 
-            });
-
-            showToast(currentLang==='en'?'Medicine Saved!':'محفوظ ہو گیا!');
-            renderMedicines();
-            setTimeout(() => { bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide(); }, 2000);
-        }
-
-        function editMedicine(id) {
-            const m = db.medicines.find(x => x.id === id);
-            if(!m) return;
-            document.getElementById('medIdOriginal').value = m.id;
-            document.getElementById('medId').value = m.id; 
-            document.getElementById('mName').value = m.name;
-            document.getElementById('mCat').value = m.category; 
-            document.getElementById('mFormula').value = m.formula || '';
-            document.getElementById('mBatch').value = m.batchNumber || '';
-            document.getElementById('mPurchasePrice').value = m.purchasePrice || 0;
-            document.getElementById('mPrice').value = m.price;
-            document.getElementById('mStock').value = m.stock; 
-            document.getElementById('mMinStock').value = m.minStock;
-            document.getElementById('mExpiryDate').value = m.expiryDate || '';
-            
-            document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
-            document.getElementById('qrHint').style.display = 'block';
-            JsBarcode("#barcodeSvg", m.id, { 
-                format: "CODE128", width: 2, height: 80, displayValue: true, margin: 20, background: "#ffffff"
-            });
-
-            document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
-            new bootstrap.Modal(document.getElementById('medicineModal')).show();
-        }
-
-        function deleteMedicine(id) {
-            showConfirm(currentLang==='en'?'Delete this medicine?':'کیا آپ حذف کرنا چاہتے ہیں؟', () => {
-                db.medicines = db.medicines.filter(m => m.id !== id);
-                saveDB(); renderMedicines(); showToast('Deleted');
-            });
-        }
-
-        function executeQRPrint(medicinesToPrint) {
-            const printArea = document.getElementById('qrPrintSection');
-            printArea.innerHTML = ''; 
-
-            medicinesToPrint.forEach(med => {
-                const label = document.createElement('div');
-                label.className = 'qr-label-print';
-                label.innerHTML = `
-                    <div style="font-weight:bold; font-size: 14px;">${med.name}</div>
-                    <svg id="print-barcode-${med.id}"></svg>
-                    <div style="font-size: 12px; color: #555;">Rs ${med.price}</div>
-                `;
-                printArea.appendChild(label);
-                
-                JsBarcode(`#print-barcode-${med.id}`, med.id, {
-                    format: "CODE128", width: 2, height: 80, displayValue: true, fontSize: 14, margin: 20, background: "#ffffff"
-                });
-            });
-
-            document.getElementById('printSection').classList.add('no-print-section'); 
-            document.getElementById('genericPrintSection').classList.add('no-print-section'); 
-            document.getElementById('qrPrintSection').classList.remove('no-print-section'); 
-            document.getElementById('mainSystem').classList.add('no-print-section'); 
-            
-            setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                    document.getElementById('qrPrintSection').classList.add('no-print-section');
-                    document.getElementById('mainSystem').classList.remove('no-print-section');
-                }, 500);
-            }, 600);
-        }
-
-        /* ================= Camera Scanner (Barcode Optimization) ================= */
-        let html5QrcodeScanner = null; let scanContext = '';
-        function openQRScanner(context) {
-            scanContext = context;
-            new bootstrap.Modal(document.getElementById('scannerModal')).show();
-            
-            setTimeout(() => {
-                // FIXED: Explicitly added formatsToSupport and useBarCodeDetectorIfSupported for better accuracy
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-                    fps: 10, 
-                    qrbox: { width: 300, height: 100 }, 
-                    rememberLastUsedCamera: true,
-                    formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13 ],
-                    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
-                }, false);
-                
-                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            }, 500);
-        }
-        function onScanSuccess(decodedText, decodedResult) {
-            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
-            if(scanContext === 'sale') addToSale(decodedText);
-            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
-        }
-        function onScanFailure(error) { } 
-        function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
 
         /* ================= Reports Actions & Returns ================= */
         function renderReports() {
@@ -1967,7 +2065,13 @@
             document.body.innerHTML = originalContents; location.reload(); 
         }
 
-        /* --- Suppliers, Employees, Deliveries UI Actions --- */
+        /* ================= Other Pages Integration ================= */
+        function loadInventoryPage() {
+            document.getElementById('invTotal').innerText = db.medicines.length;
+            document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
+        }
+
+        /* --- Suppliers --- */
         function renderSuppliers() {
             const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
             db.suppliers.forEach(s => {
@@ -1992,6 +2096,7 @@
         function deleteSupplier(id) { showConfirm('Delete supplier?', () => { db.suppliers = db.suppliers.filter(s=>s.id!==id); saveDB(); renderSuppliers(); showToast('Deleted'); }); }
         function printSupplier(id) { const s = db.suppliers.find(x=>x.id===id); if(s) printGenericRecord('Supplier Info', {'Supplier ID': s.id, 'Name': s.name, 'Contact': s.contact}); }
 
+        /* --- Employees --- */
         function renderEmployees() {
             const tbody = document.getElementById('employeesTableBody'); tbody.innerHTML = '';
             db.employees.forEach(e => {
@@ -2016,6 +2121,7 @@
         function deleteEmployee(id) { showConfirm('Delete employee?', () => { db.employees = db.employees.filter(e=>e.id!==id); saveDB(); renderEmployees(); showToast('Deleted'); }); }
         function printEmployee(id) { const e = db.employees.find(x=>x.id===id); if(e) printGenericRecord('Employee Info', {'Employee ID': e.id, 'Name': e.name, 'Role': e.role}); }
 
+        /* --- Delivery --- */
         function renderDeliveries() {
             const tbody = document.getElementById('deliveryTableBody'); tbody.innerHTML = '';
             db.deliveries.forEach(d => {
@@ -2069,24 +2175,6 @@
         function saveProfile() {
             if(document.getElementById('profPass').value) showToast('Password updated');
             else showToast('Profile saved');
-        }
-
-        /* Miscellaneous utilities */
-        function openSingleQRPrintModal() {
-            const select = document.getElementById('singleQRSelect');
-            select.innerHTML = '';
-            if(db.medicines.length === 0) { showToast('No medicines available to print.', 'warning'); return; }
-            db.medicines.forEach(m => { select.innerHTML += `<option value="${m.id}">${m.name} (${m.id})</option>`; });
-            new bootstrap.Modal(document.getElementById('singleQRModal')).show();
-        }
-        function printSingleQRCode() {
-            const medId = document.getElementById('singleQRSelect').value;
-            const med = db.medicines.find(m => m.id === medId);
-            if(med) { bootstrap.Modal.getInstance(document.getElementById('singleQRModal')).hide(); executeQRPrint([med]); }
-        }
-        function printBulkQRCodes() {
-            if(db.medicines.length === 0) { showToast('No medicines available to print.', 'warning'); return; }
-            executeQRPrint(db.medicines);
         }
 
     </script>
