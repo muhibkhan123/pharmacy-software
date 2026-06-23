@@ -1,0 +1,37 @@
+1. 💊 Core Pharmacy & Inventory Features (Bohat Zaroori)
+Expiry Date Tracking: Pharmacy mein sabse zaroori cheez medicines ki expiry hoti hai. Har medicine add karte waqt uski Expiry Date dalni chahiye, aur Dashboard par "Expiring Soon (Next 3 Months)" ka ek alert/report hona chahiye.
+
+Batch / Lot Numbers: Ek hi medicine (e.g., Panadol) ke alag-alag batch aate hain jinki expiry aur price alag ho sakti hai. Batch number ka system hona chahiye.
+
+Formula / Generic Name: Aksar customer brand name maangta hai jo khatam hota hai, to pharmacist formula (jaise Paracetamol) search karke alternative dawa de sake. Iska search filter hona chahiye.
+
+Purchase Price vs Sale Price: Abhi hum sirf 'Price' add kar rahe hain. Humein Purchase Price (Kharid) aur Sale Price (Farokht) dono track karne chahiye taake Profit (Munafa) nikal sake.
+
+2. 🛒 Advanced POS & Sales (Customer Dealing)
+Discount & Tax (GST) System: Bill banate waqt item par ya poore bill par percentage (%) ya fixed discount dene ka option hona chahiye.
+
+Sales Return / Refund: Agar koi customer dawa wapas karne aaye, to POS mein "Return" ka option ho jo paise wapas dikhaye aur medicine ko wapas stock mein add kar de.
+
+Customer Khata (Udhaar System): Regular customers ya padosiyon ka khata (Credit ledger) jahan unka udhaar, jama karwayi hui raqam aur baqaya (balance) track ho sake.
+
+Hold Bill (Cart Hold): Agar ek customer bill banwa raha hai aur paise nikalne chala jaye, to uski cart ko 'Hold' karke dusre customer ka bill banaya ja sake.
+
+3. 📦 Purchases & Supplier Management
+Purchase Invoices (GRN): Abhi Supplier ka sirf naam save hota hai. Humein ek page chahiye jahan hum Supplier se aane wala maal (Stock) system mein enter karein, jisse Stock automatic update ho aur supplier ka khata/payment track ho.
+
+4. 📊 Accounting & Financial Reports
+Expenses (Kharchay) Module: Dukan ka kiraya, bijli ka bill, mulazimon ki tankhwa, ya chaye-pani ka kharcha add karne ka page.
+
+Profit & Loss Report (P&L): Ek aisi report jo bataye ke aaj ya is mahine total Sales kitni hui, usme se Purchases aur Expenses nikal kar Net Profit (Khaalis Munafa) kitna bacha.
+
+Cash Register / Shift System: Cashier ki shift start hone par drawer mein kitna cash tha (Opening Balance) aur shift khatam hone par kitna hona chahiye (Closing Balance).
+
+5. 🔐 Security & Role-Based Access (Multi-User)
+User Roles (Admin vs Cashier): Abhi koi bhi login kare to sab kuch dekh sakta hai. Humein restriction lagani hogi:
+
+Cashier: Sirf POS use kar sake, bill bana sake, lekin purani sales delete na kar sake aur 'Profit/Loss' ya 'Settings' na dekh sake.
+
+Admin/Owner: Har cheez dekh sake, delete kar sake aur reports dekh sake.
+
+6. 🌐 Technical Architecture (Long-term)
+Real Database (Backend API): Abhi saara data browser ki localStorage mein save ho raha hai. Agar browser ki history/cache clear ho jaye to data delete ho sakta hai. Isko permanent banane ke liye aage chal kar humein isay kisi asli database (jaise Firebase, MySQL, ya Node.js backend) ke sath connect karna hoga taake aap multiple laptops ya mobiles se ek hi time par data dekh sakein.
