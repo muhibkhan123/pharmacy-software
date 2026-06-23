@@ -46,8 +46,38 @@
         .btn-login { background-color: var(--primary-color); color: white; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; }
         .btn-login:hover { background-color: #1e3a8a; color: white;}
 
+        /* --- Responsive Styles (Mobile & Tablet) --- */
+        @media (max-width: 768px) {
+            .login-container { flex-direction: column; height: auto; min-height: 100vh; }
+            .login-left, .login-right { padding: 30px 20px; flex: none; height: auto; }
+            .login-left { text-align: center; padding-bottom: 20px; }
+            .features-list { display: none; } /* Hide extra text on very small screens to save space */
+            
+            /* Quick actions spacing */
+            .d-flex.gap-2.flex-wrap .btn { flex: 1 1 45%; font-size: 14px; padding: 8px 4px; }
+            .d-flex.gap-2.flex-wrap .dropdown { flex: 1 1 100%; }
+            .d-flex.gap-2.flex-wrap .dropdown .btn { width: 100%; }
+            
+            /* Topbar mobile wrap */
+            .topbar-mobile-wrap { flex-direction: column; align-items: flex-start !important; gap: 15px; }
+            .topbar-mobile-wrap .gap-3 { width: 100%; justify-content: space-between; }
+        }
+        
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+        
+        @media (max-width: 991.98px) {
+            html[dir="ltr"] .sidebar { transform: translateX(-100%); }
+            html[dir="rtl"] .sidebar { transform: translateX(100%); }
+            html[dir="ltr"] .sidebar.show { transform: translateX(0); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+            html[dir="rtl"] .sidebar.show { transform: translateX(0); box-shadow: -2px 0 10px rgba(0,0,0,0.5); }
+            
+            html[dir="ltr"] .main-content { margin-left: 0; }
+            html[dir="rtl"] .main-content { margin-right: 0; }
+            .sidebar-overlay.show { display: block; }
+        }
+
         /* --- Main Layout CSS --- */
-        .main-system { display: none; height: 100vh; overflow: hidden; }
+        .main-system { display: none; height: 100vh; overflow: hidden; position: relative; }
         .sidebar {
             background: linear-gradient(180deg, var(--primary-color) 0%, #1e3a8a 100%);
             color: white; height: 100vh; position: fixed; width: 250px; overflow-y: auto; z-index: 1000;
@@ -212,6 +242,9 @@
 
     <!-- Main System -->
     <div id="mainSystem" class="main-system">
+        <!-- Overlay for Mobile Sidebar -->
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        
         <div class="container-fluid p-0">
             <!-- Sidebar -->
             <nav class="sidebar p-3">
@@ -238,8 +271,11 @@
             <!-- Main Content -->
             <main class="main-content">
                 <!-- Topbar -->
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h2 class="fw-bold text-primary" id="pageTitle" data-i18n="dashboard">Dashboard</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 topbar-mobile-wrap">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-primary d-lg-none me-3" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                        <h2 class="fw-bold text-primary mb-0" id="pageTitle" data-i18n="dashboard">Dashboard</h2>
+                    </div>
                     <div class="d-flex align-items-center gap-3">
                         <button class="btn btn-outline-secondary" onclick="toggleLanguage()"><i class="fas fa-language"></i> EN / اردو</button>
                         <div class="dropdown">
@@ -861,8 +897,13 @@
                     }
                 }
             });
-            renderMedicines(); 
-            if(document.getElementById('dashboard').classList.contains('active')) loadDashboard();
+
+            // FIX: Ensure database is initialized before rendering data.
+            // This prevents "Cannot read properties of undefined (reading 'filter')" on the login screen.
+            if (db && db.medicines) {
+                renderMedicines(); 
+                if(document.getElementById('dashboard').classList.contains('active')) loadDashboard();
+            }
         }
 
         /* ================= Database (LocalStorage) ================= */
@@ -974,6 +1015,18 @@
             });
         }
 
+        /* Responsive Sidebar Toggle */
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+        function closeSidebar() {
+            if(window.innerWidth < 992) {
+                document.querySelector('.sidebar').classList.remove('show');
+                document.getElementById('sidebarOverlay').classList.remove('show');
+            }
+        }
+
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
@@ -985,6 +1038,8 @@
             });
             
             document.getElementById('pageTitle').innerText = i18n[currentLang][pageId] || pageId.toUpperCase();
+
+            closeSidebar(); // Auto-close sidebar on mobile after clicking
 
             if(pageId === 'dashboard') loadDashboard();
             if(pageId === 'medicines') renderMedicines();
@@ -1207,6 +1262,8 @@
 
         /* ================= Medicines & UI Logic ================= */
         function renderMedicines() {
+            if (!db || !db.medicines) return; // Add guard clause to prevent mapping before DB is initialized
+
             const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
             const tbody = document.getElementById('medTableBody');
             tbody.innerHTML = '';
