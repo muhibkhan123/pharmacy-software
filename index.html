@@ -46,37 +46,9 @@
         .btn-login { background-color: var(--primary-color); color: white; padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; }
         .btn-login:hover { background-color: #1e3a8a; color: white;}
 
-        /* --- Responsive Styles (Mobile & Tablet) --- */
-        @media (max-width: 768px) {
-            .login-container { flex-direction: column; height: auto; min-height: 100vh; }
-            .login-left, .login-right { padding: 30px 20px; flex: none; height: auto; }
-            .login-left { text-align: center; padding-bottom: 20px; }
-            .features-list { display: none; } /* Hide extra text on very small screens to save space */
-            
-            /* Quick actions spacing */
-            .d-flex.gap-2.flex-wrap .btn { flex: 1 1 45%; font-size: 14px; padding: 8px 4px; }
-            .d-flex.gap-2.flex-wrap .dropdown { flex: 1 1 100%; }
-            .d-flex.gap-2.flex-wrap .dropdown .btn { width: 100%; }
-            
-            /* Topbar mobile wrap */
-            .topbar-mobile-wrap { flex-direction: column; align-items: flex-start !important; gap: 15px; }
-            .topbar-mobile-wrap .gap-3 { width: 100%; justify-content: space-between; }
-        }
-        
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; }
-        
-        @media (max-width: 991.98px) {
-            html[dir="ltr"] .sidebar { transform: translateX(-100%); }
-            html[dir="rtl"] .sidebar { transform: translateX(100%); }
-            html[dir="ltr"] .sidebar.show { transform: translateX(0); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
-            html[dir="rtl"] .sidebar.show { transform: translateX(0); box-shadow: -2px 0 10px rgba(0,0,0,0.5); }
-            
-            html[dir="ltr"] .main-content { margin-left: 0; }
-            html[dir="rtl"] .main-content { margin-right: 0; }
-            .sidebar-overlay.show { display: block; }
-        }
 
-        /* --- Main Layout CSS --- */
+        /* --- Main Layout CSS (Desktop Base) --- */
         .main-system { display: none; height: 100vh; overflow: hidden; position: relative; }
         .sidebar {
             background: linear-gradient(180deg, var(--primary-color) 0%, #1e3a8a 100%);
@@ -91,7 +63,7 @@
         html[dir="rtl"] .sidebar { right: 0; }
         
         .main-content {
-            padding: 20px; height: 100vh; overflow-y: auto; transition: all 0.3s;
+            padding: 20px; height: 100vh; overflow-y: auto; overflow-x: hidden; transition: all 0.3s;
         }
         html[dir="ltr"] .main-content { margin-left: 250px; }
         html[dir="rtl"] .main-content { margin-right: 250px; }
@@ -132,6 +104,35 @@
         #reader__dashboard_section_csr span { color: #888 !important; }
 
         .action-btns .btn { padding: 4px 8px; font-size: 12px; margin-inline-end: 4px; }
+
+        /* --- Responsive Styles (Mobile & Tablet) - PLACED AFTER DESKTOP CSS TO FIX OVERRIDE BUG --- */
+        @media (max-width: 991.98px) {
+            html[dir="ltr"] .sidebar { transform: translateX(-100%); }
+            html[dir="rtl"] .sidebar { transform: translateX(100%); }
+            html[dir="ltr"] .sidebar.show { transform: translateX(0); box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+            html[dir="rtl"] .sidebar.show { transform: translateX(0); box-shadow: -2px 0 10px rgba(0,0,0,0.5); }
+            
+            /* Removes the 250px white space on mobile screens perfectly */
+            html[dir="ltr"] .main-content { margin-left: 0; }
+            html[dir="rtl"] .main-content { margin-right: 0; }
+            .sidebar-overlay.show { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            .login-container { flex-direction: column; height: auto; min-height: 100vh; }
+            .login-left, .login-right { padding: 30px 20px; flex: none; height: auto; }
+            .login-left { text-align: center; padding-bottom: 20px; }
+            .features-list { display: none; } /* Hide extra text on very small screens to save space */
+            
+            /* Quick actions spacing */
+            .d-flex.gap-2.flex-wrap .btn { flex: 1 1 45%; font-size: 14px; padding: 8px 4px; }
+            .d-flex.gap-2.flex-wrap .dropdown { flex: 1 1 100%; }
+            .d-flex.gap-2.flex-wrap .dropdown .btn { width: 100%; }
+            
+            /* Topbar mobile wrap */
+            .topbar-mobile-wrap { flex-direction: column; align-items: flex-start !important; gap: 15px; }
+            .topbar-mobile-wrap .gap-3 { width: 100%; justify-content: space-between; }
+        }
 
         /* --- Print Styles --- */
         .no-print-section { display: none !important; }
@@ -898,9 +899,8 @@
                 }
             });
 
-            // FIX: Ensure database is initialized before rendering data.
-            // This prevents "Cannot read properties of undefined (reading 'filter')" on the login screen.
-            if (db && db.medicines) {
+            // FIXED: Using Array.isArray allows safely calling .filter and prevents "undefined" errors
+            if (db && Array.isArray(db.medicines)) {
                 renderMedicines(); 
                 if(document.getElementById('dashboard').classList.contains('active')) loadDashboard();
             }
@@ -1262,7 +1262,8 @@
 
         /* ================= Medicines & UI Logic ================= */
         function renderMedicines() {
-            if (!db || !db.medicines) return; // Add guard clause to prevent mapping before DB is initialized
+            // FIXED: Added Array.isArray check to prevent filter mapping errors
+            if (!db || !Array.isArray(db.medicines)) return; 
 
             const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
             const tbody = document.getElementById('medTableBody');
