@@ -1133,6 +1133,47 @@
         </div>
     </div>
 
+    <!-- Return Sale Modal -->
+    <div class="modal fade" id="returnSaleModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold text-dark"><i class="fas fa-undo"></i> Return Invoice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <input type="hidden" id="retSaleId">
+                    <div class="text-center mb-4">
+                        <h6 class="text-muted">Total Invoice Amount</h6>
+                        <h2 class="text-danger fw-bold">Rs <span id="retSaleTotal">0</span></h2>
+                    </div>
+                    
+                    <div class="card card-body border-0 shadow-sm mb-3">
+                        <label class="form-label text-success fw-bold"><i class="fas fa-money-bill-wave"></i> Naqad Wapas Kiya (Cash Refunded)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs</span>
+                            <input type="number" class="form-control form-control-lg fw-bold text-success" id="retCashAmount" oninput="calculateReturnKhata()">
+                        </div>
+                        <small class="text-muted mt-1">Customer ko nqad kitne paise wapas diye?</small>
+                    </div>
+
+                    <div class="card card-body border-0 shadow-sm" id="retKhataDiv">
+                        <label class="form-label text-primary fw-bold"><i class="fas fa-book"></i> Khata Me Jama (Udhaar Reversal)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rs</span>
+                            <input type="number" class="form-control form-control-lg fw-bold text-primary bg-white" id="retKhataAmount" readonly>
+                        </div>
+                        <small class="text-muted mt-1">Baaki amount customer ke khate me JAMA ho jayegi.</small>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger px-4" onclick="confirmReturnSale()"><i class="fas fa-check-circle"></i> Confirm Return</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scanner Modal -->
     <div class="modal fade" id="scannerModal" tabindex="-1">
         <div class="modal-dialog">
@@ -2621,27 +2662,76 @@
             });
         }
 
+        let returnActiveSale = null;
+
         function returnSale(id) {
             const sale = db.sales.find(s => s.id === id);
             if(!sale || sale.isReturned) return;
             
-            showConfirm('Process Return / Refund for this entire invoice? Stock and Udhaar will be reversed.', () => {
-                sale.isReturned = true;
-                
-                sale.items.forEach(item => {
-                    const med = db.medicines.find(m => m.id === item.id);
-                    if(med) med.stock += item.qty;
-                });
-                
-                if(sale.paymentMethod === 'Credit' && sale.customerId) {
-                    const cust = db.customers.find(c => c.id === sale.customerId);
-                    if(cust) {
-                        cust.ledger.push({ date: new Date().toLocaleString(), desc: `Refund / Invoice Reversal #${sale.id}`, type: 'credit', amount: sale.total });
-                        recalculateCustomerBalance(cust.id);
-                    }
-                }
-                saveDB(); renderReports(); showToast('Invoice Returned Successfully', 'success');
+            returnActiveSale = sale;
+            document.getElementById('retSaleId').value = sale.id;
+            document.getElementById('retSaleTotal').innerText = sale.total;
+            
+            // Default logic: Agar Cash sale thi to pura Cash wapas, agar Udhaar tha to Khata jama
+            if(sale.paymentMethod === 'Cash' || sale.customerId === 'C-WALKIN') {
+                document.getElementById('retCashAmount').value = sale.total;
+                document.getElementById('retKhataAmount').value = 0;
+                document.getElementById('retKhataDiv').style.display = 'none';
+            } else {
+                document.getElementById('retCashAmount').value = 0;
+                document.getElementById('retKhataAmount').value = sale.total;
+                document.getElementById('retKhataDiv').style.display = 'block';
+            }
+            
+            new bootstrap.Modal(document.getElementById('returnSaleModal')).show();
+        }
+
+        function calculateReturnKhata() {
+            if(!returnActiveSale) return;
+            let cash = parseFloat(document.getElementById('retCashAmount').value) || 0;
+            if(cash > returnActiveSale.total) {
+                cash = returnActiveSale.total;
+                document.getElementById('retCashAmount').value = cash;
+            } else if (cash < 0) {
+                cash = 0;
+                document.getElementById('retCashAmount').value = 0;
+            }
+            let khata = returnActiveSale.total - cash;
+            document.getElementById('retKhataAmount').value = khata.toFixed(2);
+        }
+
+        function confirmReturnSale() {
+            if(!returnActiveSale) return;
+            const sale = returnActiveSale;
+            
+            const cashRefunded = parseFloat(document.getElementById('retCashAmount').value) || 0;
+            const khataReversal = parseFloat(document.getElementById('retKhataAmount').value) || 0;
+            
+            sale.isReturned = true;
+            
+            // Stock wapas store me daalo
+            sale.items.forEach(item => {
+                const med = db.medicines.find(m => m.id === item.id);
+                if(med) med.stock += item.qty;
             });
+            
+            // Agar khata me jama karni hai amount
+            if(khataReversal > 0 && sale.customerId && sale.customerId !== 'C-WALKIN') {
+                const cust = db.customers.find(c => c.id === sale.customerId);
+                if(cust) {
+                    cust.ledger.push({ 
+                        date: new Date().toLocaleString(), 
+                        desc: `Invoice Return #${sale.id} (Cash Given: Rs${cashRefunded})`, 
+                        type: 'credit', 
+                        amount: khataReversal 
+                    });
+                    recalculateCustomerBalance(cust.id);
+                }
+            }
+            
+            saveDB(); renderReports(); 
+            bootstrap.Modal.getInstance(document.getElementById('returnSaleModal')).hide();
+            showToast('Invoice Returned Successfully', 'success');
         }
 
         function editSale(id) {
