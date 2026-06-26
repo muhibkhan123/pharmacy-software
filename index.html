@@ -69,6 +69,7 @@
         html[dir="ltr"] .main-content { margin-left: 250px; }
         html[dir="rtl"] .main-content { margin-right: 250px; }
 
+        .sidebar .nav-item { transition: all 0.3s ease; }
         .sidebar .nav-link { color: rgba(255, 255, 255, 0.8); padding: 10px 20px; margin: 2px 0; border-radius: 8px; cursor: pointer; font-size: 0.95rem; }
         .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: rgba(255, 255, 255, 0.1); color: white; }
         .sidebar .nav-link i { margin-inline-end: 10px; width: 20px; text-align: center; }
@@ -111,6 +112,12 @@
         /* Returns / Refund Styles */
         .returned-row { background-color: #ffeaea !important; text-decoration: line-through; opacity: 0.7; }
         .returned-badge { text-decoration: none; display: inline-block; }
+
+        /* Custom Permissions Checkboxes */
+        .perm-check-card { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 6px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; }
+        .perm-check-card:hover { border-color: var(--primary-color); background: #f0f4f8; }
+        .perm-check-card input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .perm-check-card label { cursor: pointer; margin: 0; font-weight: 600; color: #2c3e50; font-size: 14px; flex: 1; user-select: none; }
 
         /* --- Responsive Styles (Mobile & Tablet) --- */
         @media (max-width: 991.98px) {
@@ -231,6 +238,13 @@
                         <p data-i18n="pos_desc">Fast selling and electronic invoices</p>
                     </div>
                 </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div>
+                        <h4>Role-Based Access</h4>
+                        <p>Secure login with Super Admin, Admin, and Cashier roles</p>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="login-right">
@@ -244,6 +258,12 @@
                     <input type="password" class="form-control" id="password" placeholder="Password" required>
                     <button type="submit" class="btn btn-login" data-i18n="login_btn">Sign In</button>
                 </form>
+                <div class="alert alert-info small mt-4">
+                    <strong>Demo Logins:</strong><br>
+                    Superadmin: <code>superadmin</code> / <code>123</code><br>
+                    Admin: <code>admin</code> / <code>123</code><br>
+                    Cashier: <code>cashier</code> / <code>123</code>
+                </div>
             </div>
         </div>
     </div>
@@ -260,30 +280,33 @@
                     <h3 class="fw-bold"><i class="fas fa-clinic-medical"></i></h3>
                     <p class="small" data-i18n="sys_title">Pharmacy System</p>
                 </div>
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
+                <ul class="nav flex-column" id="sidebarNav">
+                    <li class="nav-item" data-page="dashboard"><a class="nav-link active" onclick="showPage('dashboard')"><i class="fas fa-tachometer-alt"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
                     
-                    <h6 class="text-white-50 mt-3 mb-1 ms-2" style="font-size:0.75rem; text-transform:uppercase;">POS & Inventory</h6>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="sales">Sales (POS)</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('cash_register')"><i class="fas fa-cash-register"></i> <span data-i18n="shift_mgt">Cash Register</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('purchases')"><i class="fas fa-file-invoice-dollar"></i> <span data-i18n="purchases">Purchases (GRN)</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('medicines')"><i class="fas fa-pills"></i> <span data-i18n="medicines">Medicines</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('inventory')"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory</span></a></li>
+                    <h6 class="text-white-50 mt-3 mb-1 ms-2 nav-heading" style="font-size:0.75rem; text-transform:uppercase;">POS & Inventory</h6>
+                    <li class="nav-item" data-page="sales"><a class="nav-link" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="sales">Sales (POS)</span></a></li>
+                    <li class="nav-item" data-page="cash_register"><a class="nav-link" onclick="showPage('cash_register')"><i class="fas fa-cash-register"></i> <span data-i18n="shift_mgt">Cash Register</span></a></li>
+                    <li class="nav-item" data-page="purchases"><a class="nav-link" onclick="showPage('purchases')"><i class="fas fa-file-invoice-dollar"></i> <span data-i18n="purchases">Purchases (GRN)</span></a></li>
+                    <li class="nav-item" data-page="medicines"><a class="nav-link" onclick="showPage('medicines')"><i class="fas fa-pills"></i> <span data-i18n="medicines">Medicines</span></a></li>
+                    <li class="nav-item" data-page="inventory"><a class="nav-link" onclick="showPage('inventory')"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory</span></a></li>
                     
-                    <h6 class="text-white-50 mt-3 mb-1 ms-2" style="font-size:0.75rem; text-transform:uppercase;">People & Khata</h6>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('customers')"><i class="fas fa-user-friends"></i> <span data-i18n="customers">Customers (Khata)</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('suppliers')"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('employees')"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('delivery')"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></a></li>
+                    <h6 class="text-white-50 mt-3 mb-1 ms-2 nav-heading" style="font-size:0.75rem; text-transform:uppercase;">People & Khata</h6>
+                    <li class="nav-item" data-page="customers"><a class="nav-link" onclick="showPage('customers')"><i class="fas fa-user-friends"></i> <span data-i18n="customers">Customers (Khata)</span></a></li>
+                    <li class="nav-item" data-page="suppliers"><a class="nav-link" onclick="showPage('suppliers')"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></a></li>
+                    <li class="nav-item" data-page="employees"><a class="nav-link" onclick="showPage('employees')"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></a></li>
+                    <li class="nav-item" data-page="delivery"><a class="nav-link" onclick="showPage('delivery')"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></a></li>
                     
-                    <h6 class="text-white-50 mt-3 mb-1 ms-2" style="font-size:0.75rem; text-transform:uppercase;">Finance & Reports</h6>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('expenses')"><i class="fas fa-money-bill-wave"></i> <span data-i18n="expenses">Expenses</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('accounting')"><i class="fas fa-calculator"></i> <span data-i18n="accounting">P&L Accounting</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Sales Reports</span></a></li>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('alerts')"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></a></li>
+                    <h6 class="text-white-50 mt-3 mb-1 ms-2 nav-heading" style="font-size:0.75rem; text-transform:uppercase;">Finance & Reports</h6>
+                    <li class="nav-item" data-page="expenses"><a class="nav-link" onclick="showPage('expenses')"><i class="fas fa-money-bill-wave"></i> <span data-i18n="expenses">Expenses</span></a></li>
+                    <li class="nav-item" data-page="accounting"><a class="nav-link" onclick="showPage('accounting')"><i class="fas fa-calculator"></i> <span data-i18n="accounting">P&L Accounting</span></a></li>
+                    <li class="nav-item" data-page="reports"><a class="nav-link" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Sales Reports</span></a></li>
+                    <li class="nav-item" data-page="alerts"><a class="nav-link" onclick="showPage('alerts')"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></a></li>
                     
-                    <h6 class="text-white-50 mt-3 mb-1 ms-2" style="font-size:0.75rem; text-transform:uppercase;">System</h6>
-                    <li class="nav-item"><a class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
+                    <h6 class="text-white-50 mt-3 mb-1 ms-2 nav-heading" style="font-size:0.75rem; text-transform:uppercase;">System</h6>
+                    <!-- NEW RBAC TAB -->
+                    <li class="nav-item" data-page="users_manage"><a class="nav-link" onclick="showPage('users_manage')"><i class="fas fa-user-shield"></i> <span data-i18n="users_manage">Users & Roles</span></a></li>
+                    
+                    <li class="nav-item" data-page="settings"><a class="nav-link" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
                     <hr class="text-white border-white opacity-25 my-2">
                     <li class="nav-item"><a class="nav-link text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
                 </ul>
@@ -302,12 +325,13 @@
                         <div class="dropdown">
                             <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-2"></i> <span id="userDisplayName">User</span>
+                                <span class="badge bg-light text-primary ms-1" id="userDisplayRole" style="font-size: 0.7em;">Role</span>
                             </button>
-                            <ul class="dropdown-menu">
+                            <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" onclick="showPage('profile')"><i class="fas fa-id-badge"></i> <span data-i18n="profile">Profile</span></a></li>
-                                <li><a class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
+                                <li id="topbar-settings-link"><a class="dropdown-item" onclick="showPage('settings')"><i class="fas fa-cog"></i> <span data-i18n="settings">Settings</span></a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
+                                <li><a class="dropdown-item text-danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="logout">Logout</span></a></li>
                             </ul>
                         </div>
                     </div>
@@ -319,13 +343,13 @@
                     <div class="row mb-3">
                         <div class="col-12">
                             <div class="d-flex gap-2 flex-wrap">
-                                <button class="btn btn-primary" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="new_sale">New Sale</span></button>
-                                <button class="btn btn-success" onclick="showPage('medicines'); openAddMedicineModal();"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add Medicine</span></button>
-                                <button class="btn btn-info text-white" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
-                                <button class="btn btn-warning text-dark" onclick="showPage('purchases'); openNewPurchaseModal();"><i class="fas fa-box-open"></i> <span data-i18n="new_purchase">New Purchase</span></button>
+                                <button class="btn btn-primary perm-btn-sales" onclick="showPage('sales')"><i class="fas fa-shopping-cart"></i> <span data-i18n="new_sale">New Sale</span></button>
+                                <button class="btn btn-success perm-btn-medicines" onclick="showPage('medicines'); openAddMedicineModal();"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add Medicine</span></button>
+                                <button class="btn btn-info text-white perm-btn-sales" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
+                                <button class="btn btn-warning text-dark perm-btn-purchases" onclick="showPage('purchases'); openNewPurchaseModal();"><i class="fas fa-box-open"></i> <span data-i18n="new_purchase">New Purchase</span></button>
                                 
                                 <!-- Barcode Print Dropdown -->
-                                <div class="dropdown d-inline-block">
+                                <div class="dropdown d-inline-block perm-btn-medicines">
                                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-print"></i> <span data-i18n="print_qr">Print Barcodes</span>
                                     </button>
@@ -342,7 +366,7 @@
                     <!-- Statistics Cards -->
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="stat-card" onclick="openDetailsModal('sales')">
+                            <div class="stat-card" onclick="showPage('reports')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="total_sales">Total Sales</h6>
@@ -353,7 +377,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" onclick="openDetailsModal('medicines')">
+                            <div class="stat-card" onclick="showPage('medicines')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="available_meds">Meds</h6>
@@ -363,7 +387,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 perm-card-accounting">
                             <div class="stat-card" onclick="showPage('accounting')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -374,7 +398,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3 perm-card-customers">
                             <div class="stat-card" onclick="showPage('customers')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -388,12 +412,11 @@
                     </div>
 
                     <!-- Charts Row -->
-                    <div class="row mb-4">
+                    <div class="row mb-4 perm-charts">
                         <div class="col-md-8">
                             <div class="card dash-widget-card h-100">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <span data-i18n="sales_trend">Sales Trend (Last 7 Days)</span>
-                                    <button class="btn btn-sm btn-outline-secondary" onclick="showPage('reports')"><i class="fas fa-arrow-right"></i></button>
                                 </div>
                                 <div class="card-body">
                                     <canvas id="salesTrendChart" height="100"></canvas>
@@ -412,7 +435,7 @@
 
                     <!-- Recent Activity & Low Stock -->
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-6 perm-card-reports">
                             <div class="card dash-widget-card">
                                 <div class="card-header bg-white"><i class="fas fa-history text-primary"></i> <span data-i18n="recent_sales">Recent Sales</span></div>
                                 <div class="card-body p-0">
@@ -425,7 +448,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6 perm-card-inventory">
                             <div class="card dash-widget-card">
                                 <div class="card-header bg-white"><i class="fas fa-exclamation-triangle text-danger"></i> <span data-i18n="low_stock">Low Stock & Expiry</span></div>
                                 <div class="card-body p-0">
@@ -441,6 +464,124 @@
                     </div>
                 </div>
 
+                <!-- 11. NEW Users & Permissions Page -->
+                <div id="users_manage" class="page">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-user-shield"></i> Users & Roles Management</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="nav nav-tabs px-3 pt-3 bg-light" id="userRolesTabs">
+                                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tab-user-list">User List</a></li>
+                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-add-user" onclick="resetUserForm()">Add / Edit User</a></li>
+                                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tab-roles">Manage Roles</a></li>
+                            </ul>
+                            
+                            <div class="tab-content p-4">
+                                <!-- User List Tab -->
+                                <div class="tab-pane fade show active" id="tab-user-list">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <input type="text" id="userSearch" class="form-control w-25" placeholder="Search users..." onkeyup="renderUsersManageTable()">
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Username</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th class="text-center">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="umUsersTableBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Add / Edit User Tab -->
+                                <div class="tab-pane fade" id="tab-add-user">
+                                    <form id="manageUserForm" onsubmit="saveManageUser(event)">
+                                        <input type="hidden" id="umUserId">
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Full Name</label>
+                                                <input type="text" class="form-control" id="umName" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Username (For Login)</label>
+                                                <input type="text" class="form-control" id="umUsername" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Password</label>
+                                                <input type="password" class="form-control" id="umPassword" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold">Assign Role</label>
+                                                <select class="form-select border-primary" id="umRole" onchange="autoCheckPermissionsForRole()">
+                                                    <!-- Filled dynamically -->
+                                                </select>
+                                                <small class="text-muted">Selecting a role auto-checks default permissions below.</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="border-top pt-3">
+                                            <h5 class="mb-3 text-primary"><i class="fas fa-check-square"></i> Allowed Modules (Permissions)</h5>
+                                            <p class="text-muted small mb-3">Select the tabs and modules this user is allowed to access.</p>
+                                            
+                                            <div class="row g-3" id="umPermissionsContainer">
+                                                <!-- Permissions checkboxes inserted here dynamically -->
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 text-end">
+                                            <button type="button" class="btn btn-secondary px-4" onclick="document.querySelector('#userRolesTabs .nav-link[href=\'#tab-user-list\']').click()">Cancel</button>
+                                            <button type="submit" class="btn btn-success px-4"><i class="fas fa-save"></i> Save User</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Manage Roles Tab -->
+                                <div class="tab-pane fade" id="tab-roles">
+                                    <div class="row">
+                                        <div class="col-md-4 border-end">
+                                            <h6 class="fw-bold mb-3">Create New Role</h6>
+                                            <form onsubmit="saveCustomRole(event)">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Role Identifier (e.g., manager)</label>
+                                                    <input type="text" class="form-control" id="newRoleId" required placeholder="manager" pattern="[a-z0-9_]+">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Display Name</label>
+                                                    <input type="text" class="form-control" id="newRoleName" required placeholder="Branch Manager">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Default Permissions</label>
+                                                    <div style="max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" id="newRolePerms">
+                                                        <!-- Checkboxes -->
+                                                    </div>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100">Save Role</button>
+                                            </form>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h6 class="fw-bold mb-3">Existing Roles</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead class="table-light">
+                                                        <tr><th>Role Name</th><th>Identifier</th><th>Permissions Count</th><th>Actions</th></tr>
+                                                    </thead>
+                                                    <tbody id="umRolesTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 2. Medicines Page -->
                 <div id="medicines" class="page">
                     <div class="card">
@@ -448,7 +589,7 @@
                             <h5 class="mb-0"><i class="fas fa-pills me-2"></i> <span data-i18n="medicines">Medicines</span></h5>
                             <div>
                                 <button class="btn btn-light btn-sm me-2" onclick="openQRScanner('medicine')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
-                                <button class="btn btn-success btn-sm" onclick="openAddMedicineModal()"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add New</span></button>
+                                <button class="btn btn-success btn-sm admin-only-btn" onclick="openAddMedicineModal()"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add New</span></button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -463,7 +604,7 @@
                                             <th data-i18n="sale_price">Sale Price</th>
                                             <th data-i18n="stock">Stock</th>
                                             <th data-i18n="batch_expiry">Batch & Expiry</th>
-                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                            <th data-i18n="actions" class="text-center admin-only-cell">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="medTableBody"></tbody>
@@ -629,7 +770,7 @@
                     <div class="card">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> <span data-i18n="purchases">Purchases (GRN)</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openNewPurchaseModal()"><i class="fas fa-plus"></i> <span data-i18n="new_purchase">New Purchase</span></button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openNewPurchaseModal()"><i class="fas fa-plus"></i> <span data-i18n="new_purchase">New Purchase</span></button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -655,7 +796,7 @@
                     <div class="card">
                         <div class="card-header bg-purple text-white d-flex justify-content-between align-items-center" style="background-color: #6f42c1;">
                             <h5 class="mb-0"><i class="fas fa-user-friends me-2"></i> <span data-i18n="customers">Customers (Khata)</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i> <span data-i18n="add_customer">Add Customer</span></button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i> <span data-i18n="add_customer">Add Customer</span></button>
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control mb-3" id="custSearch" placeholder="Search customer..." onkeyup="renderCustomers()">
@@ -666,7 +807,7 @@
                                             <th data-i18n="name">Name</th>
                                             <th data-i18n="contact">Phone</th>
                                             <th data-i18n="balance">Balance (Udhaar)</th>
-                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                            <th data-i18n="actions" class="text-center admin-only-cell">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="customersTableBody"></tbody>
@@ -702,7 +843,7 @@
                     <div class="card">
                         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> <span data-i18n="alerts">Alerts</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="clearAlerts()"><i class="fas fa-check-double"></i> Clear All</button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="clearAlerts()"><i class="fas fa-check-double"></i> Clear All</button>
                         </div>
                         <div class="card-body">
                             <div id="alertsContainer"></div>
@@ -742,7 +883,7 @@
                                     <thead><tr>
                                         <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th>
                                         <th data-i18n="discount">Disc. / Tax</th><th data-i18n="total">Total</th>
-                                        <th data-i18n="net_profit" class="text-success">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
+                                        <th data-i18n="net_profit" class="text-success perm-col-profit">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
                                     </tr></thead>
                                     <tbody id="reportsTableBody"></tbody>
                                 </table>
@@ -756,12 +897,12 @@
                     <div class="card">
                         <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-money-bill-wave"></i> <span data-i18n="expenses">Expenses (Kharchay)</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openAddExpenseModal()"><i class="fas fa-plus"></i> Add Expense</button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openAddExpenseModal()"><i class="fas fa-plus"></i> Add Expense</button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped">
-                                    <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Action</th></tr></thead>
+                                    <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th class="admin-only-cell">Action</th></tr></thead>
                                     <tbody id="expensesTableBody"></tbody>
                                 </table>
                             </div>
@@ -815,7 +956,7 @@
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-truck-loading"></i> <span data-i18n="suppliers">Suppliers</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openAddSupplierModal()"><i class="fas fa-plus"></i> <span data-i18n="add_supplier">Add Supplier</span></button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openAddSupplierModal()"><i class="fas fa-plus"></i> <span data-i18n="add_supplier">Add Supplier</span></button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -825,7 +966,7 @@
                                             <th data-i18n="name">Name</th>
                                             <th data-i18n="contact">Contact</th>
                                             <th data-i18n="balance">Balance (Payable)</th>
-                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                            <th data-i18n="actions" class="text-center admin-only-cell">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="suppliersTableBody"></tbody>
@@ -840,12 +981,12 @@
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-users"></i> <span data-i18n="employees">Employees</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openAddEmployeeModal()"><i class="fas fa-plus"></i> <span data-i18n="add_employee">Add Employee</span></button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openAddEmployeeModal()"><i class="fas fa-plus"></i> <span data-i18n="add_employee">Add Employee</span></button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover">
-                                    <thead><tr><th data-i18n="name">Name</th><th data-i18n="role">Role</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <thead><tr><th data-i18n="name">Name</th><th data-i18n="role">Role</th><th data-i18n="actions" class="text-center admin-only-cell">Actions</th></tr></thead>
                                     <tbody id="employeesTableBody"></tbody>
                                 </table>
                             </div>
@@ -858,12 +999,12 @@
                     <div class="card">
                         <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-truck"></i> <span data-i18n="delivery">Delivery</span></h5>
-                            <button class="btn btn-light btn-sm" onclick="openAddDeliveryModal()"><i class="fas fa-plus"></i> <span data-i18n="add_delivery">Add Delivery</span></button>
+                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openAddDeliveryModal()"><i class="fas fa-plus"></i> <span data-i18n="add_delivery">Add Delivery</span></button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped">
-                                    <thead><tr><th>Order #</th><th data-i18n="customer">Customer</th><th data-i18n="status">Status</th><th data-i18n="actions" class="text-center">Actions</th></tr></thead>
+                                    <thead><tr><th>Order #</th><th data-i18n="customer">Customer</th><th data-i18n="status">Status</th><th data-i18n="actions" class="text-center admin-only-cell">Actions</th></tr></thead>
                                     <tbody id="deliveryTableBody"></tbody>
                                 </table>
                             </div>
@@ -888,7 +1029,7 @@
                             </div>
                         </div>
 
-                        <!-- New Feature: Backup and Restore -->
+                        <!-- Backup and Restore -->
                         <div class="col-md-6">
                             <div class="card mb-4 border-info">
                                 <div class="card-header bg-info text-white"><h5 class="mb-0"><i class="fas fa-database"></i> Database Backup & Restore</h5></div>
@@ -1047,7 +1188,7 @@
                                     <th>Description</th>
                                     <th class="text-danger">Debit (Udhaar)</th>
                                     <th class="text-success">Credit (Jama)</th>
-                                    <th class="text-center">Actions</th>
+                                    <th class="text-center admin-only-cell">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="ledgerTableBody"></tbody>
@@ -1071,7 +1212,7 @@
                 </div>
                 <div class="modal-body">
                     <!-- Manual Entry Row -->
-                    <div class="row g-2 mb-3 bg-white p-3 border rounded shadow-sm">
+                    <div class="row g-2 mb-3 bg-white p-3 border rounded shadow-sm admin-only-block">
                         <div class="col-12"><small class="text-muted fw-bold mb-1 d-block">Add Manual Entry</small></div>
                         <div class="col-md-4">
                             <input type="text" class="form-control form-control-sm" id="sLedgerDesc" placeholder="Description (e.g. Paid Cash)">
@@ -1102,7 +1243,7 @@
                                     <th>Description</th>
                                     <th class="text-danger">Credit (Bill/Maal)</th>
                                     <th class="text-success">Debit (Paid)</th>
-                                    <th class="text-center">Actions</th>
+                                    <th class="text-center admin-only-cell">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="supLedgerTableBody"></tbody>
@@ -1332,11 +1473,7 @@
                 <div class="modal-body">
                     <input type="hidden" id="empId">
                     <div class="mb-3"><label data-i18n="name">Name</label><input type="text" class="form-control" id="eName"></div>
-                    <div class="mb-3"><label data-i18n="role">Role</label>
-                        <select class="form-select" id="eRole">
-                            <option value="Admin">Admin</option><option value="Pharmacist">Pharmacist</option><option value="Cashier">Cashier</option>
-                        </select>
-                    </div>
+                    <div class="mb-3"><label data-i18n="role">Role / Position</label><input type="text" class="form-control" id="eRole"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveEmployee()" data-i18n="save">Save</button></div>
             </div>
@@ -1424,6 +1561,7 @@
             <div id="invTaxRow" style="font-size: 12px; color:#333; margin-bottom: 4px;"></div>
             <h4 id="invGrandTotal" style="margin: 0; font-size: 14px; font-weight: bold;"></h4>
             <div id="invPaymentMethod" style="font-size: 11px; color:#555; margin-top: 3px;"></div>
+            <div id="invCashierName" style="font-size: 10px; color:#777; margin-top: 3px;"></div>
         </div>
         
         <div style="text-align: center; margin-top: 15px;">
@@ -1477,7 +1615,8 @@
                 purchase_price: "Purchase Price", sale_price: "Sale Price", expiry_date: "Expiry Date", discount: "Discount", tax: "Tax / GST (%)", subtotal: "Subtotal", net_profit: "Net Profit",
                 balance: "Balance (Udhaar)", expiring_soon: "Expiring Soon", expired: "Expired!",
                 purchases: "Purchases (GRN)", new_purchase: "New Purchase", supplier: "Supplier", payment_type: "Payment Type",
-                expenses: "Expenses", accounting: "P&L Accounting", shift_mgt: "Cash Register"
+                expenses: "Expenses", accounting: "P&L Accounting", shift_mgt: "Cash Register",
+                users_manage: "Users & Roles"
             },
             ur: {
                 sys_title: "فارمیسی مینجمنٹ سسٹم",
@@ -1502,7 +1641,8 @@
                 purchase_price: "خرید قیمت", sale_price: "فروخت قیمت", expiry_date: "تاریخ تنسیخ", discount: "ڈسکاؤنٹ (رعایت)", tax: "ٹیکس (%)", subtotal: "سب ٹوٹل", net_profit: "خالص منافع",
                 balance: "بقایا", expiring_soon: "جلد ایکسپائر ہونے والی", expired: "ایکسپائر ہوچکی ہے!",
                 purchases: "خریداری (Purchases)", new_purchase: "نئی خریداری", supplier: "سپلائر", payment_type: "ادائیگی کا طریقہ",
-                expenses: "اخراجات (Expenses)", accounting: "منافع و نقصان", shift_mgt: "کیش رجسٹر"
+                expenses: "اخراجات (Expenses)", accounting: "منافع و نقصان", shift_mgt: "کیش رجسٹر",
+                users_manage: "صارفین اور کردار"
             }
         };
 
@@ -1549,8 +1689,6 @@
                 db.settings = db.settings || { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
                 db.customers = db.customers || [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
                 db.heldBills = db.heldBills || [];
-                
-                // New features added collections
                 db.expenses = db.expenses || [];
                 db.shifts = db.shifts || [];
                 if(db.currentShift === undefined) db.currentShift = null;
@@ -1559,6 +1697,10 @@
                     if(s.balance === undefined) s.balance = 0;
                     if(!s.ledger) s.ledger = [];
                 });
+                
+                // RBAC System Data Checks
+                initRBACData();
+
             } else {
                 db.medicines = [
                     { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
@@ -1578,9 +1720,25 @@
                 db.expenses = [];
                 db.shifts = [];
                 db.currentShift = null;
+                initRBACData();
             }
             generateSystemAlerts();
             saveDB(); 
+        }
+
+        // Initialize Users and Roles Data if they don't exist
+        function initRBACData() {
+            db.roles = db.roles || [
+                { id: 'superadmin', name: 'Super Admin', perms: ['dashboard', 'sales', 'cash_register', 'purchases', 'medicines', 'inventory', 'customers', 'suppliers', 'employees', 'delivery', 'expenses', 'accounting', 'reports', 'alerts', 'settings', 'users_manage'] },
+                { id: 'admin', name: 'Admin', perms: ['dashboard', 'sales', 'cash_register', 'purchases', 'medicines', 'inventory', 'customers', 'suppliers', 'employees', 'delivery', 'expenses', 'accounting', 'reports', 'alerts'] },
+                { id: 'cashier', name: 'Cashier', perms: ['dashboard', 'sales', 'cash_register', 'customers'] }
+            ];
+
+            db.users = db.users || [
+                { id: 'U1', username: 'superadmin', password: '123', name: 'Super Admin', role: 'superadmin', status: 'active', perms: [...db.roles.find(r=>r.id==='superadmin').perms] },
+                { id: 'U2', username: 'admin', password: '123', name: 'System Admin', role: 'admin', status: 'active', perms: [...db.roles.find(r=>r.id==='admin').perms] },
+                { id: 'U3', username: 'cashier', password: '123', name: 'POS Cashier', role: 'cashier', status: 'active', perms: [...db.roles.find(r=>r.id==='cashier').perms] }
+            ];
         }
         
         function saveDB() { localStorage.setItem('pharmacySysDB', JSON.stringify(db)); }
@@ -1625,17 +1783,24 @@
             bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
         });
 
-        /* ================= Auth & Navigation ================= */
+        /* ================= Auth & Role Base Access ================= */
+        let currentUser = null;
+
         document.addEventListener('DOMContentLoaded', () => {
+            initDB();
             const isLoggedIn = localStorage.getItem('isLoggedIn');
-            const savedUsername = localStorage.getItem('currentUsername');
+            const sessionUserStr = localStorage.getItem('loggedInUser');
             
-            if (isLoggedIn === 'true' && savedUsername) {
+            if (isLoggedIn === 'true' && sessionUserStr) {
+                currentUser = JSON.parse(sessionUserStr);
+                
+                // Refresh user object from DB in case permissions changed
+                const dbUser = db.users.find(u => u.id === currentUser.id);
+                if(dbUser) { currentUser = dbUser; localStorage.setItem('loggedInUser', JSON.stringify(currentUser)); }
+                
                 document.getElementById('loginPage').style.display = 'none';
                 document.getElementById('mainSystem').style.display = 'block';
-                document.getElementById('userDisplayName').innerText = savedUsername;
-                document.getElementById('profUser').value = savedUsername;
-                initDB();
+                setupUserUI();
                 showPage('dashboard');
             } else {
                 document.getElementById('loginPage').style.display = 'flex';
@@ -1645,22 +1810,81 @@
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value || 'Admin';
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('currentUsername', username);
+            const uInput = document.getElementById('username').value.trim();
+            const pInput = document.getElementById('password').value;
+            
+            initDB(); // ensure DB is loaded
+            const matchedUser = db.users.find(u => u.username === uInput && u.password === pInput && u.status === 'active');
 
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('mainSystem').style.display = 'block';
-            document.getElementById('userDisplayName').innerText = username;
-            document.getElementById('profUser').value = username;
-            initDB();
-            showPage('dashboard');
+            if (matchedUser) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loggedInUser', JSON.stringify(matchedUser));
+                currentUser = matchedUser;
+                
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainSystem').style.display = 'block';
+                
+                setupUserUI();
+                showPage('dashboard');
+            } else {
+                showToast('Invalid Username or Password (or Inactive account)', 'danger');
+            }
         });
+
+        function setupUserUI() {
+            document.getElementById('userDisplayName').innerText = currentUser.name;
+            document.getElementById('userDisplayRole').innerText = currentUser.role.toUpperCase();
+            document.getElementById('profUser').value = currentUser.username;
+            
+            // Hide/Show sidebar links based on permissions
+            const allowedPerms = currentUser.perms || [];
+            document.querySelectorAll('#sidebarNav .nav-item').forEach(li => {
+                const pageTarget = li.getAttribute('data-page');
+                if (pageTarget) {
+                    if (allowedPerms.includes(pageTarget)) {
+                        li.style.display = 'block';
+                    } else {
+                        li.style.display = 'none';
+                    }
+                }
+            });
+
+            // Enforce UI restrictions across the board for pure Cashiers vs Admins
+            enforceUIRestrictions();
+        }
+
+        function enforceUIRestrictions() {
+            const isCashier = currentUser.role === 'cashier';
+            
+            // Hide specific action buttons from non-admins (e.g. Delete, Add New Stock, Add Supplier)
+            document.querySelectorAll('.admin-only-btn').forEach(el => {
+                el.style.display = isCashier ? 'none' : 'inline-block';
+            });
+            document.querySelectorAll('.admin-only-cell').forEach(el => {
+                el.style.display = isCashier ? 'none' : 'table-cell';
+            });
+            document.querySelectorAll('.admin-only-block').forEach(el => {
+                el.style.display = isCashier ? 'none' : 'flex';
+            });
+
+            // Hide specific dashboard cards if they don't have access to those tabs
+            if(!currentUser.perms.includes('accounting')) document.querySelector('.perm-card-accounting')?.classList.add('d-none');
+            if(!currentUser.perms.includes('customers')) document.querySelector('.perm-card-customers')?.classList.add('d-none');
+            if(!currentUser.perms.includes('reports')) {
+                document.querySelector('.perm-card-reports')?.classList.add('d-none');
+                document.querySelectorAll('.perm-charts').forEach(e=>e.classList.add('d-none'));
+            }
+            if(!currentUser.perms.includes('inventory')) document.querySelector('.perm-card-inventory')?.classList.add('d-none');
+
+            // Topbar settings
+            if(!currentUser.perms.includes('settings')) document.getElementById('topbar-settings-link').style.display = 'none';
+        }
 
         function logout() {
             showConfirm(currentLang==='en'?'Logout?':'کیا آپ لاگ آؤٹ کرنا چاہتے ہیں؟', () => {
                 localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('currentUsername');
+                localStorage.removeItem('loggedInUser');
+                currentUser = null;
                 document.getElementById('loginPage').style.display = 'flex';
                 document.getElementById('mainSystem').style.display = 'none';
                 document.getElementById('loginForm').reset();
@@ -1679,16 +1903,25 @@
         }
 
         function showPage(pageId) {
+            // Guard clause for authorization
+            if (currentUser && !currentUser.perms.includes(pageId) && pageId !== 'profile' && pageId !== 'dashboard') {
+                showToast('You do not have permission to view this page.', 'danger');
+                return; 
+            }
+
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
             
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if(targetPage) targetPage.classList.add('active');
+            
             document.querySelectorAll(`.sidebar .nav-link`).forEach(l => {
                 if(l.getAttribute('onclick').includes(pageId)) l.classList.add('active');
             });
-            document.getElementById('pageTitle').innerText = i18n[currentLang][pageId] || pageId.toUpperCase();
+            document.getElementById('pageTitle').innerText = (i18n[currentLang] && i18n[currentLang][pageId]) ? i18n[currentLang][pageId] : pageId.replace('_', ' ').toUpperCase();
             closeSidebar(); 
 
+            // Trigger respective page loaders
             if(pageId === 'dashboard') loadDashboard();
             if(pageId === 'medicines') renderMedicines();
             if(pageId === 'sales') loadSalesPage();
@@ -1704,6 +1937,192 @@
             if(pageId === 'alerts') renderAlerts();
             if(pageId === 'customers') renderCustomers();
             if(pageId === 'settings') loadSettings();
+            if(pageId === 'users_manage') renderUsersManageTable();
+        }
+
+        /* ================= Users & Roles Management Logic (Super Admin) ================= */
+        const allModulesList = [
+            { id: 'dashboard', name: '🏠 Dashboard' },
+            { id: 'sales', name: '🛒 Sales (POS)' },
+            { id: 'cash_register', name: '🧾 Cash Register' },
+            { id: 'purchases', name: '📦 Purchases (GRN)' },
+            { id: 'medicines', name: '💊 Medicines' },
+            { id: 'inventory', name: '🏢 Inventory' },
+            { id: 'customers', name: '👥 Customers (Khata)' },
+            { id: 'suppliers', name: '🚚 Suppliers' },
+            { id: 'employees', name: '👷 Employees' },
+            { id: 'delivery', name: '🛵 Delivery' },
+            { id: 'expenses', name: '💸 Expenses' },
+            { id: 'accounting', name: '📊 P&L Accounting' },
+            { id: 'reports', name: '📈 Reports' },
+            { id: 'alerts', name: '⚠️ Alerts' },
+            { id: 'settings', name: '⚙️ Settings & Backup' },
+            { id: 'users_manage', name: '🛡️ Users & Roles (Super Admin)' }
+        ];
+
+        function renderUsersManageTable() {
+            const tbody = document.getElementById('umUsersTableBody');
+            tbody.innerHTML = '';
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            
+            db.users.forEach(u => {
+                if(query && !u.name.toLowerCase().includes(query) && !u.username.toLowerCase().includes(query)) return;
+                
+                let acts = '';
+                if(u.id !== currentUser.id) {
+                    acts = `<button class="btn btn-sm btn-primary me-1" onclick="editManageUser('${u.id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteManageUser('${u.id}')">Delete</button>`;
+                } else {
+                    acts = `<span class="badge bg-info">Current User</span>`;
+                }
+
+                tbody.innerHTML += `<tr>
+                    <td><strong>${u.name}</strong></td>
+                    <td>${u.username}</td>
+                    <td><span class="badge bg-secondary">${u.role.toUpperCase()}</span></td>
+                    <td><span class="badge ${u.status==='active'?'bg-success':'bg-danger'}">${u.status}</span></td>
+                    <td class="text-center">${acts}</td>
+                </tr>`;
+            });
+
+            // Also render roles table & dropdowns
+            const rolesTbody = document.getElementById('umRolesTableBody');
+            rolesTbody.innerHTML = '';
+            const roleSelect = document.getElementById('umRole');
+            roleSelect.innerHTML = '<option value="">-- Select Role --</option>';
+
+            db.roles.forEach(r => {
+                roleSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+                
+                let rActs = '';
+                if(r.id !== 'superadmin' && r.id !== 'admin' && r.id !== 'cashier') {
+                    rActs = `<button class="btn btn-sm btn-danger" onclick="deleteRole('${r.id}')"><i class="fas fa-trash"></i></button>`;
+                } else {
+                    rActs = `<span class="badge bg-light text-dark border">System Default</span>`;
+                }
+                rolesTbody.innerHTML += `<tr><td>${r.name}</td><td>${r.id}</td><td>${r.perms.length} Modules</td><td>${rActs}</td></tr>`;
+            });
+
+            buildPermissionsCheckboxes('umPermissionsContainer', 'user_perm_');
+            buildPermissionsCheckboxes('newRolePerms', 'role_perm_');
+        }
+
+        function buildPermissionsCheckboxes(containerId, prefix) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            allModulesList.forEach(mod => {
+                container.innerHTML += `
+                <div class="col-md-4 col-sm-6">
+                    <div class="perm-check-card" onclick="document.getElementById('${prefix}${mod.id}').click()">
+                        <input type="checkbox" class="form-check-input mt-0 ${prefix}checkbox" id="${prefix}${mod.id}" value="${mod.id}" onclick="event.stopPropagation()">
+                        <label for="${prefix}${mod.id}">${mod.name}</label>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function autoCheckPermissionsForRole() {
+            const roleId = document.getElementById('umRole').value;
+            if(!roleId) return;
+            const roleObj = db.roles.find(r => r.id === roleId);
+            if(!roleObj) return;
+
+            document.querySelectorAll('.user_perm_checkbox').forEach(chk => {
+                chk.checked = roleObj.perms.includes(chk.value);
+            });
+        }
+
+        function resetUserForm() {
+            document.getElementById('manageUserForm').reset();
+            document.getElementById('umUserId').value = '';
+            document.querySelectorAll('.user_perm_checkbox').forEach(chk => chk.checked = false);
+        }
+
+        function editManageUser(id) {
+            const u = db.users.find(x => x.id === id);
+            if(!u) return;
+            document.getElementById('umUserId').value = u.id;
+            document.getElementById('umName').value = u.name;
+            document.getElementById('umUsername').value = u.username;
+            document.getElementById('umPassword').value = u.password;
+            document.getElementById('umRole').value = u.role;
+            
+            document.querySelectorAll('.user_perm_checkbox').forEach(chk => {
+                chk.checked = u.perms.includes(chk.value);
+            });
+
+            // Switch Tab
+            document.querySelector('#userRolesTabs .nav-link[href="#tab-add-user"]').click();
+        }
+
+        function saveManageUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('umUserId').value;
+            const uName = document.getElementById('umName').value;
+            const uUser = document.getElementById('umUsername').value;
+            const uPass = document.getElementById('umPassword').value;
+            const uRole = document.getElementById('umRole').value;
+            
+            if(!uRole) { showToast('Please assign a role first', 'warning'); return; }
+
+            // Get selected permissions
+            let selectedPerms = [];
+            document.querySelectorAll('.user_perm_checkbox:checked').forEach(chk => {
+                selectedPerms.push(chk.value);
+            });
+
+            if (id) {
+                // Edit existing
+                const u = db.users.find(x => x.id === id);
+                u.name = uName; u.username = uUser; u.password = uPass; u.role = uRole; u.perms = selectedPerms;
+                showToast('User Updated');
+            } else {
+                // Add new
+                if (db.users.find(x => x.username === uUser)) { showToast('Username already exists!', 'danger'); return; }
+                db.users.push({
+                    id: 'U' + Date.now(), name: uName, username: uUser, password: uPass, role: uRole, status: 'active', perms: selectedPerms
+                });
+                showToast('New User Created');
+            }
+            saveDB();
+            document.querySelector('#userRolesTabs .nav-link[href="#tab-user-list"]').click();
+            renderUsersManageTable();
+        }
+
+        function deleteManageUser(id) {
+            showConfirm('Delete this User permanently?', () => {
+                db.users = db.users.filter(x => x.id !== id);
+                saveDB(); renderUsersManageTable(); showToast('User Deleted');
+            });
+        }
+
+        function saveCustomRole(e) {
+            e.preventDefault();
+            const rId = document.getElementById('newRoleId').value.toLowerCase().replace(/\s+/g, '_');
+            const rName = document.getElementById('newRoleName').value;
+            
+            if(db.roles.find(r => r.id === rId)) { showToast('Role Identifier already exists', 'danger'); return; }
+
+            let selectedPerms = [];
+            document.querySelectorAll('.role_perm_checkbox:checked').forEach(chk => selectedPerms.push(chk.value));
+
+            db.roles.push({ id: rId, name: rName, perms: selectedPerms });
+            saveDB();
+            showToast('Role Created Successfully');
+            document.getElementById('newRoleId').value = '';
+            document.getElementById('newRoleName').value = '';
+            renderUsersManageTable();
+        }
+
+        function deleteRole(id) {
+            if(db.users.find(u => u.role === id)) {
+                showToast('Cannot delete role: There are users assigned to it!', 'danger');
+                return;
+            }
+            showConfirm('Delete this Role?', () => {
+                db.roles = db.roles.filter(r => r.id !== id);
+                saveDB(); renderUsersManageTable(); showToast('Role Deleted');
+            });
         }
 
         /* ================= Dashboard & Charts ================= */
@@ -1745,7 +2164,9 @@
             });
             if(lowStockList.length === 0) lowStockTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Stock & Expiry levels are good!</td></tr>`;
 
-            renderCharts();
+            if(currentUser && currentUser.perms.includes('reports')) {
+                renderCharts();
+            }
         }
 
         function renderCharts() {
@@ -1795,14 +2216,19 @@
             const tbody = document.getElementById('customersTableBody');
             tbody.innerHTML = '';
             
+            const isCashier = currentUser.role === 'cashier';
+
             db.customers.filter(c => c.name.toLowerCase().includes(q) || c.id.toLowerCase().includes(q)).forEach(c => {
-                recalculateCustomerBalance(c.id); // Ensure automatic correctness
+                recalculateCustomerBalance(c.id); 
                 const balClass = c.balance > 0 ? 'text-danger fw-bold' : 'text-success';
-                const actionBtns = c.id === 'C-WALKIN' ? '' : `
-                    <button class="btn btn-sm btn-info text-white" onclick="openLedger('${c.id}')"><i class="fas fa-book"></i> Ledger</button>
-                    <button class="btn btn-sm btn-primary" onclick="editCustomer('${c.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.id}')"><i class="fas fa-trash"></i></button>
-                `;
+                let actionBtns = '';
+                if(c.id !== 'C-WALKIN') {
+                    actionBtns += `<button class="btn btn-sm btn-info text-white me-1" onclick="openLedger('${c.id}')"><i class="fas fa-book"></i> Ledger</button>`;
+                    if(!isCashier) {
+                        actionBtns += `<button class="btn btn-sm btn-primary me-1" onclick="editCustomer('${c.id}')"><i class="fas fa-edit"></i></button>
+                                       <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.id}')"><i class="fas fa-trash"></i></button>`;
+                    }
+                }
                 
                 tbody.innerHTML += `
                     <tr>
@@ -1888,22 +2314,28 @@
             const tbody = document.getElementById('ledgerTableBody');
             tbody.innerHTML = '';
             
+            const isCashier = currentUser.role === 'cashier';
             const entriesWithIndex = activeLedgerCustomer.ledger.map((e, i) => ({...e, origIdx: i})).reverse();
             
             entriesWithIndex.forEach(entry => {
                 const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
                 const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
                 
+                let acts = '';
+                if(!isCashier) {
+                    acts = `<button class="btn btn-sm btn-primary py-0 px-2 me-1" onclick="openEditLedgerEntry('customer', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteCustomerLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>`;
+                } else {
+                    acts = `<i class="fas fa-lock text-muted" title="Restricted"></i>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td><small>${entry.date}</small></td>
                         <td>${entry.desc}</td>
                         <td class="text-danger fw-bold">${debit}</td>
                         <td class="text-success fw-bold">${credit}</td>
-                        <td class="text-center action-btns">
-                            <button class="btn btn-sm btn-primary py-0 px-2" onclick="openEditLedgerEntry('customer', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteCustomerLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>
-                        </td>
+                        <td class="text-center action-btns">${acts}</td>
                     </tr>`;
             });
             if(entriesWithIndex.length === 0) tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-center\">No transaction history</td></tr>`;
@@ -2140,22 +2572,28 @@
             const tbody = document.getElementById('supLedgerTableBody');
             tbody.innerHTML = '';
             
+            const isCashier = currentUser.role === 'cashier';
             const entriesWithIndex = activeSupplierForLedger.ledger.map((e, i) => ({...e, origIdx: i})).reverse();
             
             entriesWithIndex.forEach(entry => {
                 const credit = entry.type === 'credit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
                 const debit = entry.type === 'debit' ? `Rs ${parseFloat(entry.amount).toFixed(2)}` : '-';
                 
+                let acts = '';
+                if(!isCashier) {
+                    acts = `<button class="btn btn-sm btn-primary py-0 px-2 me-1" onclick="openEditLedgerEntry('supplier', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteSupplierLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>`;
+                } else {
+                    acts = `<i class="fas fa-lock text-muted" title="Restricted"></i>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td><small>${entry.date}</small></td>
                         <td>${entry.desc}</td>
                         <td class="text-danger fw-bold">${credit}</td>
                         <td class="text-success fw-bold">${debit}</td>
-                        <td class="text-center action-btns">
-                            <button class="btn btn-sm btn-primary py-0 px-2" onclick="openEditLedgerEntry('supplier', ${entry.origIdx})"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger py-0 px-2" onclick="deleteSupplierLedgerEntry(${entry.origIdx})"><i class="fas fa-trash"></i></button>
-                        </td>
+                        <td class="text-center action-btns">${acts}</td>
                     </tr>`;
             });
             if(entriesWithIndex.length === 0) tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-center\">No transaction history</td></tr>`;
@@ -2363,7 +2801,8 @@
             const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
             const tbody = document.getElementById('medTableBody');
             tbody.innerHTML = '';
-            
+            const isCashier = currentUser && currentUser.role === 'cashier';
+
             db.medicines.filter(m => 
                 m.name.toLowerCase().includes(q) || 
                 m.id.toLowerCase().includes(q) || 
@@ -2373,6 +2812,15 @@
                 const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
                 const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
                 
+                let acts = '';
+                if(!isCashier) {
+                    acts = `
+                    <td class="action-btns text-center admin-only-cell">
+                        <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
+                    </td>`;
+                }
+
                 tbody.innerHTML += `
                     <tr>
                         <td><strong>${m.id}</strong></td>
@@ -2381,10 +2829,7 @@
                         <td>Rs ${m.price} <br><small class=\"text-muted\">(Purch: Rs ${m.purchasePrice || 0})</small></td>
                         <td class=\"${stockClass}\">${m.stock}</td>
                         <td><span class=\"badge bg-secondary mb-1\">${m.batchNumber || 'N/A'}</span><br><span class=\"${expClass}\">${m.expiryDate || '-'}</span></td>
-                        <td class=\"action-btns text-center\">
-                            <button class=\"btn btn-primary\" onclick=\"editMedicine('${m.id}')\"><i class=\"fas fa-edit\"></i></button>
-                            <button class=\"btn btn-danger\" onclick=\"deleteMedicine('${m.id}')\"><i class=\"fas fa-trash\"></i></button>
-                        </td>
+                        ${acts}
                     </tr>`;
             });
         }
@@ -2720,6 +3165,8 @@
             
             document.getElementById('invGrandTotal').innerText = `Total: Rs ${parseFloat(sale.total).toFixed(2)}`;
             document.getElementById('invPaymentMethod').innerText = `Paid via: ${sale.paymentMethod || 'Cash'}`;
+            document.getElementById('invCashierName').innerText = `Cashier: ${currentUser ? currentUser.name : 'Unknown'}`;
+            
             if(sale.isReturned) { document.getElementById('invReturnMsg').innerText = "*** REFUNDED / RETURNED ***"; } else { document.getElementById('invReturnMsg').innerText = ""; }
 
             JsBarcode("#invBarcodeSvg", sale.id, { format: "CODE128", width: 1.5, height: 40, displayValue: true, fontSize: 14, margin: 0 });
@@ -2735,6 +3182,7 @@
             
             const startDateFilter = document.getElementById('repStartDate')?.value;
             const endDateFilter = document.getElementById('repEndDate')?.value;
+            const isSuperOrAdmin = currentUser.role === 'superadmin' || currentUser.role === 'admin';
 
             let filteredSales = db.sales.slice().reverse();
 
@@ -2764,23 +3212,32 @@
                 const retBadge = isRet ? `<br><span class=\"badge bg-danger returned-badge mt-1\">Returned</span>` : '';
                 
                 let actions = `<button class=\"btn btn-sm btn-info text-white\" onclick=\"reprintSale('${s.id}')\" title=\"Print\"><i class=\"fas fa-print\"></i></button>`;
-                if (!isRet) {
-                    actions += `<button class=\"btn btn-sm btn-primary\" onclick=\"editSale('${s.id}')\" title=\"Edit\"><i class=\"fas fa-edit\"></i></button>
-                                <button class=\"btn btn-sm btn-warning text-dark\" onclick=\"returnSale('${s.id}')\" title=\"Return Invoice\"><i class=\"fas fa-undo\"></i></button>`;
+                
+                // RBAC on Reports
+                if(isSuperOrAdmin) {
+                    if (!isRet) {
+                        actions += `<button class=\"btn btn-sm btn-primary\" onclick=\"editSale('${s.id}')\" title=\"Edit\"><i class=\"fas fa-edit\"></i></button>
+                                    <button class=\"btn btn-sm btn-warning text-dark\" onclick=\"returnSale('${s.id}')\" title=\"Return Invoice\"><i class=\"fas fa-undo\"></i></button>`;
+                    }
+                    actions += `<button class=\"btn btn-sm btn-danger\" onclick=\"deleteSale('${s.id}')\" title=\"Delete Permanent\"><i class=\"fas fa-trash\"></i></button>`;
                 }
-                actions += `<button class=\"btn btn-sm btn-danger\" onclick=\"deleteSale('${s.id}')\" title=\"Delete Permanent\"><i class=\"fas fa-trash\"></i></button>`;
 
                 tbody.innerHTML += `
                     <tr class=\"${rowClass}\">
                         <td>${s.id} ${retBadge}</td><td>${s.date}</td><td>${s.customer} <br><small>(${s.paymentMethod||'Cash'})</small></td>
                         <td class=\"text-danger\">Disc: ${s.discountAmt>0?s.discountAmt:'0'} | Tax: ${s.taxAmt>0?s.taxAmt:'0'}</td>
-                        <td class=\"fw-bold\">Rs ${s.total}</td><td class=\"text-success fw-bold\">Rs ${isRet ? '0 (Void)' : (s.profit || 0)}</td>
+                        <td class=\"fw-bold\">Rs ${s.total}</td>
+                        <td class=\"text-success fw-bold perm-col-profit\">Rs ${isRet ? '0 (Void)' : (s.profit || 0)}</td>
                         <td class=\"text-center action-btns\">${actions}</td>
                     </tr>`; 
             });
             
             if (filteredSales.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No records found for the selected dates.</td></tr>`;
+            }
+
+            if(!isSuperOrAdmin && !currentUser.perms.includes('accounting')) {
+                document.querySelectorAll('.perm-col-profit').forEach(e => e.style.display = 'none');
             }
         }
         
@@ -2919,10 +3376,11 @@
         /* --- Expenses Management --- */
         function renderExpenses() {
             const tbody = document.getElementById('expensesTableBody'); tbody.innerHTML = '';
+            const isCashier = currentUser.role === 'cashier';
             db.expenses.slice().reverse().forEach((e, idx) => {
                 tbody.innerHTML += `<tr><td>${e.date}</td><td><span class=\"badge bg-danger\">${e.category}</span></td>
                 <td>${e.desc}</td><td class=\"fw-bold text-danger\">Rs ${e.amount}</td>
-                <td class="text-center"><button class=\"btn btn-sm btn-outline-danger\" onclick=\"deleteExpense('${e.id}')\"><i class=\"fas fa-trash\"></i></button></td></tr>`;
+                <td class="text-center admin-only-cell"><button class=\"btn btn-sm btn-outline-danger\" onclick=\"deleteExpense('${e.id}')\"><i class=\"fas fa-trash\"></i></button></td></tr>`;
             });
             if(db.expenses.length === 0) tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-center text-muted\">No Expenses Recorded</td></tr>`;
         }
@@ -2965,15 +3423,19 @@
         /* --- Suppliers --- */
         function renderSuppliers() {
             const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
+            const isCashier = currentUser.role === 'cashier';
             db.suppliers.forEach(s => {
                 recalculateSupplierBalance(s.id); 
                 const balClass = s.balance > 0 ? 'text-danger fw-bold' : 'text-success';
+                
+                let acts = `<button class=\"btn btn-sm btn-info text-white\" onclick=\"openSupplierLedger('${s.id}')\"><i class=\"fas fa-book\"></i> Ledger</button>`;
+                if(!isCashier) {
+                    acts += `<button class=\"btn btn-sm btn-primary mx-1\" onclick=\"editSupplier('${s.id}')\"><i class=\"fas fa-edit\"></i></button>
+                             <button class=\"btn btn-sm btn-danger\" onclick=\"deleteSupplier('${s.id}')\"><i class=\"fas fa-trash\"></i></button>`;
+                }
+                
                 tbody.innerHTML += `<tr><td><strong>${s.name}</strong></td><td>${s.contact}</td><td class=\"${balClass}\">Rs ${parseFloat(s.balance || 0).toFixed(2)}</td>
-                    <td class=\"text-center action-btns\">
-                        <button class=\"btn btn-sm btn-info text-white\" onclick=\"openSupplierLedger('${s.id}')\"><i class=\"fas fa-book\"></i> Ledger</button>
-                        <button class=\"btn btn-sm btn-primary\" onclick=\"editSupplier('${s.id}')\"><i class=\"fas fa-edit\"></i></button>
-                        <button class=\"btn btn-sm btn-danger\" onclick=\"deleteSupplier('${s.id}')\"><i class=\"fas fa-trash\"></i></button>
-                    </td>
+                    <td class=\"text-center action-btns\">${acts}</td>
                 </tr>`;
             });
         }
@@ -2990,13 +3452,15 @@
         /* --- Employees --- */
         function renderEmployees() {
             const tbody = document.getElementById('employeesTableBody'); tbody.innerHTML = '';
+            const isCashier = currentUser.role === 'cashier';
             db.employees.forEach(e => {
+                let acts = `<button class=\"btn btn-sm btn-info text-white\" onclick=\"printGenericRecord('Employee Info', {'ID': '${e.id}', 'Name': '${e.name}', 'Role': '${e.role}'})\"><i class=\"fas fa-print\"></i></button>`;
+                if(!isCashier) {
+                    acts += `<button class=\"btn btn-sm btn-primary mx-1\" onclick=\"editEmployee('${e.id}')\"><i class=\"fas fa-edit\"></i></button>
+                             <button class=\"btn btn-sm btn-danger\" onclick=\"deleteEmployee('${e.id}')\"><i class=\"fas fa-trash\"></i></button>`;
+                }
                 tbody.innerHTML += `<tr><td>${e.name}</td><td><span class=\"badge bg-secondary\">${e.role}</span></td>
-                <td class=\"text-center action-btns\">
-                    <button class=\"btn btn-sm btn-info text-white\" onclick=\"printGenericRecord('Employee Info', {'ID': '${e.id}', 'Name': '${e.name}', 'Role': '${e.role}'})\"><i class=\"fas fa-print\"></i></button>
-                    <button class=\"btn btn-sm btn-primary\" onclick=\"editEmployee('${e.id}')\"><i class=\"fas fa-edit\"></i></button>
-                    <button class=\"btn btn-sm btn-danger\" onclick=\"deleteEmployee('${e.id}')\"><i class=\"fas fa-trash\"></i></button>
-                </td></tr>`;
+                <td class=\"text-center action-btns\">${acts}</td></tr>`;
             });
         }
         function openAddEmployeeModal() { document.getElementById('empId').value=''; document.getElementById('eName').value=''; new bootstrap.Modal(document.getElementById('employeeModal')).show(); }
@@ -3011,15 +3475,20 @@
         /* --- Delivery --- */
         function renderDeliveries() {
             const tbody = document.getElementById('deliveryTableBody'); tbody.innerHTML = '';
+            const isCashier = currentUser.role === 'cashier';
             db.deliveries.forEach(d => {
                 const bClass = d.status === 'Pending' ? 'warning' : 'success';
+                let acts = '';
+                if(d.status==='Pending') acts += `<button class=\"btn btn-sm btn-success\" onclick=\"completeDelivery('${d.id}')\"><i class=\"fas fa-check\"></i></button>`;
+                acts += `<button class=\"btn btn-sm btn-info text-white mx-1\" onclick=\"printGenericRecord('Delivery Order', {'Order #': '${d.id}', 'Customer': '${d.customer}', 'Status': '${d.status}'})\"><i class=\"fas fa-print\"></i></button>`;
+                
+                if(!isCashier) {
+                    acts += `<button class=\"btn btn-sm btn-primary me-1\" onclick=\"editDelivery('${d.id}')\"><i class=\"fas fa-edit\"></i></button>
+                             <button class=\"btn btn-sm btn-danger\" onclick=\"deleteDelivery('${d.id}')\"><i class=\"fas fa-trash\"></i></button>`;
+                }
+                
                 tbody.innerHTML += `<tr><td>${d.id}</td><td>${d.customer}</td><td><span class=\"badge bg-${bClass}\">${d.status}</span></td>
-                    <td class=\"text-center action-btns\">
-                        ${d.status==='Pending' ? `<button class=\"btn btn-sm btn-success\" onclick=\"completeDelivery('${d.id}')\"><i class=\"fas fa-check\"></i></button>` : ''}
-                        <button class=\"btn btn-sm btn-info text-white\" onclick=\"printGenericRecord('Delivery Order', {'Order #': '${d.id}', 'Customer': '${d.customer}', 'Status': '${d.status}'})\"><i class=\"fas fa-print\"></i></button>
-                        <button class=\"btn btn-sm btn-primary\" onclick=\"editDelivery('${d.id}')\"><i class=\"fas fa-edit\"></i></button>
-                        <button class=\"btn btn-sm btn-danger\" onclick=\"deleteDelivery('${d.id}')\"><i class=\"fas fa-trash\"></i></button>
-                    </td></tr>`;
+                    <td class=\"text-center action-btns\">${acts}</td></tr>`;
             });
         }
         function openAddDeliveryModal() { document.getElementById('delId').value=''; document.getElementById('dCust').value=''; document.getElementById('dStatus').value='Pending'; new bootstrap.Modal(document.getElementById('deliveryModal')).show(); }
@@ -3056,11 +3525,17 @@
             saveDB(); showToast('Settings Saved');
         }
         function saveProfile() {
-            if(document.getElementById('profPass').value) showToast('Password updated');
-            else showToast('Profile saved');
+            const p = document.getElementById('profPass').value;
+            if(p) {
+                currentUser.password = p;
+                const dbU = db.users.find(u => u.id === currentUser.id);
+                if(dbU) dbU.password = p;
+                localStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+                saveDB();
+                showToast('Password updated');
+            }
         }
 
-        // New Feature: Export Database (JSON Backup)
         function exportDatabase() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
             const downloadAnchorNode = document.createElement('a');
@@ -3073,33 +3548,22 @@
             showToast('Backup File Downloaded Successfully!');
         }
 
-        // New Feature: Import Database (Restore Backup)
         function importDatabase() {
             const file = document.getElementById('importDbFile').files[0];
-            if (!file) {
-                showToast('Please select a .json backup file first', 'danger');
-                return;
-            }
+            if (!file) { showToast('Please select a .json backup file first', 'danger'); return; }
             
             showConfirm('WARNING: This will overwrite ALL current data with the backup file. Are you sure you want to proceed?', () => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     try {
                         const newDb = JSON.parse(e.target.result);
-                        if (newDb && newDb.medicines && newDb.sales) { // Basic validation
+                        if (newDb && newDb.medicines && newDb.sales) {
                             db = newDb;
                             saveDB();
                             showToast('Database Restored successfully! Reloading...');
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            showToast('Invalid backup file structure.', 'danger');
-                        }
-                    } catch(err) {
-                        showToast('Error reading the backup file.', 'danger');
-                        console.error(err);
-                    }
+                            setTimeout(() => { location.reload(); }, 1500);
+                        } else { showToast('Invalid backup file structure.', 'danger'); }
+                    } catch(err) { showToast('Error reading the backup file.', 'danger'); }
                 };
                 reader.readAsText(file);
             });
