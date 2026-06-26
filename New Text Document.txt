@@ -31,7 +31,9 @@ User Roles (Admin vs Cashier): Abhi koi bhi login kare to sab kuch dekh sakta ha
 
 Cashier: Sirf POS use kar sake, bill bana sake, lekin purani sales delete na kar sake aur 'Profit/Loss' ya 'Settings' na dekh sake.
 
-Admin/Owner: Har cheez dekh sake, delete kar sake aur reports dekh sake.
+Admin/Owner: setting ka alawa baki Har cheez dekh sake, delete kar sake aur reports dekh sake.
+
+superadmin: har cheez dekh sake, delete kar sake aour reports dekh skae, superadmin sitting ka under ik subtab hu uki under check totale software tabs hu hera tab ka sa check box hu ka tabs baki rols ku dakt sakhe for user permmission aur superadmin new rols bi add karsaka
 
 6. 🌐 Technical Architecture (Long-term)
 Real Database (Backend API): Abhi saara data browser ki localStorage mein save ho raha hai. Agar browser ki history/cache clear ho jaye to data delete ho sakta hai. Isko permanent banane ke liye aage chal kar humein isay kisi asli database (jaise Firebase, MySQL, ya Node.js backend) ke sath connect karna hoga taake aap multiple laptops ya mobiles se ek hi time par data dekh sakein.

@@ -720,6 +720,22 @@
                             </div>
                         </div>
                         <div class="card-body" id="reportPrintArea">
+                            
+                            <!-- New Feature: Date Filter for Reports -->
+                            <div class="row mb-4 bg-light p-3 rounded">
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small fw-bold">From Date</label>
+                                    <input type="date" class="form-control" id="repStartDate">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-muted small fw-bold">To Date</label>
+                                    <input type="date" class="form-control" id="repEndDate">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" onclick="renderReports()"><i class="fas fa-filter"></i> Filter Results</button>
+                                </div>
+                            </div>
+
                             <h4 class="text-center mb-4" data-i18n="sales_report">Sales Report</h4>
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle" id="reportsTable">
@@ -868,6 +884,24 @@
                                         <div class="mb-3"><label>Contact Email / Phone</label><input type="text" class="form-control" id="setEmail"></div>
                                         <button type="button" class="btn btn-primary w-100" onclick="saveSettings()" data-i18n="save">Save</button>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- New Feature: Backup and Restore -->
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-info">
+                                <div class="card-header bg-info text-white"><h5 class="mb-0"><i class="fas fa-database"></i> Database Backup & Restore</h5></div>
+                                <div class="card-body">
+                                    <p class="small text-muted">Since this app runs locally in your browser, it's highly recommended to download a backup of your data weekly.</p>
+                                    <button class="btn btn-success w-100 mb-4" onclick="exportDatabase()"><i class="fas fa-download"></i> Download Backup File (JSON)</button>
+                                    
+                                    <hr>
+                                    
+                                    <h6 class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> Restore Data</h6>
+                                    <p class="small text-muted mb-2">Restoring will overwrite your current data. Please select a valid JSON backup file.</p>
+                                    <input type="file" class="form-control mb-2" id="importDbFile" accept=".json">
+                                    <button class="btn btn-outline-danger w-100" onclick="importDatabase()"><i class="fas fa-upload"></i> Restore from Backup</button>
                                 </div>
                             </div>
                         </div>
@@ -2070,7 +2104,7 @@
             saveDB();
             renderPurchases(); renderMedicines(); renderSuppliers();
             showToast('Purchase Completed! Stock Updated.');
-            bootstrap.Modal.getInstance(document.getElementById('newPurchaseModal')).hide();
+            bootstrap.Modal.getInstance(document.getElementById('newPurchaseModal')).show();
         }
 
         /* --- Supplier Ledger Core --- */
@@ -2698,7 +2732,33 @@
         /* ================= Reports Actions & Returns ================= */
         function renderReports() {
             const tbody = document.getElementById('reportsTableBody'); tbody.innerHTML = '';
-            db.sales.slice().reverse().forEach(s => { 
+            
+            const startDateFilter = document.getElementById('repStartDate')?.value;
+            const endDateFilter = document.getElementById('repEndDate')?.value;
+
+            let filteredSales = db.sales.slice().reverse();
+
+            if (startDateFilter || endDateFilter) {
+                filteredSales = filteredSales.filter(s => {
+                    const saleDateObj = new Date(s.date.split(',')[0] || s.date.split(' ')[0]); 
+                    if (isNaN(saleDateObj)) return true; // Keep if it can't be parsed
+                    
+                    saleDateObj.setHours(0,0,0,0);
+                    let pass = true;
+                    
+                    if (startDateFilter) {
+                        const startObj = new Date(startDateFilter); startObj.setHours(0,0,0,0);
+                        if (saleDateObj < startObj) pass = false;
+                    }
+                    if (endDateFilter) {
+                        const endObj = new Date(endDateFilter); endObj.setHours(0,0,0,0);
+                        if (saleDateObj > endObj) pass = false;
+                    }
+                    return pass;
+                });
+            }
+
+            filteredSales.forEach(s => { 
                 const isRet = s.isReturned;
                 const rowClass = isRet ? 'returned-row' : '';
                 const retBadge = isRet ? `<br><span class=\"badge bg-danger returned-badge mt-1\">Returned</span>` : '';
@@ -2718,6 +2778,10 @@
                         <td class=\"text-center action-btns\">${actions}</td>
                     </tr>`; 
             });
+            
+            if (filteredSales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No records found for the selected dates.</td></tr>`;
+            }
         }
         
         function reprintSale(id) { const sale = db.sales.find(s => s.id === id); if(sale) printInvoice(sale); }
@@ -2780,7 +2844,7 @@
                 db.currentShift.cashSales -= cashRefunded;
             }
             
-            saveDB(); renderReports(); bootstrap.Modal.getInstance(document.getElementById('returnSaleModal')).hide(); showToast('Invoice Returned', 'success');
+            saveDB(); renderReports(); bootstrap.Modal.getInstance(document.getElementById('returnSaleModal')).show(); showToast('Invoice Returned', 'success');
         }
 
         function editSale(id) {
@@ -2979,7 +3043,7 @@
         function removeAlert(id) { db.alerts = db.alerts.filter(a=>a.id!==id); saveDB(); renderAlerts(); }
         function clearAlerts() { db.alerts = []; saveDB(); renderAlerts(); showToast('Alerts cleared'); }
 
-        /* --- Settings & Profile --- */
+        /* --- Settings, Profile & Backup/Restore --- */
         function loadSettings() {
             document.getElementById('setPharmaName').value = db.settings.pharmacyName || '';
             document.getElementById('setAddress').value = db.settings.address || '';
@@ -2994,6 +3058,51 @@
         function saveProfile() {
             if(document.getElementById('profPass').value) showToast('Password updated');
             else showToast('Profile saved');
+        }
+
+        // New Feature: Export Database (JSON Backup)
+        function exportDatabase() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            const dateStr = new Date().toISOString().slice(0, 10);
+            downloadAnchorNode.setAttribute("download", "pharmacy_backup_" + dateStr + ".json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showToast('Backup File Downloaded Successfully!');
+        }
+
+        // New Feature: Import Database (Restore Backup)
+        function importDatabase() {
+            const file = document.getElementById('importDbFile').files[0];
+            if (!file) {
+                showToast('Please select a .json backup file first', 'danger');
+                return;
+            }
+            
+            showConfirm('WARNING: This will overwrite ALL current data with the backup file. Are you sure you want to proceed?', () => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const newDb = JSON.parse(e.target.result);
+                        if (newDb && newDb.medicines && newDb.sales) { // Basic validation
+                            db = newDb;
+                            saveDB();
+                            showToast('Database Restored successfully! Reloading...');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            showToast('Invalid backup file structure.', 'danger');
+                        }
+                    } catch(err) {
+                        showToast('Error reading the backup file.', 'danger');
+                        console.error(err);
+                    }
+                };
+                reader.readAsText(file);
+            });
         }
 
     </script>
