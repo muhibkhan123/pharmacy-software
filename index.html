@@ -357,10 +357,10 @@
                         </div>
                     </div>
 
-                    <!-- Statistics Cards -->
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="stat-card" onclick="showPage('reports')">
+<!-- Statistics Cards -->
+                    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 mb-4 g-3">
+                        <div class="col">
+                            <div class="stat-card h-100" onclick="openDetailsModal('sales')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="total_sales">Total Sales</h6>
@@ -370,8 +370,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="stat-card" onclick="showPage('medicines')">
+                        <div class="col">
+                            <div class="stat-card h-100" onclick="openDetailsModal('medicines')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="available_meds">Meds</h6>
@@ -381,8 +381,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 perm-card-accounting">
-                            <div class="stat-card" onclick="showPage('accounting')">
+                        <div class="col perm-card-accounting">
+                            <div class="stat-card h-100" onclick="openDetailsModal('profit')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="net_profit">Net Profit</h6>
@@ -392,8 +392,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3 perm-card-customers">
-                            <div class="stat-card" onclick="showPage('customers')">
+                        <div class="col perm-card-customers">
+                            <div class="stat-card h-100" onclick="openDetailsModal('customers')">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted" data-i18n="khata_balance">Total Udhaar</h6>
@@ -403,8 +403,19 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- New Expenses Card -->
+                        <div class="col perm-card-accounting">
+                            <div class="stat-card h-100" onclick="openDetailsModal('expenses')">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted">Expenses</h6>
+                                        <h4 class="fw-bold text-danger" id="dashTotalExpenses">0</h4>
+                                    </div>
+                                    <div class="icon bg-gradient-danger text-white"><i class="fas fa-money-bill-wave"></i></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
                     <!-- Charts Row -->
                     <div class="row mb-4 perm-charts">
                         <div class="col-md-8">
@@ -608,89 +619,156 @@
                     </div>
                 </div>
 
-                <!-- 3. Sales Page -->
+               <!-- 3. Sales Page (Modernized Redesign) -->
                 <div id="sales" class="page">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> <span data-i18n="pos">POS</span></h5>
-                                    <div>
-                                        <button class="btn btn-warning btn-sm text-dark me-2" onclick="holdCurrentCart()"><i class="fas fa-pause"></i> <span data-i18n="hold_bill">Hold Cart</span></button>
-                                        <button class="btn btn-dark btn-sm me-2" onclick="openHeldBillsModal()"><i class="fas fa-list"></i> <span data-i18n="held_bills">Held Carts</span> (<span id="heldBillsCount">0</span>)</button>
-                                        <button class="btn btn-light btn-sm" onclick="newSale()"><i class="fas fa-receipt"></i> <span data-i18n="new_sale">New / Clear</span></button>
+                    <!-- Scoped CSS for new POS UI -->
+                    <style>
+                        .pos-cart-wrapper { height: calc(100vh - 460px); min-height: 250px; overflow-y: auto; border-radius: 8px; border: 1px solid #eef2f5; }
+                        .pos-cart-table thead th { position: sticky; top: 0; background-color: #f8f9fa; z-index: 10; font-size: 0.85rem; text-transform: uppercase; color: #6c757d; border-bottom: 2px solid #dee2e6; padding: 12px 15px; }
+                        .pos-cart-table tbody td { padding: 12px 15px; vertical-align: middle; }
+                        .pos-totals-box { background: linear-gradient(145deg, #f8f9fa, #ffffff); border: 1px solid #e0e6ed; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+                        .grand-total-display { font-size: 2.2rem; font-weight: 800; color: #1e3a8a; line-height: 1; margin: 0; }
+                        
+                        /* Quick Items Grid styling */
+                        #quickItemsList { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
+                        #quickItemsList button { height: 75px; font-weight: 600; white-space: normal; line-height: 1.2; border-radius: 10px; border: 2px solid transparent; background-color: #f0f4f8; color: #2c3e50; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+                        #quickItemsList button:hover { transform: translateY(-3px); background-color: var(--primary-color); color: white; box-shadow: 0 5px 15px rgba(44, 90, 160, 0.2); border-color: var(--primary-color); }
+                        
+                        .pos-action-btn { font-weight: 600; border-radius: 8px; transition: transform 0.1s; }
+                        .pos-action-btn:active { transform: scale(0.95); }
+                    </style>
+
+                    <div class="row g-3">
+                        <!-- LEFT COLUMN: Cart & Checkout -->
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card border-0 shadow-sm h-100">
+                                <!-- Top Bar Actions -->
+                                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <h4 class="mb-0 fw-bold text-primary"><i class="fas fa-shopping-cart me-2"></i><span data-i18n="pos">POS Terminal</span></h4>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-outline-warning text-dark pos-action-btn" onclick="holdCurrentCart()">
+                                            <i class="fas fa-pause me-1"></i> <span data-i18n="hold_bill">Hold Cart</span>
+                                        </button>
+                                        <button class="btn btn-outline-dark pos-action-btn" onclick="openHeldBillsModal()">
+                                            <i class="fas fa-list me-1"></i> <span data-i18n="held_bills">Held</span> 
+                                            <span class="badge bg-danger ms-1 rounded-pill" id="heldBillsCount">0</span>
+                                        </button>
+                                        <button class="btn btn-danger pos-action-btn" onclick="newSale()">
+                                            <i class="fas fa-trash-alt me-1"></i> Clear
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="d-flex gap-2 mb-3">
-                                        <input type="text" class="form-control mb-0" id="saleSearchInput" placeholder="Scan Barcode or Type Name..." onkeypress="handleSaleSearch(event)" onkeyup="searchSaleItemLive()">
-                                        <button class="btn btn-outline-primary" onclick="openQRScanner('sale')"><i class="fas fa-qrcode"></i></button>
-                                    </div>
-                                    
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                                <select class="form-select" id="posCustomerSelect"></select>
-                                                <button class="btn btn-outline-secondary" onclick="openAddCustomerModal()"><i class="fas fa-plus"></i></button>
+
+                                <div class="card-body p-3">
+                                    <!-- Search & Customer Row -->
+                                    <div class="row g-2 mb-3">
+                                        <!-- Big Search Bar -->
+                                        <div class="col-md-12">
+                                            <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden">
+                                                <span class="input-group-text bg-white border-end-0 text-primary"><i class="fas fa-search"></i></span>
+                                                <input type="text" class="form-control border-start-0" id="saleSearchInput" placeholder="Scan Barcode or Type Medicine Name..." onkeypress="handleSaleSearch(event)" onkeyup="searchSaleItemLive()" style="font-size: 1.1rem; box-shadow: none;">
+                                                <button class="btn btn-primary px-4" onclick="openQRScanner('sale')"><i class="fas fa-qrcode fs-5"></i></button>
                                             </div>
                                         </div>
+                                        <!-- Customer Select -->
                                         <div class="col-md-6">
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas fa-money-bill"></i></span>
-                                                <select class="form-select" id="posPaymentMethod">
-                                                    <option value="Cash" data-i18n="cash">Cash</option>
+                                            <div class="input-group input-group-sm shadow-sm rounded-2">
+                                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
+                                                <select class="form-select border-start-0" id="posCustomerSelect" style="font-weight: 600; color: #495057;"></select>
+                                                <button class="btn btn-outline-success" onclick="openAddCustomerModal()"><i class="fas fa-user-plus"></i></button>
+                                            </div>
+                                        </div>
+                                        <!-- Payment Method -->
+                                        <div class="col-md-6">
+                                            <div class="input-group input-group-sm shadow-sm rounded-2">
+                                                <span class="input-group-text bg-light"><i class="fas fa-wallet text-muted"></i></span>
+                                                <select class="form-select border-start-0" id="posPaymentMethod" style="font-weight: 600; color: #495057;">
+                                                    <option value="Cash" data-i18n="cash">Cash Payment</option>
                                                     <option value="Credit" data-i18n="credit">Credit (Udhaar)</option>
                                                 </select>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="table-responsive">
-                                        <table class="table table-sm align-middle">
+                                    <!-- Scrollable Cart Area -->
+                                    <div class="pos-cart-wrapper mb-3 shadow-inner">
+                                        <table class="table table-hover table-borderless pos-cart-table mb-0 align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th data-i18n="med_name">Item</th><th data-i18n="price">Price</th><th data-i18n="qty">Qty</th><th data-i18n="total">Total</th><th></th>
+                                                    <th data-i18n="med_name" width="40%">Item Name</th>
+                                                    <th data-i18n="price" width="20%">Price</th>
+                                                    <th data-i18n="qty" width="20%" class="text-center">Qty</th>
+                                                    <th data-i18n="total" width="20%" class="text-end">Total</th>
                                                 </tr>
                                             </thead>
-                                            <tbody id="saleItemsTable"></tbody>
+                                            <tbody id="saleItemsTable">
+                                                <!-- JS renders items here -->
+                                            </tbody>
                                         </table>
                                     </div>
-                                    <hr>
-                                    <!-- Tax and Discount Section -->
-                                    <div class="row mt-3 align-items-center bg-light p-3 rounded">
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label text-muted small fw-bold" data-i18n="tax">Tax / GST (%)</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control form-control-sm" id="saleTax" value="0" min="0" oninput="renderSaleTable()">
-                                                <span class="input-group-text">%</span>
+
+                                    <!-- Beautiful Checkout / Totals Section -->
+                                    <div class="pos-totals-box">
+                                        <div class="row align-items-center">
+                                            <!-- Tax & Discount Inputs -->
+                                            <div class="col-md-5 border-end">
+                                                <div class="mb-3">
+                                                    <label class="form-label text-muted small fw-bold text-uppercase mb-1" data-i18n="discount">Discount Apply</label>
+                                                    <div class="input-group input-group-sm shadow-sm">
+                                                        <input type="number" class="form-control fw-bold text-success" id="saleDiscount" value="0" min="0" oninput="renderSaleTable()">
+                                                        <select class="form-select bg-light" id="saleDiscountType" onchange="renderSaleTable()" style="max-width: 70px;">
+                                                            <option value="Rs">Rs</option>
+                                                            <option value="%">%</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label class="form-label text-muted small fw-bold text-uppercase mb-1" data-i18n="tax">Tax / GST Apply</label>
+                                                    <div class="input-group input-group-sm shadow-sm">
+                                                        <input type="number" class="form-control fw-bold text-danger" id="saleTax" value="0" min="0" oninput="renderSaleTable()">
+                                                        <span class="input-group-text bg-light">%</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4 mb-2">
-                                            <label class="form-label text-muted small fw-bold" data-i18n="discount">Discount</label>
-                                            <div class="input-group">
-                                                <input type="number" class="form-control form-control-sm" id="saleDiscount" value="0" min="0" oninput="renderSaleTable()">
-                                                <select class="form-select form-select-sm" id="saleDiscountType" onchange="renderSaleTable()" style="max-width: 80px;">
-                                                    <option value="Rs">Rs</option>
-                                                    <option value="%">%</option>
-                                                </select>
+                                            
+                                            <!-- Subtotal & Grand Total Display -->
+                                            <div class="col-md-7 ps-4">
+                                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                                    <span class="text-muted fw-bold text-uppercase" data-i18n="subtotal">Subtotal</span>
+                                                    <span class="fw-bold fs-5 text-dark">Rs <span id="saleSubTotal">0.00</span></span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-end mb-3">
+                                                    <span class="text-muted fw-bold text-uppercase" data-i18n="total">Grand Total</span>
+                                                    <div class="text-end">
+                                                        <span class="fs-4 text-primary fw-bold">Rs</span>
+                                                        <span class="grand-total-display" id="saleGrandTotal">0.00</span>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-success btn-lg w-100 shadow fw-bold pos-action-btn text-uppercase" onclick="completeSale()" style="letter-spacing: 1px;">
+                                                    <i class="fas fa-print me-2"></i> <span data-i18n="complete_sale">Complete Checkout</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <h6 class="text-muted mb-1"><span data-i18n="subtotal">Subtotal</span>: Rs <span id="saleSubTotal">0.00</span></h6>
-                                            <h3 class="text-primary fw-bold mb-2"><span data-i18n="total">Grand Total</span>: Rs <span id="saleGrandTotal">0.00</span></h3>
-                                        </div>
-                                        <div class="col-12 mt-2">
-                                            <button class="btn btn-success btn-lg w-100" onclick="completeSale()"><i class="fas fa-print"></i> <span data-i18n="complete_sale">Complete Sale (Thermal Print)</span></button>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header bg-info text-white"><h5 class="mb-0" data-i18n="quick_items">Quick Items</h5></div>
-                                <div class="card-body" id="quickItemsList"></div>
+
+                        <!-- RIGHT COLUMN: Quick Items Grid -->
+                        <div class="col-xl-4 col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white border-bottom py-3">
+                                    <h5 class="mb-0 fw-bold text-info"><i class="fas fa-star text-warning me-2"></i><span data-i18n="quick_items">Quick Tap Items</span></h5>
+                                </div>
+                                <div class="card-body p-3" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+                                    <div id="quickItemsList">
+                                        <!-- JS renders quick buttons here -->
+                                    </div>
+                                    <div class="text-center mt-4">
+                                        <small class="text-muted"><i class="fas fa-info-circle"></i> Most sold items appear here automatically.</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1384,7 +1462,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="medForm">
+					<form id="medForm">
                         <input type="hidden" id="medIdOriginal"> <!-- To track original ID when editing -->
                         <div class="mb-3">
                             <label data-i18n="barcode_id">Barcode / ID</label>
@@ -1403,6 +1481,19 @@
                             <div class="col-md-6 mb-3"><label data-i18n="purchase_price">Purchase Price (Khareed)</label><input type="number" class="form-control" id="mPurchasePrice" required></div>
                             <div class="col-md-6 mb-3"><label data-i18n="sale_price">Sale Price (Farokht)</label><input type="number" class="form-control" id="mPrice" required></div>
                         </div>
+                        
+                        <!-- Naya Tax aur Discount Box -->
+                        <div class="row bg-light pt-2 pb-1 mb-3 rounded border">
+                            <div class="col-md-6 mb-2">
+                                <label class="text-info fw-bold">Tax / GST (%)</label>
+                                <input type="number" class="form-control border-info" id="mTax" value="0" min="0">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="text-success fw-bold">Discount (%)</label>
+                                <input type="number" class="form-control border-success" id="mDiscount" value="0" min="0">
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-4 mb-3"><label data-i18n="stock">Stock Qty</label><input type="number" class="form-control" id="mStock" required></div>
                             <div class="col-md-4 mb-3"><label data-i18n="min_stock">Min Stock</label><input type="number" class="form-control" id="mMinStock" value="10"></div>
@@ -1493,24 +1584,39 @@
         </div>
     </div>
 
-    <!-- Details/Export Modal (For Dashboard Cards) -->
+<!-- Details/Export Modal (For Dashboard Cards) -->
     <div class="modal fade" id="detailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title" id="detailsModalTitle">Details</h5>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-danger btn-sm" onclick="exportDetailsPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="detailsModalTitle"><i class="fas fa-list"></i> Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body table-responsive">
-                    <table class="table table-bordered" id="detailsTable"><thead id="detailsTableHead"></thead><tbody id="detailsTableBody"></tbody></table>
+                <div class="modal-body bg-light">
+                    
+                    <!-- Search & PDF Action Bar -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm border">
+                        <div class="input-group" style="max-width: 300px;">
+                            <span class="input-group-text bg-primary text-white border-primary"><i class="fas fa-search"></i></span>
+                            <input type="text" id="detailsSearchInput" class="form-control border-primary" placeholder="Search in table..." onkeyup="searchDetailsTable()">
+                        </div>
+                        <button class="btn btn-danger mt-2 mt-md-0" onclick="exportDetailsPDF()">
+                            <i class="fas fa-file-pdf me-1"></i> Download PDF
+                        </button>
+                    </div>
+
+                    <!-- Beautiful Table -->
+                    <div class="table-responsive bg-white p-2 rounded shadow-sm border">
+                        <table class="table table-hover table-striped align-middle mb-0" id="detailsTable">
+                            <thead id="detailsTableHead" class="table-dark"></thead>
+                            <tbody id="detailsTableBody"></tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-
     <!-- Scanner Modal -->
     <div class="modal fade" id="scannerModal" tabindex="-1">
         <div class="modal-dialog">
@@ -2142,6 +2248,7 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.getElementById('dashNetProfit').innerText = 'Rs ' + netProfit.toFixed(2);
             document.getElementById('dashNetProfit').className = netProfit >= 0 ? "fw-bold text-info" : "fw-bold text-danger";
             document.getElementById('dashUdhaar').innerText = 'Rs ' + totalUdhaar.toFixed(2);
+			document.getElementById('dashTotalExpenses').innerText = 'Rs ' + totalExpenses.toFixed(2);
 
             const recentSalesTbody = document.getElementById('dashRecentSales');
             recentSalesTbody.innerHTML = '';
@@ -2837,6 +2944,8 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.getElementById('mBatch').value = ''; 
             document.getElementById('mPurchasePrice').value = ''; 
             document.getElementById('mExpiryDate').value = ''; 
+			document.getElementById('mTax').value = '0';
+            document.getElementById('mDiscount').value = '0';
             document.getElementById('barcodeContainerDiv').style.display = 'none';
             document.getElementById('qrHint').style.display = 'none';
             document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
@@ -2849,7 +2958,7 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             const inputId = document.getElementById('medId').value.trim();
             const newId = inputId ? inputId : 'MED-' + Math.floor(Math.random()*10000);
             
-            const med = {
+			const med = {
                 id: newId, 
                 name: document.getElementById('mName').value, 
                 formula: document.getElementById('mFormula').value,
@@ -2857,11 +2966,12 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                 category: document.getElementById('mCat').value,
                 purchasePrice: parseFloat(document.getElementById('mPurchasePrice').value || 0),
                 price: parseFloat(document.getElementById('mPrice').value), 
+                tax: parseFloat(document.getElementById('mTax').value || 0),           // Naya
+                discount: parseFloat(document.getElementById('mDiscount').value || 0), // Naya
                 stock: parseInt(document.getElementById('mStock').value),
                 minStock: parseInt(document.getElementById('mMinStock').value),
                 expiryDate: document.getElementById('mExpiryDate').value
             };
-
             if (originalId) {
                 db.medicines = db.medicines.filter(m => m.id !== originalId);
                 db.medicines.push(med);
@@ -2901,6 +3011,8 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.getElementById('mStock').value = m.stock; 
             document.getElementById('mMinStock').value = m.minStock;
             document.getElementById('mExpiryDate').value = m.expiryDate || '';
+			document.getElementById('mTax').value = m.tax || 0;
+            document.getElementById('mDiscount').value = m.discount || 0;
             
             document.getElementById('barcodeContainerDiv').style.display = 'flex'; 
             document.getElementById('qrHint').style.display = 'block';
@@ -2919,29 +3031,69 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             });
         }
 
-        let currentModalContext = '';
+let currentModalContext = '';
         function openDetailsModal(type) {
             currentModalContext = type;
             const thead = document.getElementById('detailsTableHead');
             const tbody = document.getElementById('detailsTableBody');
+            
+            // Clear previous search and table
+            document.getElementById('detailsSearchInput').value = ''; 
             thead.innerHTML = ''; tbody.innerHTML = '';
             let title = '';
 
             if (type === 'sales') {
-                title = currentLang==='en'?'Recent Sales':'حالیہ سیلز';
-                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Total</th><th>Profit</th></tr>`;
-                db.sales.forEach(s => { tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class=\"text-success\">Rs ${s.profit||0}</td></tr>`; });
+                title = 'Total Sales History';
+                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Customer</th><th>Total</th></tr>`;
+                db.sales.filter(s => !s.isReturned).forEach(s => { 
+                    tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>${s.customer}</td><td class="fw-bold text-success">Rs ${s.total}</td></tr>`; 
+                });
             } else if (type === 'medicines') {
-                title = currentLang==='en'?'All Medicines':'تمام ادویات';
-                thead.innerHTML = `<tr><th>ID/Barcode</th><th>Name & Formula</th><th>Batch</th><th>Stock</th><th>Price</th><th>Expiry</th></tr>`;
-                db.medicines.forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class=\"text-muted\">${m.formula||''}</small></td><td>${m.batchNumber||'-'}</td><td>${m.stock}</td><td>Rs ${m.price}</td><td>${m.expiryDate||'-'}</td></tr>`; });
-            } else if (type === 'lowstock') {
-                title = currentLang==='en'?'Low Stock Alert':'کم اسٹاک الرٹ';
-                thead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Current Stock</th><th>Min Required</th></tr>`;
-                db.medicines.filter(m=>m.stock<=m.minStock).forEach(m => { tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name}</td><td class=\"text-danger fw-bold\">${m.stock}</td><td>${m.minStock}</td></tr>`; });
+                title = 'Available Medicines Inventory';
+                thead.innerHTML = `<tr><th>Barcode/ID</th><th>Name</th><th>Category</th><th>Stock</th><th>Price</th></tr>`;
+                db.medicines.forEach(m => { 
+                    tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name} <br><small class="text-muted">${m.formula||''}</small></td><td>${m.category||'-'}</td><td class="fw-bold text-primary">${m.stock}</td><td>Rs ${m.price}</td></tr>`; 
+                });
+            } else if (type === 'profit') {
+                title = 'Net Profit Details';
+                thead.innerHTML = `<tr><th>Inv#</th><th>Date</th><th>Sale Total</th><th>Net Profit</th></tr>`;
+                db.sales.filter(s => !s.isReturned).forEach(s => { 
+                    tbody.innerHTML += `<tr><td>${s.id}</td><td>${s.date}</td><td>Rs ${s.total}</td><td class="text-success fw-bold">Rs ${s.profit||0}</td></tr>`; 
+                });
+            } else if (type === 'customers') {
+                title = 'Total Udhaar (Customer Balances)';
+                thead.innerHTML = `<tr><th>Customer ID</th><th>Name</th><th>Contact</th><th>Udhaar Balance</th></tr>`;
+                db.customers.filter(c => c.balance > 0).forEach(c => { 
+                    tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.phone||'-'}</td><td class="text-danger fw-bold">Rs ${parseFloat(c.balance).toFixed(2)}</td></tr>`; 
+                });
+            } else if (type === 'expenses') {
+                title = 'Total Expenses Details';
+                thead.innerHTML = `<tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>`;
+                db.expenses.forEach(e => { 
+                    tbody.innerHTML += `<tr><td>${e.date}</td><td><span class="badge bg-danger">${e.category}</span></td><td>${e.desc}</td><td class="text-danger fw-bold">Rs ${e.amount}</td></tr>`; 
+                });
             }
-            document.getElementById('detailsModalTitle').innerText = title;
+
+            if(tbody.innerHTML === '') {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No records found</td></tr>`;
+            }
+
+            document.getElementById('detailsModalTitle').innerHTML = `<i class="fas fa-list"></i> ${title}`;
             new bootstrap.Modal(document.getElementById('detailsModal')).show();
+        }
+
+        // Live Search function for the Modal Table
+        function searchDetailsTable() {
+            const input = document.getElementById("detailsSearchInput").value.toLowerCase();
+            const rows = document.getElementById("detailsTableBody").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if (text.includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
         }
 
         function exportDetailsPDF() {
@@ -3018,12 +3170,17 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             if(!med) { showToast('Medicine not found', 'danger'); return; }
             if(med.stock <= 0) { showToast('Out of stock!', 'danger'); return; }
             
-            const existing = db.currentSale.items.find(i => i.id === id);
+			const existing = db.currentSale.items.find(i => i.id === id);
             if(existing) {
                 if(existing.qty >= med.stock) { showToast('Not enough stock', 'danger'); return; }
-                existing.qty++; existing.total = existing.qty * existing.price; existing.totalPurchase = existing.qty * existing.purchasePrice;
+                existing.qty++; 
+                // Calculation will be handled dynamically in renderSaleTable
             } else { 
-                db.currentSale.items.push({ id: med.id, name: med.name, price: med.price, purchasePrice: med.purchasePrice || 0, qty: 1, total: med.price, totalPurchase: med.purchasePrice || 0 }); 
+                db.currentSale.items.push({ 
+                    id: med.id, name: med.name, price: med.price, purchasePrice: med.purchasePrice || 0, qty: 1, 
+                    taxRate: med.tax || 0, discountRate: med.discount || 0, // Item ka apna specific tax/discount
+                    total: 0, totalPurchase: 0 
+                }); 
             }
             saveDB(); renderSaleTable();
         }
@@ -3037,30 +3194,61 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             saveDB(); renderSaleTable();
         }
 
-        function renderSaleTable() {
+function renderSaleTable() {
             const tbody = document.getElementById('saleItemsTable'); tbody.innerHTML = ''; 
-            let subTotal = 0;
+            let subTotal = 0; // Asal Qeemat (Bagair kisi tax ya discount ke)
+            let totalItemDiscount = 0;
+            let totalItemTax = 0;
+
             db.currentSale.items.forEach((item, idx) => {
-                subTotal += item.total;
-                tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.price}</td>
+                // Item level calculations
+                let itemBaseTotal = item.qty * item.price;
+                let itemDiscVal = itemBaseTotal * ((item.discountRate || 0) / 100);
+                let itemTaxVal = (itemBaseTotal - itemDiscVal) * ((item.taxRate || 0) / 100);
+                
+                item.total = itemBaseTotal - itemDiscVal + itemTaxVal;
+                item.totalPurchase = item.qty * item.purchasePrice;
+
+                subTotal += itemBaseTotal;
+                totalItemDiscount += itemDiscVal;
+                totalItemTax += itemTaxVal;
+
+                // UI Display badges
+                let detailBadges = '';
+                if(item.discountRate > 0) detailBadges += `<span class="badge bg-success ms-1">-${item.discountRate}% Disc</span>`;
+                if(item.taxRate > 0) detailBadges += `<span class="badge bg-info ms-1">+${item.taxRate}% Tax</span>`;
+
+                tbody.innerHTML += `<tr>
+                        <td>${item.name} <br>${detailBadges}</td>
+                        <td>${item.price}</td>
                         <td><div class=\"input-group input-group-sm\" style=\"width:100px\" dir=\"ltr\"><button class=\"btn btn-secondary\" onclick=\"updateSaleQty(${idx}, -1)\">-</button><input class=\"form-control text-center\" value=\"${item.qty}\" readonly><button class=\"btn btn-secondary\" onclick=\"updateSaleQty(${idx}, 1)\">+</button></div></td>
-                        <td>${item.total}</td></tr>`;
+                        <td class="fw-bold text-primary">Rs ${item.total.toFixed(2)}</td>
+                        <td></td>
+                    </tr>`;
             });
             
+            // Handle Global Boxes (Oopar wale items calculate hone ke baad)
             const discountInput = document.getElementById('saleDiscount');
-            let discountVal = parseFloat(discountInput.value) || 0;
-            let discountType = document.getElementById('saleDiscountType').value;
-            let taxPercent = parseFloat(document.getElementById('saleTax').value) || 0;
+            let globalDiscountVal = parseFloat(discountInput.value) || 0;
+            let globalDiscountType = document.getElementById('saleDiscountType').value;
+            let globalTaxPercent = parseFloat(document.getElementById('saleTax').value) || 0;
 
-            let discountAmt = 0;
-            if (discountType === '%') { discountAmt = subTotal * (discountVal / 100); } else { discountAmt = discountVal; }
-            if (discountAmt > subTotal) discountAmt = subTotal; 
+            let afterItemMods = subTotal - totalItemDiscount + totalItemTax;
 
-            let totalAfterDisc = subTotal - discountAmt;
-            let taxAmt = totalAfterDisc * (taxPercent / 100);
-            let grandTotal = totalAfterDisc + taxAmt;
+            let globalDiscountAmt = 0;
+            if (globalDiscountType === '%') { globalDiscountAmt = afterItemMods * (globalDiscountVal / 100); } 
+            else { globalDiscountAmt = globalDiscountVal; }
 
-            db.currentSale.subTotal = subTotal; db.currentSale.discountAmt = discountAmt; db.currentSale.discountType = discountType; db.currentSale.discountVal = discountVal; db.currentSale.taxPercent = taxPercent; db.currentSale.taxAmt = taxAmt; db.currentSale.total = grandTotal;
+            let totalAfterGlobalDisc = afterItemMods - globalDiscountAmt;
+            let globalTaxAmt = totalAfterGlobalDisc * (globalTaxPercent / 100);
+            
+            let grandTotal = totalAfterGlobalDisc + globalTaxAmt;
+
+            // Database save karna
+            db.currentSale.subTotal = subTotal; 
+            db.currentSale.discountAmt = totalItemDiscount + globalDiscountAmt; 
+            db.currentSale.taxAmt = totalItemTax + globalTaxAmt; 
+            db.currentSale.total = grandTotal;
             
             document.getElementById('saleSubTotal').innerText = subTotal.toFixed(2);
             document.getElementById('saleGrandTotal').innerText = grandTotal.toFixed(2);
