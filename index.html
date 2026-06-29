@@ -587,38 +587,56 @@
                     </div>
                 </div>
 
-                <!-- 2. Medicines Page -->
+<!-- 2. Medicines Page -->
                 <div id="medicines" class="page">
-                    <div class="card">
+                    <div class="card border-0 shadow-sm">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-pills me-2"></i> <span data-i18n="medicines">Medicines</span></h5>
+                            <h5 class="mb-0"><i class="fas fa-pills me-2"></i> <span data-i18n="medicines">Medicines Management</span></h5>
                             <div>
                                 <button class="btn btn-light btn-sm me-2" onclick="openQRScanner('medicine')"><i class="fas fa-qrcode"></i> <span data-i18n="scan_qr">Scan Barcode</span></button>
                                 <button class="btn btn-success btn-sm admin-only-btn" onclick="openAddMedicineModal()"><i class="fas fa-plus"></i> <span data-i18n="add_med">Add New</span></button>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <input type="text" class="form-control mb-3" id="medSearch" placeholder="Search by name, formula or barcode..." onkeyup="renderMedicines()">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th data-i18n="barcode_id">Barcode / ID</th>
-                                            <th data-i18n="med_name">Name & Formula</th>
-                                            <th data-i18n="category">Category</th>
-                                            <th data-i18n="sale_price">Sale Price</th>
-                                            <th data-i18n="stock">Stock</th>
-                                            <th data-i18n="batch_expiry">Batch & Expiry</th>
-                                            <th data-i18n="actions" class="text-center admin-only-cell">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="medTableBody"></tbody>
-                                </table>
+                        <div class="card-body bg-light">
+                            <!-- 3 Cards System -->
+                            <div class="row g-4 mb-2">
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-primary" onclick="openMedModal('total_sales')" style="border-bottom: 4px solid #2c5aa0;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Total Medicines Sold</h6>
+                                                <h3 class="fw-bold text-primary" id="medCardTotalSold">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-primary text-white"><i class="fas fa-shopping-cart"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-success" onclick="openMedModal('all_medicines')" style="border-bottom: 4px solid #34a853;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Every Single Medicine</h6>
+                                                <h3 class="fw-bold text-success" id="medCardAllMeds">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-success text-white"><i class="fas fa-list-ul"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-danger" onclick="openMedModal('low_stock')" style="border-bottom: 4px solid #e74c3c;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Low Stock Medicines</h6>
+                                                <h3 class="fw-bold text-danger" id="medCardLowStock">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-danger text-white"><i class="fas fa-exclamation-triangle"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
                <!-- 3. Sales Page (Modernized Redesign) -->
                 <div id="sales" class="page">
                     <!-- Scoped CSS for new POS UI -->
@@ -1625,6 +1643,40 @@
                 <div class="modal-body">
                     <div id="reader"></div>
                     <p class="text-muted text-center mt-2 small">Upload an image or align barcode inside the box</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- New Medicine Stats Window (Modal) -->
+    <div class="modal fade" id="medicineStatsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable"> <!-- Changed to modal-xl -->
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="medModalTitle"><i class="fas fa-table"></i> Medicine Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <!-- Search & PDF Action Bar -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm border">
+                        <div class="input-group" style="max-width: 350px;">
+                            <span class="input-group-text bg-primary text-white border-primary"><i class="fas fa-search"></i></span>
+                            <input type="text" id="medModalSearch" class="form-control border-primary" placeholder="Search Barcode, Name or Formula..." onkeyup="searchMedModalTable()">
+                        </div>
+                        <button class="btn btn-danger mt-2 mt-md-0" onclick="exportMedModalPDF()">
+                            <i class="fas fa-file-pdf me-1"></i> Bulk Total PDF Download
+                        </button>
+                    </div>
+
+                    <!-- Beautiful Detail Table -->
+                    <div class="table-responsive bg-white p-2 rounded shadow-sm border">
+                        <table class="table table-hover table-striped align-middle mb-0" id="medModalTable">
+                            <thead class="table-dark" id="medModalTableHead">
+                                <!-- JS will insert headers dynamically here -->
+                            </thead>
+                            <tbody id="medModalTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2897,43 +2949,339 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
         }
 
         /* ================= Medicines & UI Logic ================= */
+// Helper function for Medicine Sales Calculations
+        function getMedSalesStats() {
+            let stats = {};
+            let totalQtyAll = 0;
+            db.sales.filter(s => !s.isReturned).forEach(sale => {
+                sale.items.forEach(item => {
+                    if(!stats[item.id]) stats[item.id] = { qty: 0, profit: 0 };
+                    stats[item.id].qty += item.qty;
+                    totalQtyAll += item.qty;
+                    // item.total has tax and discount applied per item
+                    let itemProfit = item.total - (item.qty * item.purchasePrice);
+                    stats[item.id].profit += itemProfit;
+                });
+            });
+            return { stats, totalQtyAll };
+        }
+
+        // Updated Render Function (Updates Dashboard Cards only)
         function renderMedicines() {
             if (!db || !Array.isArray(db.medicines)) return; 
+            const salesData = getMedSalesStats();
+            
+            // Populate Cards dynamically
+            const elTotalSold = document.getElementById('medCardTotalSold');
+            if(elTotalSold) elTotalSold.innerText = salesData.totalQtyAll;
+            
+            const elAllMeds = document.getElementById('medCardAllMeds');
+            if(elAllMeds) elAllMeds.innerText = db.medicines.length;
+            
+            const lowStockCount = db.medicines.filter(m => m.stock <= m.minStock).length;
+            const elLowStock = document.getElementById('medCardLowStock');
+            if(elLowStock) elLowStock.innerText = lowStockCount;
+        }
 
-            const q = document.getElementById('medSearch')?.value.toLowerCase() || '';
-            const tbody = document.getElementById('medTableBody');
+// Open Specific Modal Based on Card Click
+        function openMedModal(type) {
+            const thead = document.getElementById('medModalTableHead');
+            const tbody = document.getElementById('medModalTableBody');
             tbody.innerHTML = '';
-            const isCashier = currentUser && currentUser.role === 'cashier';
+            thead.innerHTML = '';
+            document.getElementById('medModalSearch').value = '';
+            
+            let title = '';
+            let medsToShow = [];
+            const salesData = getMedSalesStats().stats;
+            
+            if (type === 'total_sales') {
+                title = 'Total Medicines Sales Analytics';
+                // Show only medicines that actually have sales
+                medsToShow = db.medicines.filter(m => salesData[m.id] && salesData[m.id].qty > 0);
+            } else if (type === 'all_medicines') {
+                title = 'Every Single Medicine (Complete Inventory)';
+                medsToShow = db.medicines;
+            } else if (type === 'low_stock') {
+                title = 'Low Stock Alerts';
+                medsToShow = db.medicines.filter(m => m.stock <= m.minStock);
+            }
 
-            db.medicines.filter(m => 
-                m.name.toLowerCase().includes(q) || 
-                m.id.toLowerCase().includes(q) || 
-                (m.formula && m.formula.toLowerCase().includes(q)) ||
-                (m.batchNumber && m.batchNumber.toLowerCase().includes(q))
-            ).forEach(m => {
-                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
-                const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
+            const isCashier = currentUser && currentUser.role === 'cashier';
+            const isLowStock = type === 'low_stock'; // Check if card is low stock
+
+            // DYNAMIC HEADERS (Columns hiding logic)
+            let headHTML = `<tr>
+                <th>Barcode/ID</th>
+                <th>Name & Formula</th>
+                <th class="text-warning">Sell Count</th>
+                <th>Category</th>
+                <th>Purch. Price</th>`;
+            
+            if(!isLowStock) headHTML += `<th>Sale Price</th>`; // Remove from Low Stock
+            
+            headHTML += `<th>Stock</th><th>Batch/Expiry</th>`;
                 
-                let acts = '';
+            if(!isLowStock) { // Remove from Low Stock
+                headHTML += `<th>GST%</th><th>Disc%</th><th class="text-success">Total Profit</th>`;
+            }
+            headHTML += `<th class="text-center">Actions</th></tr>`;
+            thead.innerHTML = headHTML;
+
+            // DYNAMIC ROWS
+            medsToShow.forEach(m => {
+                const stat = salesData[m.id] || { qty: 0, profit: 0 };
+                const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
+                const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
+                
+				let acts = `<button class="btn btn-sm btn-danger text-white me-1 mb-1" onclick="printSingleMedPDF('${m.id}', '${type}')" title="Print PDF"><i class="fas fa-file-pdf"></i> PDF</button>`;
+                
                 if(!isCashier) {
-                    acts = `
-                    <td class="action-btns text-center admin-only-cell">
-                        <button class="btn btn-primary" onclick="editMedicine('${m.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>
-                    </td>`;
+                    // FIX: data-bs-dismiss added to close window before opening Edit Modal
+                    acts += `<button class="btn btn-sm btn-primary me-1 mb-1" data-bs-dismiss="modal" onclick="setTimeout(() => editMedicine('${m.id}'), 400)"><i class="fas fa-edit"></i></button>
+                             <button class="btn btn-sm btn-outline-danger mb-1" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>`;
                 }
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${m.id}</strong></td>
-                        <td>${m.name} <br><small class=\"text-muted\">${m.formula || ''}</small></td>
-                        <td>${m.category}</td>
-                        <td>Rs ${m.price} <br><small class=\"text-muted\">(Purch: Rs ${m.purchasePrice || 0})</small></td>
-                        <td class=\"${stockClass}\">${m.stock}</td>
-                        <td><span class=\"badge bg-secondary mb-1\">${m.batchNumber || 'N/A'}</span><br><span class=\"${expClass}\">${m.expiryDate || '-'}</span></td>
-                        ${acts}
-                    </tr>`;
+                let rowHTML = `<tr>
+                    <td><strong>${m.id}</strong></td>
+                    <td>${m.name} <br><small class="text-muted">${m.formula || ''}</small></td>
+                    <td class="fw-bold text-primary" style="font-size: 1.1em;">${stat.qty}</td>
+                    <td>${m.category || '-'}</td>
+                    <td>Rs ${m.purchasePrice || 0}</td>`;
+                    
+                if(!isLowStock) rowHTML += `<td>Rs ${m.price}</td>`;
+                
+                rowHTML += `<td class="${stockClass}">${m.stock}</td>
+                    <td><span class="badge bg-secondary">${m.batchNumber || '-'}</span><br><span class="${expClass}">${m.expiryDate || '-'}</span></td>`;
+                    
+                if(!isLowStock) {
+                    rowHTML += `<td>${m.tax || 0}%</td>
+                        <td>${m.discount || 0}%</td>
+                        <td class="text-success fw-bold">Rs ${stat.profit.toFixed(2)}</td>`;
+                }
+                
+                rowHTML += `<td class="text-center action-btns" style="white-space: nowrap;">${acts}</td></tr>`;
+                
+                tbody.innerHTML += rowHTML;
             });
+
+            if(medsToShow.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="text-center text-muted py-4">No records found</td></tr>`;
+            }
+
+            document.getElementById('medModalTitle').innerHTML = `<i class="fas fa-table"></i> ${title}`;
+            new bootstrap.Modal(document.getElementById('medicineStatsModal')).show();
+        }
+
+        // Live Search for Medicine Window
+        function searchMedModalTable() {
+            const input = document.getElementById("medModalSearch").value.toLowerCase();
+            const rows = document.getElementById("medModalTableBody").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if (text.includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        // Bulk PDF Download (Table parsing)
+        function exportMedModalPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            const title = document.getElementById('medModalTitle').innerText;
+            doc.text(title, 14, 15);
+            
+            const table = document.getElementById('medModalTable');
+            const headers = []; const data = [];
+            
+            // Extract headers but skip the last "Actions" column
+            const ths = table.querySelectorAll('thead th');
+            for(let i=0; i<ths.length-1; i++) headers.push(ths[i].innerText);
+            
+            // Extract rows
+            const trs = table.querySelectorAll('tbody tr');
+            trs.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if(tds.length > 1) { // Skip empty row
+                    const rowData = [];
+                    for(let i=0; i<tds.length-1; i++) { rowData.push(tds[i].innerText.replace(/\n/g, ' ')); }
+                    data.push(rowData);
+                }
+            });
+
+            doc.autoTable({ head: [headers], body: data, startY: 20, styles: { fontSize: 8 } });
+            doc.save(`${title.replace(/[^a-zA-Z0-9]/g, '_')}_Report.pdf`);
+            showToast('Bulk PDF Downloaded!');
+        }
+
+// Single Medicine PDF in TABLE FORMAT (Conditional Columns)
+        function printSingleMedPDF(id, type) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            const salesData = getMedSalesStats().stats;
+            const stat = salesData[m.id] || { qty: 0, profit: 0 };
+            
+            const isLowStock = (type === 'low_stock'); // Pata chalega ke kis card se call hua hai
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); 
+            
+            doc.setFontSize(16);
+            doc.text(`Medicine Sales & Details Report: ${m.name}`, 14, 15);
+            
+            let headers = [];
+            let data = [];
+            
+            // Agar Low Stock card se PDF download ho raha hai
+            if (isLowStock) {
+                headers = ['Barcode/ID', 'Name & Formula', 'Sell Count', 'Category', 'Purch. Price', 'Stock', 'Batch/Expiry'];
+                data = [
+                    [
+                        m.id, 
+                        `${m.name} \n(${m.formula || '-'})`, 
+                        stat.qty, 
+                        m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, 
+                        m.stock, 
+                        `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`
+                    ]
+                ];
+            } 
+            // Agar Total Sales ya All Medicines card se PDF download ho raha hai
+            else {
+                headers = ['Barcode/ID', 'Name & Formula', 'Category', 'Purch. Price', 'Sale Price', 'Stock', 'Batch/Expiry', 'GST%', 'Disc%', 'Total Sold', 'Total Profit'];
+                data = [
+                    [
+                        m.id, 
+                        `${m.name} \n(${m.formula || '-'})`, 
+                        m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, 
+                        `Rs ${m.price}`, 
+                        m.stock, 
+                        `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`, 
+                        `${m.tax || 0}%`, 
+                        `${m.discount || 0}%`, 
+                        stat.qty, 
+                        `Rs ${stat.profit.toFixed(2)}`
+                    ]
+                ];
+            }
+
+            // PDF Table Generate karna
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 25,
+                styles: { fontSize: 9, halign: 'center', valign: 'middle' },
+                headStyles: { fillColor: [44, 90, 160], textColor: 255 },
+                columnStyles: isLowStock ? 
+                    { 0: { fontStyle: 'bold' } } : // Low stock styling
+                    { 0: { fontStyle: 'bold' }, 10: { textColor: [40, 167, 69], fontStyle: 'bold' } } // Normal styling with profit green
+            });
+            
+            doc.save(`Single_Med_${m.id}.pdf`);
+            showToast('Single Medicine Table PDF Downloaded!');
+        }
+
+        // Live Search for Medicine Window
+        function searchMedModalTable() {
+            const input = document.getElementById("medModalSearch").value.toLowerCase();
+            const rows = document.getElementById("medModalTableBody").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if (text.includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        // Bulk PDF Download (Whole Table)
+        function exportMedModalPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); // Landscape format since there are many columns
+            const title = document.getElementById('medModalTitle').innerText;
+            doc.text(title, 14, 15);
+            doc.autoTable({ 
+                html: '#medModalTable', 
+                startY: 20, 
+                columns: [0,1,2,3,4,5,6,7,8,9,10] // Exclude Actions column (index 11)
+            }); 
+            doc.save(`${title.replace(/[^a-zA-Z0-9]/g, '_')}_Report.pdf`);
+            showToast('Bulk PDF Downloaded!');
+        }
+
+// Single Medicine PDF in TABLE FORMAT (Conditional Columns)
+        function printSingleMedPDF(id, type) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            const salesData = getMedSalesStats().stats;
+            const stat = salesData[m.id] || { qty: 0, profit: 0 };
+            
+            const isLowStock = (type === 'low_stock'); // Pata chalega ke kis card se call hua hai
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); 
+            
+            doc.setFontSize(16);
+            doc.text(`Medicine Sales & Details Report: ${m.name}`, 14, 15);
+            
+            let headers = [];
+            let data = [];
+            
+            // Agar Low Stock card se PDF download ho raha hai
+            if (isLowStock) {
+                headers = ['Barcode/ID', 'Name & Formula', 'Sell Count', 'Category', 'Purch. Price', 'Stock', 'Batch/Expiry'];
+                data = [
+                    [
+                        m.id, 
+                        `${m.name} \n(${m.formula || '-'})`, 
+                        stat.qty, 
+                        m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, 
+                        m.stock, 
+                        `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`
+                    ]
+                ];
+            } 
+            // Agar Total Sales ya All Medicines card se PDF download ho raha hai
+            else {
+                headers = ['Barcode/ID', 'Name & Formula', 'Category', 'Purch. Price', 'Sale Price', 'Stock', 'Batch/Expiry', 'GST%', 'Disc%', 'Total Sold', 'Total Profit'];
+                data = [
+                    [
+                        m.id, 
+                        `${m.name} \n(${m.formula || '-'})`, 
+                        m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, 
+                        `Rs ${m.price}`, 
+                        m.stock, 
+                        `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`, 
+                        `${m.tax || 0}%`, 
+                        `${m.discount || 0}%`, 
+                        stat.qty, 
+                        `Rs ${stat.profit.toFixed(2)}`
+                    ]
+                ];
+            }
+
+            // PDF Table Generate karna
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 25,
+                styles: { fontSize: 9, halign: 'center', valign: 'middle' },
+                headStyles: { fillColor: [44, 90, 160], textColor: 255 },
+                columnStyles: isLowStock ? 
+                    { 0: { fontStyle: 'bold' } } : // Low stock styling
+                    { 0: { fontStyle: 'bold' }, 10: { textColor: [40, 167, 69], fontStyle: 'bold' } } // Normal styling with profit green
+            });
+            
+            doc.save(`Single_Med_${m.id}.pdf`);
+            showToast('Single Medicine Table PDF Downloaded!');
         }
 
         function openAddMedicineModal() {
