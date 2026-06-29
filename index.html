@@ -1905,8 +1905,7 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
         }
 
         /* ================= Database (LocalStorage) ================= */
-        let db = {};
-        
+        let db = {}; 
         function initDB() {
             const saved = localStorage.getItem('pharmacySysDB');
             if (saved) {
@@ -1919,7 +1918,7 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                 db.employees = db.employees || [];
                 db.alerts = db.alerts || [];
                 db.deliveries = db.deliveries || [];
-                db.settings = db.settings || { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
+                db.settings = db.settings || { pharmacyName: 'Pharmacy System', address: '', email: '' };
                 db.customers = db.customers || [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
                 db.heldBills = db.heldBills || [];
                 db.expenses = db.expenses || [];
@@ -1935,28 +1934,33 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                 initRBACData();
 
             } else {
-                db.medicines = [
-                    { id: '123456789012', name: 'Panadol', formula: 'Paracetamol', batchNumber: 'B-001', category: 'Painkiller', purchasePrice: 40, price: 50, stock: 100, minStock: 20, expiryDate: '2026-12-31' },
-                    { id: 'M102', name: 'Augmentin', formula: 'Amoxicillin', batchNumber: 'B-002', category: 'Antibiotic', purchasePrice: 200, price: 250, stock: 15, minStock: 20, expiryDate: '2025-05-10' },
-                    { id: 'M103', name: 'Vitamin C', formula: 'Ascorbic Acid', batchNumber: 'B-003', category: 'Vitamins', purchasePrice: 100, price: 150, stock: 200, minStock: 50, expiryDate: '2028-01-01' }
-                ];
+                // FACTORY RESET YA NEW SETUP KE WAQT YEH BLOCK CHALEGA
+                // Yahan se saara default (dummy) data hata diya gaya hai taake software bilkul clean start le
+                db.medicines = [];
                 db.sales = [];
                 db.currentSale = { items: [], subTotal: 0, discountAmt: 0, discountType: 'Rs', discountVal: 0, taxPercent: 0, taxAmt: 0, total: 0, editingId: null, editingDate: null };
-                db.suppliers = [{ id: 'S1', name: 'PharmaCorp Inc', contact: '0300-1234567', balance: 0, ledger: [] }];
+                db.suppliers = [];
                 db.purchases = []; 
-                db.employees = [{ id: 'E1', name: 'Dr. Ali', role: 'Pharmacist' }];
+                db.employees = [];
                 db.deliveries = [];
                 db.alerts = [];
-                db.settings = { pharmacyName: 'Elite Pharmacy', address: 'Main St, City', email: '0300-1234567' };
-                db.customers = [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }];
+                db.settings = { pharmacyName: 'Pharmacy System', address: '', email: '' };
+                db.customers = [{ id: 'C-WALKIN', name: 'Walk-in Customer', phone: '', balance: 0, ledger: [] }]; // POS chalane ke liye sirf Walk-in zaruri hai
                 db.heldBills = [];
                 db.expenses = [];
                 db.shifts = [];
                 db.currentShift = null;
+                
+                // Login access bachane ke liye sirf default users banenge
                 initRBACData();
             }
             generateSystemAlerts();
-			applySystemSettings();
+            
+            // Agar applySystemSettings function mojood hai to usay call karein
+            if (typeof applySystemSettings === "function") {
+                applySystemSettings(); 
+            }
+            
             saveDB(); 
         }
 
