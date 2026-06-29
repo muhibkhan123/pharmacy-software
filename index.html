@@ -1519,13 +1519,31 @@
                             <input type="text" class="form-control border-primary" id="medId" placeholder="Scan Barcode or leave empty">
                             <small class="text-muted" data-i18n="barcode_hint">Use scanner to auto-fill</small>
                         </div>
+				<!-- Name & Category with Datalist Dropdowns -->
                         <div class="row">
-                            <div class="col-md-6 mb-3"><label data-i18n="med_name">Name</label><input type="text" class="form-control" id="mName" required></div>
-                            <div class="col-md-6 mb-3"><label data-i18n="category">Category</label><input type="text" class="form-control" id="mCat" required></div>
+                            <div class="col-md-6 mb-3">
+                                <label data-i18n="med_name">Name</label>
+                                <input type="text" class="form-control" id="mName" list="nameSuggestions" autocomplete="off" required>
+                                <datalist id="nameSuggestions"></datalist>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label data-i18n="category">Category</label>
+                                <input type="text" class="form-control" id="mCat" list="catSuggestions" autocomplete="off" required>
+                                <datalist id="catSuggestions"></datalist>
+                            </div>
                         </div>
+                        
+                        <!-- Formula & Batch with Datalist Dropdown -->
                         <div class="row">
-                            <div class="col-md-6 mb-3"><label data-i18n="formula">Formula / Generic Name</label><input type="text" class="form-control" id="mFormula" placeholder="e.g. Paracetamol"></div>
-                            <div class="col-md-6 mb-3"><label data-i18n="batch_no">Batch / Lot No</label><input type="text" class="form-control" id="mBatch" placeholder="e.g. B-101"></div>
+                            <div class="col-md-6 mb-3">
+                                <label data-i18n="formula">Formula / Generic Name</label>
+                                <input type="text" class="form-control" id="mFormula" list="formulaSuggestions" autocomplete="off" placeholder="e.g. Paracetamol">
+                                <datalist id="formulaSuggestions"></datalist>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label data-i18n="batch_no">Batch / Lot No</label>
+                                <input type="text" class="form-control" id="mBatch" placeholder="e.g. B-101">
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3"><label data-i18n="purchase_price">Purchase Price (Khareed)</label><input type="number" class="form-control" id="mPurchasePrice" required></div>
@@ -3411,8 +3429,31 @@ function renderCharts() {
             document.getElementById('barcodeContainerDiv').style.display = 'none';
             document.getElementById('qrHint').style.display = 'none';
             document.getElementById('medModalTitle').innerText = currentLang==='en'?'Add Medicine':'نئی دوا شامل کریں';
+			populateMedicineSuggestions();
             new bootstrap.Modal(document.getElementById('medicineModal')).show();
             setTimeout(() => document.getElementById('medId').focus(), 500);
+        }
+
+// Auto-complete Dropdowns ke liye data tyar karna
+        function populateMedicineSuggestions() {
+            const nameList = document.getElementById('nameSuggestions');
+            const catList = document.getElementById('catSuggestions');
+            const formulaList = document.getElementById('formulaSuggestions');
+            
+            // Purana data clear karein
+            nameList.innerHTML = '';
+            catList.innerHTML = '';
+            formulaList.innerHTML = '';
+
+            // Database se unique (bila-taqrar) names nikalna
+            const uniqueNames = [...new Set(db.medicines.map(m => m.name).filter(Boolean))];
+            const uniqueCats = [...new Set(db.medicines.map(m => m.category).filter(Boolean))];
+            const uniqueFormulas = [...new Set(db.medicines.map(m => m.formula).filter(Boolean))];
+
+            // Datalist mein options add karna
+            uniqueNames.forEach(n => nameList.innerHTML += `<option value="${n}">`);
+            uniqueCats.forEach(c => catList.innerHTML += `<option value="${c}">`);
+            uniqueFormulas.forEach(f => formulaList.innerHTML += `<option value="${f}">`);
         }
 
         function saveMedicine() {
@@ -3483,6 +3524,7 @@ function renderCharts() {
             });
 
             document.getElementById('medModalTitle').innerText = currentLang==='en'?'Edit Medicine':'ترمیم کریں';
+			populateMedicineSuggestions();
             new bootstrap.Modal(document.getElementById('medicineModal')).show();
         }
 
