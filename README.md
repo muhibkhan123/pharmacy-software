@@ -182,6 +182,15 @@ Simply double-click the index.html file to open it in any modern web browser (Ch
 
 No local server (XAMPP/Node) is required!
 
+🔑 Default Login Credentials
+
+(Assuming initial system setup)
+
+Super Admin: superadmin / superadminmuhib
+
+Admin: admin / admin123
+
+Cashier: cashier / pos123
 
 🖨️ Printing Configuration
 
@@ -203,6 +212,6 @@ Local Storage: All data (pharmacySysDB) is saved directly in the user's browser 
 
 Backups: It is highly recommended to use the Settings > Database Backup feature weekly to prevent data loss in case browser cache is cleared.
 
-Factory Reset Keys: The system contains hardcoded reset keys to prevent accidental data erasure by standard admins.
+Factory Reset Keys: The system contains hardcoded reset keys (muhib-1234, Latif-1, mohammad-1) to prevent accidental data erasure by standard admins.
 
 Built with ❤️ for Pharmacies requiring fast, local, and reliable management software.
