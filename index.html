@@ -331,7 +331,7 @@
                     </div>
                 </div>
 
-                <!-- 1. Dashboard Page -->
+<!-- 1. Dashboard Page -->
                 <div id="dashboard" class="page active">
                     <!-- Quick Actions Row -->
                     <div class="row mb-3">
@@ -357,7 +357,7 @@
                         </div>
                     </div>
 
-<!-- Statistics Cards -->
+                    <!-- Statistics 5 Cards -->
                     <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 mb-4 g-3">
                         <div class="col">
                             <div class="stat-card h-100" onclick="openDetailsModal('sales')">
@@ -403,7 +403,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- New Expenses Card -->
+                        <!-- Expenses Card -->
                         <div class="col perm-card-accounting">
                             <div class="stat-card h-100" onclick="openDetailsModal('expenses')">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -416,6 +416,33 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- NAYE 2 CARDS (Total Purchases & Expected Profit) -->
+                    <div class="row mb-4 perm-card-accounting">
+                        <div class="col-md-6">
+                            <div class="stat-card h-100 bg-white shadow-sm border" style="border-left: 5px solid #6c757d !important;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted fw-bold">Total Purchases (Current Stock Value)</h6>
+                                        <h3 class="fw-bold text-secondary" id="dashTotalPurchases">Rs 0.00</h3>
+                                    </div>
+                                    <div class="icon bg-gradient-dark text-white"><i class="fas fa-boxes"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card h-100 bg-white shadow-sm border" style="border-left: 5px solid #28a745 !important;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-muted fw-bold">Expected Profit (From Current Stock)</h6>
+                                        <h3 class="fw-bold text-success" id="dashExpectedProfit">Rs 0.00</h3>
+                                    </div>
+                                    <div class="icon bg-gradient-success text-white"><i class="fas fa-hand-holding-usd"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Charts Row -->
                     <div class="row mb-4 perm-charts">
                         <div class="col-md-8">
@@ -2301,6 +2328,24 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.getElementById('dashNetProfit').className = netProfit >= 0 ? "fw-bold text-info" : "fw-bold text-danger";
             document.getElementById('dashUdhaar').innerText = 'Rs ' + totalUdhaar.toFixed(2);
 			document.getElementById('dashTotalExpenses').innerText = 'Rs ' + totalExpenses.toFixed(2);
+			// Naye 2 Cards ki Calculation (Total Purchases aur Expected Profit)
+            let totalStockPurchaseValue = 0;
+            let totalExpectedProfitValue = 0;
+
+            db.medicines.forEach(m => {
+                let pPrice = parseFloat(m.purchasePrice) || 0;
+                let sPrice = parseFloat(m.price) || 0;
+                let qty = parseInt(m.stock) || 0;
+
+                // Purchase Cost = Khareed Qeemat * Stock
+                totalStockPurchaseValue += (pPrice * qty);
+                
+                // Expected Profit = (Farokht Qeemat - Khareed Qeemat) * Stock
+                totalExpectedProfitValue += ((sPrice - pPrice) * qty);
+            });
+
+            document.getElementById('dashTotalPurchases').innerText = 'Rs ' + totalStockPurchaseValue.toFixed(2);
+            document.getElementById('dashExpectedProfit').innerText = 'Rs ' + totalExpectedProfitValue.toFixed(2);s
 
             const recentSalesTbody = document.getElementById('dashRecentSales');
             recentSalesTbody.innerHTML = '';
@@ -2323,11 +2368,19 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             }
         }
 
+// Pura renderCharts function is se replace kar dein
         function renderCharts() {
-            const ctxSales = document.getElementById('salesTrendChart').getContext('2d');
+            const salesCanvas = document.getElementById('salesTrendChart');
+            const invCanvas = document.getElementById('inventoryDistChart');
+            
+            // Agar canvas nahi mila to code crash na ho
+            if (!salesCanvas || !invCanvas) return; 
+
+            const ctxSales = salesCanvas.getContext('2d');
             if (salesTrendChartInst) salesTrendChartInst.destroy();
             
             const activeSales = db.sales.filter(s => !s.isReturned);
+            
             salesTrendChartInst = new Chart(ctxSales, {
                 type: 'line',
                 data: {
@@ -2340,14 +2393,23 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                         borderWidth: 2, tension: 0.4, fill: true
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, // Yeh line zaroori hai graph ko fit karne ke liye
+                    plugins: { legend: { display: false } }, 
+                    scales: { x: { grid: { display: false } } } 
+                }
             });
 
-            const ctxInv = document.getElementById('inventoryDistChart').getContext('2d');
+            const ctxInv = invCanvas.getContext('2d');
             if (invDistChartInst) invDistChartInst.destroy();
             
             const categories = {};
-            db.medicines.forEach(m => { categories[m.category] = (categories[m.category] || 0) + 1; });
+            db.medicines.forEach(m => { 
+                // Agar category khali ho to error na aaye
+                let cat = m.category || 'Uncategorized';
+                categories[cat] = (categories[cat] || 0) + 1; 
+            });
             const labels = Object.keys(categories);
             const data = Object.values(categories);
 
@@ -2360,7 +2422,12 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                         backgroundColor: ['#2c5aa0', '#34a853', '#ffc107', '#ff6b35', '#17a2b8', '#6f42c1']
                     }]
                 },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { position: 'bottom' } }, 
+                    cutout: '70%' 
+                }
             });
         }
 
