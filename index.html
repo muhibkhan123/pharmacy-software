@@ -417,14 +417,15 @@
                         </div>
                     </div>
 
-                    <!-- NAYE 2 CARDS (Total Purchases & Expected Profit) -->
+					<!-- NAYE 2 CARDS (Total Purchases & Expected Profit) -->
                     <div class="row mb-4 perm-card-accounting">
                         <div class="col-md-6">
                             <div class="stat-card h-100 bg-white shadow-sm border" style="border-left: 5px solid #6c757d !important;">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="text-muted fw-bold">Total Purchases (Current Stock Value)</h6>
-                                        <h3 class="fw-bold text-secondary" id="dashTotalPurchases">Rs 0.00</h3>
+                                        <!-- Yahan text-secondary ko text-danger kar diya gaya hai -->
+                                        <h3 class="fw-bold text-danger" id="dashTotalPurchases">Rs 0.00</h3>
                                     </div>
                                     <div class="icon bg-gradient-dark text-white"><i class="fas fa-boxes"></i></div>
                                 </div>
@@ -443,23 +444,27 @@
                         </div>
                     </div>
 
-                    <!-- Charts Row -->
+
+					<!-- Charts Row -->
                     <div class="row mb-4 perm-charts">
                         <div class="col-md-8">
                             <div class="card dash-widget-card h-100">
                                 <div class="card-header d-flex justify-content-between align-items-center">
                                     <span data-i18n="sales_trend">Sales Trend (Last 7 Days)</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="showPage('reports')"><i class="fas fa-arrow-right"></i></button>
                                 </div>
-                                <div class="card-body">
-                                    <canvas id="salesTrendChart" height="100"></canvas>
+                                <!-- Yahan Fix Apply Kiya Gaya Hai -->
+                                <div class="card-body" style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="salesTrendChart"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="card dash-widget-card h-100">
                                 <div class="card-header"><span data-i18n="inv_dist">Inventory Distribution</span></div>
-                                <div class="card-body d-flex justify-content-center align-items-center">
-                                    <canvas id="inventoryDistChart" height="200"></canvas>
+                                <!-- Yahan Fix Apply Kiya Gaya Hai -->
+                                <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="inventoryDistChart"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -2309,7 +2314,7 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
         let salesTrendChartInst = null;
         let invDistChartInst = null;
 
-        function loadDashboard() {
+function loadDashboard() {
             generateSystemAlerts(); 
             const activeSales = db.sales.filter(s => !s.isReturned);
             const totalSales = activeSales.reduce((sum, s) => sum + parseFloat(s.total || 0), 0);
@@ -2327,8 +2332,9 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.getElementById('dashNetProfit').innerText = 'Rs ' + netProfit.toFixed(2);
             document.getElementById('dashNetProfit').className = netProfit >= 0 ? "fw-bold text-info" : "fw-bold text-danger";
             document.getElementById('dashUdhaar').innerText = 'Rs ' + totalUdhaar.toFixed(2);
-			document.getElementById('dashTotalExpenses').innerText = 'Rs ' + totalExpenses.toFixed(2);
-			// Naye 2 Cards ki Calculation (Total Purchases aur Expected Profit)
+            document.getElementById('dashTotalExpenses').innerText = 'Rs ' + totalExpenses.toFixed(2);
+            
+            // Naye 2 Cards ki Calculation (Total Purchases aur Expected Profit)
             let totalStockPurchaseValue = 0;
             let totalExpectedProfitValue = 0;
 
@@ -2345,7 +2351,8 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             });
 
             document.getElementById('dashTotalPurchases').innerText = 'Rs ' + totalStockPurchaseValue.toFixed(2);
-            document.getElementById('dashExpectedProfit').innerText = 'Rs ' + totalExpectedProfitValue.toFixed(2);s
+            // Fix: Yahan aakhir se extra 's' hata diya gaya hai
+            document.getElementById('dashExpectedProfit').innerText = 'Rs ' + totalExpectedProfitValue.toFixed(2);
 
             const recentSalesTbody = document.getElementById('dashRecentSales');
             recentSalesTbody.innerHTML = '';
@@ -2363,31 +2370,68 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             });
             if(lowStockList.length === 0) lowStockTbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Stock & Expiry levels are good!</td></tr>`;
 
-            if(currentUser && currentUser.perms.includes('reports')) {
-                renderCharts();
-            }
+            // Fix: renderCharts ko setTimeout mein rakha gaya hai taake graphs sahi se ban jayein
+            setTimeout(() => {
+                if(currentUser && currentUser.perms.includes('reports')) {
+                    renderCharts();
+                }
+            }, 100);
         }
 
 // Pura renderCharts function is se replace kar dein
-        function renderCharts() {
+function renderCharts() {
             const salesCanvas = document.getElementById('salesTrendChart');
             const invCanvas = document.getElementById('inventoryDistChart');
             
-            // Agar canvas nahi mila to code crash na ho
             if (!salesCanvas || !invCanvas) return; 
 
             const ctxSales = salesCanvas.getContext('2d');
             if (salesTrendChartInst) salesTrendChartInst.destroy();
             
-            const activeSales = db.sales.filter(s => !s.isReturned);
+            // --- AUTOMATIC 7 DAYS CALCULATION LOGIC ---
+            const last7DaysLabels = [];
+            const last7DaysData = [];
+            const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = new Date();
+
+            // Pichle 6 din + Aaj ka din (Total 7 days)
+            for (let i = 6; i >= 0; i--) {
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() - i); // Din minus kar rahe hain
+                
+                // Graph ke neeche Day ka naam set karna
+                if (i === 0) {
+                    last7DaysLabels.push('Today');
+                } else {
+                    last7DaysLabels.push(dayNames[targetDate.getDay()]);
+                }
+
+                // Us makhsoos din ki total sale nikalna
+                let dailyTotal = 0;
+                db.sales.filter(s => !s.isReturned).forEach(sale => {
+                    const saleDate = new Date(sale.date); // Sale ki tareekh
+                    
+                    // Check karna ke kya sale ki tareekh aur target tareekh match karti hain
+                    if (!isNaN(saleDate.getTime())) {
+                        if (saleDate.getFullYear() === targetDate.getFullYear() &&
+                            saleDate.getMonth() === targetDate.getMonth() &&
+                            saleDate.getDate() === targetDate.getDate()) {
+                            
+                            dailyTotal += parseFloat(sale.total || 0);
+                        }
+                    }
+                });
+                last7DaysData.push(dailyTotal); // Din ki sale array mein daal di
+            }
+            // ------------------------------------------
             
             salesTrendChartInst = new Chart(ctxSales, {
                 type: 'line',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: last7DaysLabels, // Automatic Days
                     datasets: [{
                         label: 'Sales (Rs)',
-                        data: [1200, 1900, 1500, 2200, 1800, 2500, activeSales.reduce((s,a)=>s+parseFloat(a.total||0),0) || 3000],
+                        data: last7DaysData, // Automatic Original Sales Data
                         borderColor: '#2c5aa0',
                         backgroundColor: 'rgba(44, 90, 160, 0.1)',
                         borderWidth: 2, tension: 0.4, fill: true
@@ -2395,18 +2439,21 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
                 },
                 options: { 
                     responsive: true, 
-                    maintainAspectRatio: false, // Yeh line zaroori hai graph ko fit karne ke liye
+                    maintainAspectRatio: false, 
                     plugins: { legend: { display: false } }, 
-                    scales: { x: { grid: { display: false } } } 
+                    scales: { 
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true } // Graph hamesha 0 se start hoga
+                    } 
                 }
             });
 
+            // Inventory Distribution Graph (Baqi code same hai)
             const ctxInv = invCanvas.getContext('2d');
             if (invDistChartInst) invDistChartInst.destroy();
             
             const categories = {};
             db.medicines.forEach(m => { 
-                // Agar category khali ho to error na aaye
                 let cat = m.category || 'Uncategorized';
                 categories[cat] = (categories[cat] || 0) + 1; 
             });
