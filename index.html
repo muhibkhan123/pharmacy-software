@@ -890,7 +890,7 @@
                     </div>
                 </div>
 
-                <!-- 3.5 Purchases Page -->
+				<!-- 3.5 Purchases Page -->
                 <div id="purchases" class="page">
                     <div class="card">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -907,6 +907,8 @@
                                             <th data-i18n="supplier">Supplier</th>
                                             <th data-i18n="payment_type">Payment Type</th>
                                             <th data-i18n="total">Total Amount</th>
+                                            <!-- Naya Column Added -->
+                                            <th class="text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="purchasesTableBody"></tbody>
@@ -915,7 +917,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Customers Page -->
                 <div id="customers" class="page">
                     <div class="card">
@@ -1218,7 +1219,7 @@
 
     <!-- Modals -->
 
-    <!-- New Purchase / GRN Modal -->
+<!-- New Purchase / GRN Modal -->
     <div class="modal fade" id="newPurchaseModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -1230,11 +1231,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold" data-i18n="supplier">Select Supplier</label>
-                            <select class="form-select" id="purchaseSupplierSelect"></select>
+                            <select class="form-select border-primary" id="purchaseSupplierSelect"></select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold" data-i18n="payment_type">Payment Method</label>
-                            <select class="form-select" id="purchasePaymentMethod">
+                            <select class="form-select border-primary" id="purchasePaymentMethod">
                                 <option value="Cash" data-i18n="cash">Cash Paid</option>
                                 <option value="Credit" data-i18n="credit">Credit (Udhaar / Pay Later)</option>
                             </select>
@@ -1244,7 +1245,9 @@
                     <div class="card mb-3 border-0 shadow-sm">
                         <div class="card-body">
                             <div class="d-flex gap-2 mb-3">
-                                <input type="text" class="form-control" id="purchaseSearchInput" placeholder="Scan Barcode or Type Medicine Name..." onkeyup="searchPurchaseItemLive()">
+                                <input type="text" class="form-control mb-0 border-primary" id="purchaseSearchInput" placeholder="Scan Barcode or Type Medicine Name..." onkeyup="searchPurchaseItemLive()">
+                                <!-- YAHAN SCANNER BUTTON ADD KIYA GAYA HAI -->
+                                <button class="btn btn-outline-primary" onclick="openQRScanner('purchase')"><i class="fas fa-qrcode"></i></button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-bordered table-sm align-middle bg-white">
@@ -2725,9 +2728,10 @@ function renderCharts() {
         /* ================= Purchases (GRN) & Suppliers Khata ================= */
         let currentPurchaseCart = [];
         
-        function renderPurchases() {
+function renderPurchases() {
             const tbody = document.getElementById('purchasesTableBody');
             tbody.innerHTML = '';
+            
             db.purchases.slice().reverse().forEach(p => {
                 tbody.innerHTML += `
                     <tr>
@@ -2736,12 +2740,44 @@ function renderCharts() {
                         <td>${p.supplierName}</td>
                         <td><span class=\"badge ${p.paymentMethod === 'Cash' ? 'bg-success' : 'bg-danger'}\">${p.paymentMethod}</span></td>
                         <td class=\"fw-bold\">Rs ${parseFloat(p.total).toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-info text-white" onclick="printPurchaseGRN('${p.id}')" title="Print GRN"><i class="fas fa-print"></i></button>
+                            <button class="btn btn-sm btn-danger admin-only-btn" onclick="deletePurchase('${p.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>
                 `;
             });
             if(db.purchases.length === 0) {
-                tbody.innerHTML = `<tr><td colspan=\"5\" class=\"text-center text-muted\">No purchases recorded yet</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan=\"6\" class=\"text-center text-muted\">No purchases recorded yet</td></tr>`;
             }
+            if (typeof enforceUIRestrictions === "function") enforceUIRestrictions();
+        }
+
+        // NAYA FUNCTION: GRN Print Karne Ke Liye
+        function printPurchaseGRN(id) {
+            const p = db.purchases.find(x => x.id === id);
+            if(!p) return;
+            
+            let itemsHtml = p.items.map(i => `<div style="padding-bottom:3px; border-bottom:1px dashed #ccc; margin-bottom:3px;">- ${i.name} <br> <small>Qty: ${i.qty} | Price: Rs ${i.purchasePrice} | Subtotal: Rs ${i.total}</small></div>`).join('');
+            
+            printGenericRecord('Goods Receipt Note (GRN)', {
+                'GRN #': p.id,
+                'Date': p.date.split(',')[0],
+                'Supplier': p.supplierName,
+                'Payment Method': p.paymentMethod,
+                'Items Received': `<div style="margin-top:5px;">${itemsHtml}</div>`,
+                'Total Amount': `<h4 style="margin:5px 0;">Rs ${p.total}</h4>`
+            });
+        }
+
+        // NAYA FUNCTION: Purchase Delete Karne Ke Liye
+        function deletePurchase(id) {
+            showConfirm('Delete this purchase record? Note: This will NOT deduct stock automatically, you must adjust stock manually if needed.', () => {
+                db.purchases = db.purchases.filter(p => p.id !== id);
+                saveDB();
+                renderPurchases();
+                showToast('Purchase record deleted', 'danger');
+            });
         }
 
         function openNewPurchaseModal() {
@@ -3658,10 +3694,22 @@ let currentModalContext = '';
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             }, 500);
         }
-        function onScanSuccess(decodedText, decodedResult) {
-            stopScanner(); bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); showToast('Scanned: ' + decodedText);
-            if(scanContext === 'sale') addToSale(decodedText);
-            else if (scanContext === 'medicine') { document.getElementById('medSearch').value = decodedText; renderMedicines(); }
+		function onScanSuccess(decodedText, decodedResult) {
+            stopScanner(); 
+            bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); 
+            showToast('Scanned: ' + decodedText);
+            
+            if(scanContext === 'sale') {
+                addToSale(decodedText);
+            } else if (scanContext === 'medicine') { 
+                document.getElementById('medSearch').value = decodedText; 
+                renderMedicines(); 
+            } else if (scanContext === 'purchase') {
+                // Naya Purchase Context
+                document.getElementById('purchaseSearchInput').value = decodedText;
+                addToPurchase(decodedText);
+                document.getElementById('purchaseSearchInput').value = '';
+            }
         }
         function onScanFailure(error) { } 
         function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
