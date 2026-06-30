@@ -1138,7 +1138,7 @@
                     </div>
                 </div>
 
-                <!-- 7. Suppliers Page -->
+				<!-- 7. Suppliers Page -->
                 <div id="suppliers" class="page">
                     <div class="card">
                         <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
@@ -1147,11 +1147,13 @@
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-hover">
+                                <table class="table table-hover align-middle">
                                     <thead>
                                         <tr>
-                                            <th data-i18n="name">Name</th>
+                                            <th data-i18n="name">Supplier Name</th>
+                                            <th>Company / Agency</th>
                                             <th data-i18n="contact">Contact</th>
+                                            <th>Address</th>
                                             <th data-i18n="balance">Balance (Payable)</th>
                                             <th data-i18n="actions" class="text-center admin-only-cell">Actions</th>
                                         </tr>
@@ -1695,17 +1697,37 @@
         </div>
     </div>
 
-    <!-- Add/Edit Supplier Modal -->
+<!-- Add/Edit Supplier Modal -->
     <div class="modal fade" id="supplierModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title" data-i18n="add_supplier">Add Supplier</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header">
+                    <h5 class="modal-title" data-i18n="add_supplier">Add / Edit Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body">
                     <input type="hidden" id="supId">
-                    <div class="mb-3"><label data-i18n="name">Name</label><input type="text" class="form-control" id="sName"></div>
-                    <div class="mb-3"><label data-i18n="contact">Contact</label><input type="text" class="form-control" id="sContact"></div>
+                    <div class="mb-3">
+                        <label class="fw-bold" data-i18n="name">Supplier Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="sName" required placeholder="e.g. Asif Ali">
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Company / Agency Name</label>
+                        <input type="text" class="form-control" id="sCompany" placeholder="e.g. GSK / Abbott Distributors">
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold" data-i18n="contact">Contact Number <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="sContact" required placeholder="0300-XXXXXXX">
+                    </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Address</label>
+                        <textarea class="form-control" id="sAddress" rows="2" placeholder="Full Address..."></textarea>
+                    </div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-primary" onclick="saveSupplier()" data-i18n="save">Save</button></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSupplier()" data-i18n="save">Save Supplier</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1792,22 +1814,28 @@
 
 <!-- New Medicine Stats Window (Modal) -->
     <div class="modal fade" id="medicineStatsModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable"> <!-- Changed to modal-xl -->
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title" id="medModalTitle"><i class="fas fa-table"></i> Medicine Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body bg-light">
-                    <!-- Search & PDF Action Bar -->
+                    <!-- Search & PDF/Barcode Action Bar -->
                     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm border">
                         <div class="input-group" style="max-width: 350px;">
                             <span class="input-group-text bg-primary text-white border-primary"><i class="fas fa-search"></i></span>
                             <input type="text" id="medModalSearch" class="form-control border-primary" placeholder="Search Barcode, Name or Formula..." onkeyup="searchMedModalTable()">
                         </div>
-                        <button class="btn btn-danger mt-2 mt-md-0" onclick="exportMedModalPDF()">
-                            <i class="fas fa-file-pdf me-1"></i> Bulk Total PDF Download
-                        </button>
+                        <div class="mt-2 mt-md-0">
+                            <!-- NAYA: Barcode Generate Button -->
+                            <button class="btn btn-dark me-2" onclick="printSelectedMedBarcodes()">
+                                <i class="fas fa-barcode me-1"></i> Generate Barcodes
+                            </button>
+                            <button class="btn btn-danger" onclick="exportMedModalPDF()">
+                                <i class="fas fa-file-pdf me-1"></i> Bulk PDF Download
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Beautiful Detail Table -->
@@ -3247,8 +3275,13 @@ function renderPurchases() {
             if(elLowStock) elLowStock.innerText = lowStockCount;
         }
 
-// Open Specific Modal Based on Card Click
+// Global Variables for Modal Filtering
+        let currentModalMeds = [];
+        let currentModalType = '';
+
+        // Open Specific Modal Based on Card Click
         function openMedModal(type) {
+            currentModalType = type; // Global variable set ki
             const thead = document.getElementById('medModalTableHead');
             const tbody = document.getElementById('medModalTableBody');
             tbody.innerHTML = '';
@@ -3275,12 +3308,13 @@ function renderPurchases() {
                 medsToShow = db.medicines.filter(m => m.expiryDate && new Date(m.expiryDate) <= next90Days);
             }
 
+            currentModalMeds = medsToShow; // Store for PDF/Barcode extraction
             const isCashier = currentUser && currentUser.role === 'cashier';
-            // Agar Low Stock ya Expiring ka card hai to restricted columns hide honge
             const isRestrictedCard = (type === 'low_stock' || type === 'expiring'); 
 
-            // DYNAMIC HEADERS
+            // DYNAMIC HEADERS (With Checkbox)
             let headHTML = `<tr>
+                <th style="width: 40px;"><input type="checkbox" id="selectAllModalMeds" onclick="toggleAllModalMeds(this)" style="cursor:pointer; width: 16px; height: 16px;"></th>
                 <th>Barcode/ID</th>
                 <th>Name & Formula</th>
                 <th class="text-warning">Sell Count</th>
@@ -3311,6 +3345,7 @@ function renderPurchases() {
                 }
 
                 let rowHTML = `<tr>
+                    <td><input type="checkbox" class="modal-med-checkbox" value="${m.id}" style="cursor:pointer; width: 16px; height: 16px;"></td>
                     <td><strong>${m.id}</strong></td>
                     <td>${m.name} <br><small class="text-muted">${m.formula || ''}</small></td>
                     <td class="fw-bold text-primary" style="font-size: 1.1em;">${stat.qty}</td>
@@ -3339,6 +3374,147 @@ function renderPurchases() {
 
             document.getElementById('medModalTitle').innerHTML = `<i class="fas fa-table"></i> ${title}`;
             new bootstrap.Modal(document.getElementById('medicineStatsModal')).show();
+        }
+
+        // Live Search for Medicine Window
+        function searchMedModalTable() {
+            const input = document.getElementById("medModalSearch").value.toLowerCase();
+            const rows = document.getElementById("medModalTableBody").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if (text.includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        // CHECKBOX LOGIC (Select All)
+        function toggleAllModalMeds(source) {
+            const checkboxes = document.querySelectorAll('.modal-med-checkbox');
+            for(let i=0; i < checkboxes.length; i++) {
+                // Sirf unko check karein jo search mein filter ho kar display ho rahe hain
+                if(checkboxes[i].closest('tr').style.display !== 'none') {
+                    checkboxes[i].checked = source.checked;
+                }
+            }
+        }
+
+        // Helper: Get Ticked or All Medicines
+        function getSelectedOrAllMeds() {
+            const checkboxes = document.querySelectorAll('.modal-med-checkbox:checked');
+            if (checkboxes.length > 0) {
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+                return currentModalMeds.filter(m => selectedIds.includes(m.id));
+            }
+            // Agar koi tick nahi kiya, to wo sab bheje jo search mein nazar aa rahe hain (ya sab)
+            return currentModalMeds; 
+        }
+
+        // NAYA: Barcode Print Function
+        function printSelectedMedBarcodes() {
+            const medsToPrint = getSelectedOrAllMeds();
+            if(medsToPrint.length === 0) { showToast('No medicines to print.', 'warning'); return; }
+            
+            // Calling the existing Barcode Logic
+            bootstrap.Modal.getInstance(document.getElementById('medicineStatsModal')).hide();
+            executeQRPrint(medsToPrint);
+        }
+
+        // Bulk PDF Download (Object parsing)
+        function exportMedModalPDF() {
+            const medsToExport = getSelectedOrAllMeds();
+            if(medsToExport.length === 0) { showToast('No data to export', 'warning'); return; }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            const title = document.getElementById('medModalTitle').innerText;
+            doc.text(title, 14, 15);
+            
+            const isRestrictedCard = (currentModalType === 'low_stock' || currentModalType === 'expiring');
+            const salesData = getMedSalesStats().stats;
+
+            let headers = [];
+            let data = [];
+
+            if (isRestrictedCard) {
+                headers = ['Barcode/ID', 'Name & Formula', 'Sell Count', 'Category', 'Purch. Price', 'Stock', 'Batch/Expiry'];
+                data = medsToExport.map(m => {
+                    const stat = salesData[m.id] || { qty: 0 };
+                    return [
+                        m.id, `${m.name} \n(${m.formula || '-'})`, stat.qty, m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, m.stock, `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`
+                    ];
+                });
+            } else {
+                headers = ['Barcode/ID', 'Name & Formula', 'Category', 'Purch. Price', 'Sale Price', 'Stock', 'Batch/Expiry', 'GST%', 'Disc%', 'Total Sold', 'Total Profit'];
+                data = medsToExport.map(m => {
+                    const stat = salesData[m.id] || { qty: 0, profit: 0 };
+                    return [
+                        m.id, `${m.name} \n(${m.formula || '-'})`, m.category || '-', 
+                        `Rs ${m.purchasePrice || 0}`, `Rs ${m.price}`, m.stock, 
+                        `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`, 
+                        `${m.tax || 0}%`, `${m.discount || 0}%`, stat.qty, `Rs ${stat.profit.toFixed(2)}`
+                    ];
+                });
+            }
+
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 20,
+                styles: { fontSize: 8, halign: 'center', valign: 'middle' },
+                headStyles: { fillColor: [44, 90, 160] }
+            });
+
+            doc.save(`${title.replace(/[^a-zA-Z0-9]/g, '_')}_Report.pdf`);
+            showToast('Bulk PDF Downloaded!');
+        }
+
+        // Single Medicine PDF in TABLE FORMAT (Conditional Columns)
+        function printSingleMedPDF(id, type) {
+            const m = db.medicines.find(x => x.id === id);
+            if(!m) return;
+            const salesData = getMedSalesStats().stats;
+            const stat = salesData[m.id] || { qty: 0, profit: 0 };
+            
+            const isLowStock = (type === 'low_stock' || type === 'expiring'); 
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); 
+            
+            doc.setFontSize(16);
+            doc.text(`Medicine Sales & Details Report: ${m.name}`, 14, 15);
+            
+            let headers = [];
+            let data = [];
+            
+            if (isLowStock) {
+                headers = ['Barcode/ID', 'Name & Formula', 'Sell Count', 'Category', 'Purch. Price', 'Stock', 'Batch/Expiry'];
+                data = [[
+                    m.id, `${m.name} \n(${m.formula || '-'})`, stat.qty, m.category || '-', 
+                    `Rs ${m.purchasePrice || 0}`, m.stock, `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`
+                ]];
+            } else {
+                headers = ['Barcode/ID', 'Name & Formula', 'Category', 'Purch. Price', 'Sale Price', 'Stock', 'Batch/Expiry', 'GST%', 'Disc%', 'Total Sold', 'Total Profit'];
+                data = [[
+                    m.id, `${m.name} \n(${m.formula || '-'})`, m.category || '-', 
+                    `Rs ${m.purchasePrice || 0}`, `Rs ${m.price}`, m.stock, 
+                    `${m.batchNumber || '-'}\n${m.expiryDate || '-'}`, 
+                    `${m.tax || 0}%`, `${m.discount || 0}%`, stat.qty, `Rs ${stat.profit.toFixed(2)}`
+                ]];
+            }
+
+            doc.autoTable({
+                head: [headers], body: data, startY: 25,
+                styles: { fontSize: 9, halign: 'center', valign: 'middle' },
+                headStyles: { fillColor: [44, 90, 160], textColor: 255 },
+                columnStyles: isLowStock ? { 0: { fontStyle: 'bold' } } : { 0: { fontStyle: 'bold' }, 10: { textColor: [40, 167, 69], fontStyle: 'bold' } } 
+            });
+            
+            doc.save(`Single_Med_${m.id}.pdf`);
+            showToast('Single Medicine Table PDF Downloaded!');
         }
 
         // Live Search for Medicine Window
@@ -4407,25 +4583,105 @@ function renderSaleTable() {
             }
         }
 
-        /* --- Suppliers --- */
+/* --- Suppliers --- */
         function renderSuppliers() {
-            const tbody = document.getElementById('suppliersTableBody'); tbody.innerHTML = '';
-            const isCashier = currentUser.role === 'cashier';
+            const tbody = document.getElementById('suppliersTableBody'); 
+            tbody.innerHTML = '';
+            const isCashier = currentUser && currentUser.role === 'cashier';
+            
             db.suppliers.forEach(s => {
                 recalculateSupplierBalance(s.id); 
                 const balClass = s.balance > 0 ? 'text-danger fw-bold' : 'text-success';
                 
-                let acts = `<button class=\"btn btn-sm btn-info text-white\" onclick=\"openSupplierLedger('${s.id}')\"><i class=\"fas fa-book\"></i> Ledger</button>`;
+                let acts = `<button class="btn btn-sm btn-info text-white me-1 mb-1" onclick="openSupplierLedger('${s.id}')"><i class="fas fa-book"></i> Ledger</button>`;
                 if(!isCashier) {
-                    acts += `<button class=\"btn btn-sm btn-primary mx-1\" onclick=\"editSupplier('${s.id}')\"><i class=\"fas fa-edit\"></i></button>
-                             <button class=\"btn btn-sm btn-danger\" onclick=\"deleteSupplier('${s.id}')\"><i class=\"fas fa-trash\"></i></button>`;
+                    acts += `<button class="btn btn-sm btn-primary me-1 mb-1" onclick="editSupplier('${s.id}')"><i class="fas fa-edit"></i></button>
+                             <button class="btn btn-sm btn-danger mb-1" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button>`;
                 }
                 
-                tbody.innerHTML += `<tr><td><strong>${s.name}</strong></td><td>${s.contact}</td><td class=\"${balClass}\">Rs ${parseFloat(s.balance || 0).toFixed(2)}</td>
-                    <td class=\"text-center action-btns\">${acts}</td>
+                tbody.innerHTML += `<tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td><span class="badge bg-secondary">${s.company || '-'}</span></td>
+                    <td>${s.contact}</td>
+                    <td><small class="text-muted">${s.address || '-'}</small></td>
+                    <td class="${balClass}">Rs ${parseFloat(s.balance || 0).toFixed(2)}</td>
+                    <td class="text-center action-btns" style="white-space: nowrap;">${acts}</td>
                 </tr>`;
             });
+
+            if(db.suppliers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No suppliers added yet.</td></tr>`;
+            }
         }
+
+        function openAddSupplierModal() { 
+            document.getElementById('supId').value = ''; 
+            document.getElementById('sName').value = ''; 
+            document.getElementById('sCompany').value = ''; 
+            document.getElementById('sContact').value = ''; 
+            document.getElementById('sAddress').value = ''; 
+            new bootstrap.Modal(document.getElementById('supplierModal')).show(); 
+        }
+
+        function saveSupplier() {
+            const id = document.getElementById('supId').value; 
+            const name = document.getElementById('sName').value; 
+            const company = document.getElementById('sCompany').value; 
+            const contact = document.getElementById('sContact').value;
+            const address = document.getElementById('sAddress').value;
+
+            if(!name || !contact) { 
+                showToast('Name and Contact Number are required!', 'warning'); 
+                return; 
+            }
+
+            if(id) { 
+                // Edit mode
+                const s = db.suppliers.find(x => x.id === id); 
+                if(s) { 
+                    s.name = name; 
+                    s.company = company;
+                    s.contact = contact; 
+                    s.address = address;
+                } 
+            } else { 
+                // Add New mode
+                db.suppliers.push({ 
+                    id: 'S' + Date.now(), 
+                    name: name, 
+                    company: company,
+                    contact: contact, 
+                    address: address,
+                    balance: 0, 
+                    ledger: [] 
+                }); 
+            }
+            saveDB(); 
+            renderSuppliers(); 
+            bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide(); 
+            showToast('Supplier Saved Successfully');
+        }
+
+        function editSupplier(id) { 
+            const s = db.suppliers.find(x => x.id === id); 
+            if(!s) return; 
+            document.getElementById('supId').value = s.id; 
+            document.getElementById('sName').value = s.name; 
+            document.getElementById('sCompany').value = s.company || ''; 
+            document.getElementById('sContact').value = s.contact; 
+            document.getElementById('sAddress').value = s.address || ''; 
+            new bootstrap.Modal(document.getElementById('supplierModal')).show(); 
+        }
+
+        function deleteSupplier(id) { 
+            showConfirm('Are you sure you want to delete this supplier?', () => { 
+                db.suppliers = db.suppliers.filter(s => s.id !== id); 
+                saveDB(); 
+                renderSuppliers(); 
+                showToast('Supplier Deleted', 'danger'); 
+            }); 
+        }
+
         function openAddSupplierModal() { document.getElementById('supId').value=''; document.getElementById('sName').value=''; document.getElementById('sContact').value=''; new bootstrap.Modal(document.getElementById('supplierModal')).show(); }
         function saveSupplier() {
             const id = document.getElementById('supId').value; const name = document.getElementById('sName').value; const contact = document.getElementById('sContact').value;
