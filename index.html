@@ -977,18 +977,20 @@
                     </div>
                 </div>
 
-                <!-- 6. Reports Page -->
+<!-- 6. Reports Page -->
                 <div id="reports" class="page">
                     <div class="card">
-                        <div class="card-header bg-dark text-white d-flex justify-content-between">
+                        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-chart-bar"></i> <span data-i18n="reports">Sales Reports</span></h5>
                             <div>
-                                <button class="btn btn-success btn-sm me-2" onclick="exportExcel()"><i class="fas fa-file-excel"></i> <span data-i18n="export_excel">Excel</span></button>
+                                <!-- Added PDF Button -->
+                                <button class="btn btn-danger btn-sm me-2" onclick="exportReportsPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                                <button class="btn btn-success btn-sm" onclick="exportExcel()"><i class="fas fa-file-excel"></i> <span data-i18n="export_excel">Excel</span></button>
                             </div>
                         </div>
                         <div class="card-body" id="reportPrintArea">
                             
-                            <!-- New Feature: Date Filter for Reports -->
+                            <!-- Date Filter for Reports -->
                             <div class="row mb-4 bg-light p-3 rounded">
                                 <div class="col-md-4">
                                     <label class="form-label text-muted small fw-bold">From Date</label>
@@ -1006,18 +1008,28 @@
                             <h4 class="text-center mb-4" data-i18n="sales_report">Sales Report</h4>
                             <div class="table-responsive">
                                 <table class="table table-striped align-middle" id="reportsTable">
-                                    <thead><tr>
-                                        <th>Inv #</th><th data-i18n="date">Date</th><th data-i18n="customer">Customer</th>
-                                        <th data-i18n="discount">Disc. / Tax</th><th data-i18n="total">Total</th>
-                                        <th data-i18n="net_profit" class="text-success perm-col-profit">Profit</th><th data-i18n="actions" class="text-center">Actions</th>
-                                    </tr></thead>
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <!-- Checkbox Header (Select All) -->
+                                            <th style="width: 40px;"><input type="checkbox" id="selectAllReports" onclick="toggleAllReports(this)" style="cursor:pointer; width: 16px; height: 16px;"></th>
+                                            <th>Inv #</th>
+                                            <th data-i18n="date">Date</th>
+                                            <th data-i18n="customer">Customer</th>
+                                            <th data-i18n="discount">Disc. / Tax</th>
+                                            <th data-i18n="total">Total</th>
+                                            <th data-i18n="net_profit" class="text-success perm-col-profit">Profit</th>
+                                            <th data-i18n="actions" class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
                                     <tbody id="reportsTableBody"></tbody>
+                                    <!-- Nayi Totals Row (Footer) -->
+                                    <tfoot class="table-secondary fw-bold" id="reportsTableFoot">
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <!-- 6.1 Expenses Page -->
                 <div id="expenses" class="page">
                     <div class="card">
@@ -3946,20 +3958,24 @@ function renderSaleTable() {
             setTimeout(() => { document.getElementById('printSection').classList.add('no-print-section'); document.getElementById('mainSystem').classList.remove('no-print-section'); document.getElementById('saleSearchInput')?.focus(); }, 1000);
         }
 
-        /* ================= Reports Actions & Returns ================= */
+// Global Array Export Filter ke liye
+        let currentFilteredSales = [];
+
         function renderReports() {
-            const tbody = document.getElementById('reportsTableBody'); tbody.innerHTML = '';
+            const tbody = document.getElementById('reportsTableBody'); 
+            const tfoot = document.getElementById('reportsTableFoot');
+            tbody.innerHTML = '';
             
             const startDateFilter = document.getElementById('repStartDate')?.value;
             const endDateFilter = document.getElementById('repEndDate')?.value;
-            const isSuperOrAdmin = currentUser.role === 'superadmin' || currentUser.role === 'admin';
+            const isSuperOrAdmin = currentUser && (currentUser.role === 'superadmin' || currentUser.role === 'admin');
 
             let filteredSales = db.sales.slice().reverse();
 
             if (startDateFilter || endDateFilter) {
                 filteredSales = filteredSales.filter(s => {
                     const saleDateObj = new Date(s.date.split(',')[0] || s.date.split(' ')[0]); 
-                    if (isNaN(saleDateObj)) return true; // Keep if it can't be parsed
+                    if (isNaN(saleDateObj)) return true;
                     
                     saleDateObj.setHours(0,0,0,0);
                     let pass = true;
@@ -3976,6 +3992,11 @@ function renderSaleTable() {
                 });
             }
 
+            currentFilteredSales = filteredSales;
+
+            let totalSalesSum = 0;
+            let totalProfitSum = 0;
+
             filteredSales.forEach(s => { 
                 const isRet = s.isReturned;
                 const rowClass = isRet ? 'returned-row' : '';
@@ -3983,7 +4004,6 @@ function renderSaleTable() {
                 
                 let actions = `<button class=\"btn btn-sm btn-info text-white\" onclick=\"reprintSale('${s.id}')\" title=\"Print\"><i class=\"fas fa-print\"></i></button>`;
                 
-                // RBAC on Reports
                 if(isSuperOrAdmin) {
                     if (!isRet) {
                         actions += `<button class=\"btn btn-sm btn-primary\" onclick=\"editSale('${s.id}')\" title=\"Edit\"><i class=\"fas fa-edit\"></i></button>
@@ -3992,23 +4012,124 @@ function renderSaleTable() {
                     actions += `<button class=\"btn btn-sm btn-danger\" onclick=\"deleteSale('${s.id}')\" title=\"Delete Permanent\"><i class=\"fas fa-trash\"></i></button>`;
                 }
 
+                // Sirf Un-returned sales ko Totals mein count karna
+                if(!isRet) {
+                    totalSalesSum += parseFloat(s.total || 0);
+                    totalProfitSum += parseFloat(s.profit || 0);
+                }
+
                 tbody.innerHTML += `
                     <tr class=\"${rowClass}\">
-                        <td>${s.id} ${retBadge}</td><td>${s.date}</td><td>${s.customer} <br><small>(${s.paymentMethod||'Cash'})</small></td>
-                        <td class=\"text-danger\">Disc: ${s.discountAmt>0?s.discountAmt:'0'} | Tax: ${s.taxAmt>0?s.taxAmt:'0'}</td>
-                        <td class=\"fw-bold\">Rs ${s.total}</td>
-                        <td class=\"text-success fw-bold perm-col-profit\">Rs ${isRet ? '0 (Void)' : (s.profit || 0)}</td>
+                        <td><input type="checkbox" class="report-checkbox" value="${s.id}" style="cursor:pointer; width: 16px; height: 16px;"></td>
+                        <td>${s.id} ${retBadge}</td>
+                        <td>${s.date}</td>
+                        <td>${s.customer} <br><small>(${s.paymentMethod||'Cash'})</small></td>
+                        <td class=\"text-danger\">Disc: ${s.discountAmt>0 ? parseFloat(s.discountAmt).toFixed(2) : '0'} | Tax: ${s.taxAmt>0 ? parseFloat(s.taxAmt).toFixed(2) : '0'}</td>
+                        <td class=\"fw-bold\">Rs ${parseFloat(s.total || 0).toFixed(2)}</td>
+                        <td class=\"text-success fw-bold perm-col-profit\">Rs ${isRet ? '0 (Void)' : (parseFloat(s.profit || 0).toFixed(2))}</td>
                         <td class=\"text-center action-btns\">${actions}</td>
                     </tr>`; 
             });
             
             if (filteredSales.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No records found for the selected dates.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No records found for the selected dates.</td></tr>`;
+                tfoot.innerHTML = '';
+            } else {
+                // Table ke end mein Sum (Totals) ki line print karna
+                tfoot.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-end text-uppercase fs-6">Grand Total (Excluding Returns):</td>
+                        <td class="text-primary fs-5">Rs ${totalSalesSum.toFixed(2)}</td>
+                        <td class="text-success fs-5 perm-col-profit">Rs ${totalProfitSum.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                `;
             }
 
-            if(!isSuperOrAdmin && !currentUser.perms.includes('accounting')) {
+            // Role base hide/show profit column
+            if(currentUser && !isSuperOrAdmin && !currentUser.perms.includes('accounting')) {
                 document.querySelectorAll('.perm-col-profit').forEach(e => e.style.display = 'none');
             }
+
+            // Uncheck the 'Select All' checkbox on fresh load
+            const selectAllCb = document.getElementById('selectAllReports');
+            if(selectAllCb) selectAllCb.checked = false;
+        }
+
+        // Select All Checkboxes Function
+        function toggleAllReports(source) {
+            const checkboxes = document.querySelectorAll('.report-checkbox');
+            for(let i=0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        // Check if user selected specific checkboxes or wants all
+        function getSelectedOrAllReports() {
+            const checkboxes = document.querySelectorAll('.report-checkbox:checked');
+            if (checkboxes.length > 0) {
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+                return currentFilteredSales.filter(s => selectedIds.includes(s.id));
+            }
+            return currentFilteredSales; // Default (Agar kisi par tick nahi laga)
+        }
+
+        // Excel Export Updated
+        function exportExcel() {
+            const salesToExport = getSelectedOrAllReports();
+            if(salesToExport.length === 0) { showToast('No sales data to export', 'warning'); return; }
+
+            const dataForExcel = salesToExport.map(s => ({
+                'Invoice #': s.id, 'Date': s.date, 'Customer': s.customer, 'Payment Method': s.paymentMethod || 'Cash',
+                'Discount': s.discountAmt || 0, 'Tax': s.taxAmt || 0, 'Total': s.total || 0,
+                'Profit': s.isReturned ? 0 : (s.profit || 0), 'Returned': s.isReturned ? 'Yes' : 'No'
+            }));
+
+            // Excel Totals Calculation
+            const totalSales = salesToExport.filter(s=>!s.isReturned).reduce((sum, s) => sum + parseFloat(s.total||0), 0);
+            const totalProfit = salesToExport.filter(s=>!s.isReturned).reduce((sum, s) => sum + parseFloat(s.profit||0), 0);
+            
+            dataForExcel.push({}); // Empty Row for spacing
+            dataForExcel.push({ 'Discount': 'GRAND TOTALS:', 'Total': totalSales, 'Profit': totalProfit });
+
+            const ws = XLSX.utils.json_to_sheet(dataForExcel);
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sales Report"); 
+            XLSX.writeFile(wb, "Pharmacy_Sales_Report.xlsx"); showToast('Excel Downloaded!');
+        }
+
+        // NAYA: PDF Export Function
+        function exportReportsPDF() {
+            const salesToExport = getSelectedOrAllReports();
+            if(salesToExport.length === 0) { showToast('No sales data to export', 'warning'); return; }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            doc.setFontSize(16);
+            doc.text('Pharmacy Sales Report', 14, 15);
+
+            const headers = ['Invoice #', 'Date', 'Customer', 'Pay Method', 'Discount', 'Tax', 'Total (Rs)', 'Profit (Rs)', 'Status'];
+            const data = salesToExport.map(s => [
+                s.id, s.date.split(',')[0], s.customer, s.paymentMethod || 'Cash',
+                parseFloat(s.discountAmt || 0).toFixed(2), parseFloat(s.taxAmt || 0).toFixed(2),
+                parseFloat(s.total || 0).toFixed(2), s.isReturned ? '0.00' : parseFloat(s.profit || 0).toFixed(2),
+                s.isReturned ? 'Returned' : 'Completed'
+            ]);
+
+            // PDF Totals Calculation
+            const totalSales = salesToExport.filter(s=>!s.isReturned).reduce((sum, s) => sum + parseFloat(s.total||0), 0);
+            const totalProfit = salesToExport.filter(s=>!s.isReturned).reduce((sum, s) => sum + parseFloat(s.profit||0), 0);
+
+            // Add Total Row to PDF Table
+            data.push([
+                { content: 'GRAND TOTAL (Excluding Returns)', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold' } },
+                { content: totalSales.toFixed(2), styles: { fontStyle: 'bold', textColor: [0,0,0] } },
+                { content: totalProfit.toFixed(2), styles: { fontStyle: 'bold', textColor: [40, 167, 69] } }, ''
+            ]);
+
+            doc.autoTable({ head: [headers], body: data, startY: 20, styles: { fontSize: 9, halign: 'center' }, headStyles: { fillColor: [44, 90, 160] } });
+
+            doc.save('Pharmacy_Sales_Report.pdf'); showToast('PDF Downloaded!');
         }
         
         function reprintSale(id) { const sale = db.sales.find(s => s.id === id); if(sale) printInvoice(sale); }
