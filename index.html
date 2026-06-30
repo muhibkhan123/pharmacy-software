@@ -943,23 +943,72 @@
                     </div>
                 </div>
 
-                <!-- 4. Inventory Page -->
+<!-- 4. Inventory Page -->
                 <div id="inventory" class="page">
-                    <div class="card">
-                        <div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory Status</span></h5></div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <div class="stat-card" onclick="openDetailsModal('medicines')">
-                                        <h5 data-i18n="total_items">Total Items</h5><h3 id="invTotal">0</h3>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-boxes"></i> <span data-i18n="inventory">Inventory Status</span></h5>
+                            <button class="btn btn-dark btn-sm" onclick="showPage('medicines')">Manage Medicines <i class="fas fa-arrow-right"></i></button>
+                        </div>
+                        <div class="card-body bg-light">
+                            <!-- 3 Cards -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <!-- Yahan openMedModal call hoga -->
+                                    <div class="stat-card h-100 bg-white shadow-sm border-primary" onclick="openMedModal('all_medicines')" style="border-bottom: 4px solid #2c5aa0;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold" data-i18n="total_items">Total Items in Catalog</h6>
+                                                <h3 class="fw-bold text-primary" id="invTotal">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-primary text-white"><i class="fas fa-cubes"></i></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="stat-card" onclick="openDetailsModal('lowstock')">
-                                        <h5 data-i18n="low_stock">Low Stock</h5><h3 class="text-danger" id="invLow">0</h3>
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-danger" onclick="openMedModal('low_stock')" style="border-bottom: 4px solid #e74c3c;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold" data-i18n="low_stock">Low Stock Alerts</h6>
+                                                <h3 class="fw-bold text-danger" id="invLow">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-danger text-white"><i class="fas fa-exclamation-triangle"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Naya Expiring Soon Card -->
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-warning" onclick="openMedModal('expiring')" style="border-bottom: 4px solid #ffc107;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Expiring Soon (90 Days)</h6>
+                                                <h3 class="fw-bold text-warning" id="invExpiring">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-warning text-white"><i class="fas fa-hourglass-half"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Naya Quick Attention Table -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm border-danger" style="border-top: 3px solid #dc3545 !important;">
+                                        <div class="card-header bg-white"><h6 class="mb-0 text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Immediate Attention Required (Zero Stock & Expired)</h6></div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive" style="max-height: 300px;">
+                                                <table class="table table-hover table-sm mb-0 align-middle">
+                                                    <thead class="table-light">
+                                                        <tr><th>ID</th><th>Medicine Name</th><th>Issue Found</th><th>Current Status</th></tr>
+                                                    </thead>
+                                                    <tbody id="invAttentionTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -3209,10 +3258,11 @@ function renderPurchases() {
             let title = '';
             let medsToShow = [];
             const salesData = getMedSalesStats().stats;
+            const today = new Date();
+            const next90Days = new Date(today.getTime() + (90 * 24 * 60 * 60 * 1000));
             
             if (type === 'total_sales') {
                 title = 'Total Medicines Sales Analytics';
-                // Show only medicines that actually have sales
                 medsToShow = db.medicines.filter(m => salesData[m.id] && salesData[m.id].qty > 0);
             } else if (type === 'all_medicines') {
                 title = 'Every Single Medicine (Complete Inventory)';
@@ -3220,12 +3270,16 @@ function renderPurchases() {
             } else if (type === 'low_stock') {
                 title = 'Low Stock Alerts';
                 medsToShow = db.medicines.filter(m => m.stock <= m.minStock);
+            } else if (type === 'expiring') {
+                title = 'Expiring Soon & Expired Medicines';
+                medsToShow = db.medicines.filter(m => m.expiryDate && new Date(m.expiryDate) <= next90Days);
             }
 
             const isCashier = currentUser && currentUser.role === 'cashier';
-            const isLowStock = type === 'low_stock'; // Check if card is low stock
+            // Agar Low Stock ya Expiring ka card hai to restricted columns hide honge
+            const isRestrictedCard = (type === 'low_stock' || type === 'expiring'); 
 
-            // DYNAMIC HEADERS (Columns hiding logic)
+            // DYNAMIC HEADERS
             let headHTML = `<tr>
                 <th>Barcode/ID</th>
                 <th>Name & Formula</th>
@@ -3233,11 +3287,11 @@ function renderPurchases() {
                 <th>Category</th>
                 <th>Purch. Price</th>`;
             
-            if(!isLowStock) headHTML += `<th>Sale Price</th>`; // Remove from Low Stock
+            if(!isRestrictedCard) headHTML += `<th>Sale Price</th>`; 
             
             headHTML += `<th>Stock</th><th>Batch/Expiry</th>`;
                 
-            if(!isLowStock) { // Remove from Low Stock
+            if(!isRestrictedCard) { 
                 headHTML += `<th>GST%</th><th>Disc%</th><th class="text-success">Total Profit</th>`;
             }
             headHTML += `<th class="text-center">Actions</th></tr>`;
@@ -3249,10 +3303,9 @@ function renderPurchases() {
                 const expClass = (m.expiryDate && new Date(m.expiryDate) < new Date()) ? 'text-danger fw-bold' : '';
                 const stockClass = m.stock <= m.minStock ? 'text-danger fw-bold' : '';
                 
-				let acts = `<button class="btn btn-sm btn-danger text-white me-1 mb-1" onclick="printSingleMedPDF('${m.id}', '${type}')" title="Print PDF"><i class="fas fa-file-pdf"></i> PDF</button>`;
+                let acts = `<button class="btn btn-sm btn-danger text-white me-1 mb-1" onclick="printSingleMedPDF('${m.id}', '${type}')" title="Print PDF"><i class="fas fa-file-pdf"></i> PDF</button>`;
                 
                 if(!isCashier) {
-                    // FIX: data-bs-dismiss added to close window before opening Edit Modal
                     acts += `<button class="btn btn-sm btn-primary me-1 mb-1" data-bs-dismiss="modal" onclick="setTimeout(() => editMedicine('${m.id}'), 400)"><i class="fas fa-edit"></i></button>
                              <button class="btn btn-sm btn-outline-danger mb-1" onclick="deleteMedicine('${m.id}')"><i class="fas fa-trash"></i></button>`;
                 }
@@ -3264,12 +3317,12 @@ function renderPurchases() {
                     <td>${m.category || '-'}</td>
                     <td>Rs ${m.purchasePrice || 0}</td>`;
                     
-                if(!isLowStock) rowHTML += `<td>Rs ${m.price}</td>`;
+                if(!isRestrictedCard) rowHTML += `<td>Rs ${m.price}</td>`;
                 
                 rowHTML += `<td class="${stockClass}">${m.stock}</td>
                     <td><span class="badge bg-secondary">${m.batchNumber || '-'}</span><br><span class="${expClass}">${m.expiryDate || '-'}</span></td>`;
                     
-                if(!isLowStock) {
+                if(!isRestrictedCard) {
                     rowHTML += `<td>${m.tax || 0}%</td>
                         <td>${m.discount || 0}%</td>
                         <td class="text-success fw-bold">Rs ${stat.profit.toFixed(2)}</td>`;
@@ -4305,10 +4358,53 @@ function renderSaleTable() {
             else { document.getElementById('accNetProfit').parentElement.className = 'p-4 border rounded bg-success text-white shadow text-center'; }
         }
 
-        /* ================= Other Pages Integration ================= */
+/* ================= Other Pages Integration ================= */
         function loadInventoryPage() {
+            const today = new Date();
+            // Next 90 days ka time nikalna taake expiry check ho sake
+            const next90Days = new Date(today.getTime() + (90 * 24 * 60 * 60 * 1000));
+
+            // Total Items Card
             document.getElementById('invTotal').innerText = db.medicines.length;
-            document.getElementById('invLow').innerText = db.medicines.filter(m => m.stock <= m.minStock).length;
+            
+            // Low Stock Card
+            const lowStockItems = db.medicines.filter(m => m.stock <= m.minStock);
+            document.getElementById('invLow').innerText = lowStockItems.length;
+
+            // Expiring Soon Card
+            const expiringItems = db.medicines.filter(m => m.expiryDate && new Date(m.expiryDate) <= next90Days);
+            document.getElementById('invExpiring').innerText = expiringItems.length;
+
+            // Immediate Attention Table (Jo items Zero ho gaye ya completely Expire ho gaye)
+            const tbody = document.getElementById('invAttentionTableBody');
+            tbody.innerHTML = '';
+            
+            let attentionItems = db.medicines.filter(m => m.stock === 0 || (m.expiryDate && new Date(m.expiryDate) < today));
+            
+            attentionItems.forEach(m => {
+                let issue = '';
+                let status = '';
+                
+                if(m.stock === 0) { 
+                    issue += '<span class="badge bg-danger me-1">Out of Stock</span>'; 
+                    status += '0 Items '; 
+                }
+                if(m.expiryDate && new Date(m.expiryDate) < today) { 
+                    issue += '<span class="badge bg-dark">Expired</span>'; 
+                    status += `Exp: ${m.expiryDate}`; 
+                }
+                
+                tbody.innerHTML += `<tr>
+                    <td><strong>${m.id}</strong></td>
+                    <td>${m.name} <small class="text-muted d-block">${m.category || ''}</small></td>
+                    <td>${issue}</td>
+                    <td class="text-danger fw-bold">${status}</td>
+                </tr>`;
+            });
+
+            if(attentionItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-success py-4 fw-bold"><i class="fas fa-check-circle"></i> All good! No zero-stock or expired items found.</td></tr>`;
+            }
         }
 
         /* --- Suppliers --- */
