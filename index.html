@@ -890,24 +890,88 @@
                     </div>
                 </div>
 
-				<!-- 3.5 Purchases Page -->
+<!-- 3.5 Purchases & Add Stock Page -->
                 <div id="purchases" class="page">
-                    <div class="card">
+                    <div class="card border-0 shadow-sm">
                         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i> <span data-i18n="purchases">Purchases (GRN)</span></h5>
-                            <button class="btn btn-light btn-sm admin-only-btn" onclick="openNewPurchaseModal()"><i class="fas fa-plus"></i> <span data-i18n="new_purchase">New Purchase</span></button>
+                            <h5 class="mb-0"><i class="fas fa-boxes"></i> Add Stock & Purchases (GRN)</h5>
+                            <button class="btn btn-light text-primary btn-sm fw-bold admin-only-btn" onclick="openNewPurchaseModal()"><i class="fas fa-plus-circle"></i> Add New Stock (GRN)</button>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead>
+                        <div class="card-body bg-light">
+                            
+                            <!-- Top 3 Cards Row -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-info" onclick="openMedModal('all_medicines')" style="border-bottom: 4px solid #17a2b8; cursor: pointer;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Total Stock Items</h6>
+                                                <h3 class="fw-bold text-info" id="addStockTotal">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-info text-white"><i class="fas fa-cubes"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card h-100 bg-white shadow-sm border-danger" onclick="openMedModal('low_stock')" style="border-bottom: 4px solid #e74c3c; cursor: pointer;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Low Stock Alerts</h6>
+                                                <h3 class="fw-bold text-danger" id="addStockLow">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-danger text-white"><i class="fas fa-exclamation-triangle"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <!-- YAHAN CARD CLICK PAR PENDING WINDOW KHULEGI -->
+                                    <div class="stat-card h-100 bg-white shadow-sm border-warning" onclick="openPendingOrdersModal()" style="border-bottom: 4px solid #ffc107; cursor: pointer;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="text-muted fw-bold">Pending Stock Orders</h6>
+                                                <h3 class="fw-bold text-warning" id="addStockPending">0</h3>
+                                            </div>
+                                            <div class="icon bg-gradient-warning text-white"><i class="fas fa-clock"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- On-Page Low Stock Ordering Table (With Custom Quantity) -->
+                            <div class="card mb-4 border-danger shadow-sm">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 text-danger fw-bold"><i class="fas fa-clipboard-list"></i> Low Stock Items (Tick & Enter Quantity to Order)</h6>
+                                    <button class="btn btn-dark btn-sm" onclick="generatePOAndPrint('page')"><i class="fas fa-print"></i> Thermal Print Order</button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive" style="max-height: 250px;">
+                                        <table class="table table-sm table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 40px;"><input type="checkbox" id="selectAllPo" onclick="toggleAllPoCheckboxes(this)" style="cursor:pointer; width:16px; height:16px;"></th>
+                                                    <th>ID / Barcode</th>
+                                                    <th>Medicine Name</th>
+                                                    <th>Current Stock</th>
+                                                    <th style="width: 150px;">Order Qty</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="addStockLowTableBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Purchases / GRN History Table -->
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-history"></i> Recent GRN / Purchase History</h6>
+                            <div class="table-responsive bg-white border rounded">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-dark">
                                         <tr>
                                             <th>GRN #</th>
                                             <th data-i18n="date">Date</th>
                                             <th data-i18n="supplier">Supplier</th>
                                             <th data-i18n="payment_type">Payment Type</th>
                                             <th data-i18n="total">Total Amount</th>
-                                            <!-- Naya Column Added -->
                                             <th class="text-center">Actions</th>
                                         </tr>
                                     </thead>
@@ -917,6 +981,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- Customers Page -->
                 <div id="customers" class="page">
                     <div class="card">
@@ -1341,6 +1406,40 @@
                         <h4 class="fw-bold mb-3"><span data-i18n="total">Grand Total</span>: Rs <span id="purchaseGrandTotal" class="text-primary">0.00</span></h4>
                         <button class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
                         <button class="btn btn-success btn-lg px-5" onclick="completePurchase()"><i class="fas fa-check-circle"></i> <span data-i18n="save">Save Purchase</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- NAYA: Pending Orders Modal -->
+    <div class="modal fade" id="pendingOrdersModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-truck-loading"></i> Pending Stock Orders</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <!-- Manual Scan Input Box -->
+                    <div class="input-group mb-3 shadow-sm">
+                        <span class="input-group-text bg-dark text-white"><i class="fas fa-barcode"></i></span>
+                        <input type="text" class="form-control" id="manualPOInput" placeholder="Scan Printed Barcode (e.g. PO-123456) here...">
+                        <button class="btn btn-primary" onclick="manualPOScan()">Load Order</button>
+                    </div>
+                    
+                    <div class="table-responsive bg-white rounded border">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Date Generated</th>
+                                    <th>Total Items</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingOrdersTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1869,15 +1968,20 @@
                             <span class="input-group-text bg-primary text-white border-primary"><i class="fas fa-search"></i></span>
                             <input type="text" id="medModalSearch" class="form-control border-primary" placeholder="Search Barcode, Name or Formula..." onkeyup="searchMedModalTable()">
                         </div>
-                        <div class="mt-2 mt-md-0">
-                            <!-- NAYA: Barcode Generate Button -->
+						<div class="mt-2 mt-md-0">
+                            <!-- NAYA: Single Order Barcode Button (Hidden by default, JS se show hoga) -->
+                            <button class="btn btn-warning me-2 fw-bold text-dark" id="btnModalGeneratePO" onclick="generatePOAndPrint('modal')" style="display:none;">
+                                <i class="fas fa-barcode"></i> Print Order Barcode
+                            </button>
+                            
                             <button class="btn btn-dark me-2" onclick="printSelectedMedBarcodes()">
-                                <i class="fas fa-barcode me-1"></i> Generate Barcodes
+                                <i class="fas fa-tags me-1"></i> Item Barcodes
                             </button>
                             <button class="btn btn-danger" onclick="exportMedModalPDF()">
                                 <i class="fas fa-file-pdf me-1"></i> Bulk PDF Download
                             </button>
                         </div>
+
                     </div>
 
                     <!-- Beautiful Detail Table -->
@@ -2859,30 +2963,367 @@ function renderCharts() {
         /* ================= Purchases (GRN) & Suppliers Khata ================= */
         let currentPurchaseCart = [];
         
-function renderPurchases() {
+// Update renderPurchases to include Quantity Inputs
+        function renderPurchases() {
+            // History Table
             const tbody = document.getElementById('purchasesTableBody');
-            tbody.innerHTML = '';
-            
-            db.purchases.slice().reverse().forEach(p => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${p.id}</strong></td>
-                        <td>${p.date}</td>
-                        <td>${p.supplierName}</td>
+            if(tbody) {
+                tbody.innerHTML = '';
+                db.purchases.slice().reverse().forEach(p => {
+                    tbody.innerHTML += `<tr>
+                        <td><strong>${p.id}</strong></td><td>${p.date}</td><td>${p.supplierName}</td>
                         <td><span class=\"badge ${p.paymentMethod === 'Cash' ? 'bg-success' : 'bg-danger'}\">${p.paymentMethod}</span></td>
                         <td class=\"fw-bold\">Rs ${parseFloat(p.total).toFixed(2)}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-info text-white" onclick="printPurchaseGRN('${p.id}')" title="Print GRN"><i class="fas fa-print"></i></button>
-                            <button class="btn btn-sm btn-danger admin-only-btn" onclick="deletePurchase('${p.id}')" title="Delete"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            if(db.purchases.length === 0) {
-                tbody.innerHTML = `<tr><td colspan=\"6\" class=\"text-center text-muted\">No purchases recorded yet</td></tr>`;
+                            <button class="btn btn-sm btn-info text-white" onclick="printPurchaseGRN('${p.id}')"><i class="fas fa-print"></i></button>
+                            <button class="btn btn-sm btn-danger admin-only-btn" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button>
+                        </td></tr>`;
+                });
             }
-            if (typeof enforceUIRestrictions === "function") enforceUIRestrictions();
+
+            // Populate Cards
+            const lowStockItems = db.medicines.filter(m => m.stock <= m.minStock);
+            db.purchaseOrders = db.purchaseOrders || []; 
+            if(document.getElementById('addStockTotal')) document.getElementById('addStockTotal').innerText = db.medicines.length;
+            if(document.getElementById('addStockLow')) document.getElementById('addStockLow').innerText = lowStockItems.length;
+            if(document.getElementById('addStockPending')) document.getElementById('addStockPending').innerText = db.purchaseOrders.length;
+
+            // Low Stock Table With QTY Inputs
+            const tbodyLow = document.getElementById('addStockLowTableBody');
+            if(tbodyLow) {
+                tbodyLow.innerHTML = '';
+                lowStockItems.forEach(m => {
+                    tbodyLow.innerHTML += `<tr>
+                        <td><input type="checkbox" class="po-checkbox" value="${m.id}" style="cursor:pointer; width:16px; height:16px;"></td>
+                        <td><strong>${m.id}</strong></td>
+                        <td>${m.name}</td>
+                        <td class="text-danger fw-bold">${m.stock}</td>
+                        <td><input type="number" id="reqQty_${m.id}" class="form-control form-control-sm border-dark text-center fw-bold" value="10" min="1"></td>
+                    </tr>`;
+                });
+                if(lowStockItems.length === 0) tbodyLow.innerHTML = `<tr><td colspan="5" class="text-center text-success py-3"><i class="fas fa-check-circle"></i> No low stock items.</td></tr>`;
+            }
         }
+
+        // Open Pending Orders Window
+        function openPendingOrdersModal() {
+            db.purchaseOrders = db.purchaseOrders || [];
+            const tbodyPending = document.getElementById('pendingOrdersTableBody');
+            tbodyPending.innerHTML = '';
+            
+            db.purchaseOrders.slice().reverse().forEach(po => {
+                tbodyPending.innerHTML += `<tr>
+                    <td><strong><i class="fas fa-barcode"></i> ${po.id}</strong></td>
+                    <td>${po.date}</td>
+                    <td><span class="badge bg-dark">${po.items.length} Items</span></td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-success fw-bold me-1" onclick="loadPOToCart('${po.id}')"><i class="fas fa-plus-circle"></i> Add to Stock</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePO('${po.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            if(db.purchaseOrders.length === 0) tbodyPending.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">No pending orders found.</td></tr>`;
+            
+            new bootstrap.Modal(document.getElementById('pendingOrdersModal')).show();
+        }
+
+        // GENERATE ORDER BARCODE WITH QUANTITIES
+        function generatePOAndPrint(source) {
+            if (source !== 'page') return; // Ye feature ab sirf main page table se chlega
+
+            const checkboxes = document.querySelectorAll('.po-checkbox:checked');
+            if(checkboxes.length === 0) { showToast('Bhai jaan, pehle dawaiyan tick karein!', 'warning'); return; }
+
+            let selectedMeds = [];
+            checkboxes.forEach(c => {
+                let m = db.medicines.find(x => x.id === c.value);
+                let inputQty = document.getElementById('reqQty_' + c.value);
+                let reqQty = inputQty ? parseInt(inputQty.value) || 1 : 1;
+                
+                if(m) selectedMeds.push({ id: m.id, name: m.name, stock: m.stock, reqQty: reqQty });
+            });
+
+            const poId = 'PO-' + Date.now().toString().slice(-6); 
+
+            db.purchaseOrders = db.purchaseOrders || [];
+            db.purchaseOrders.push({ id: poId, date: new Date().toLocaleDateString(), items: selectedMeds });
+            saveDB();
+
+            // Thermal Printer Template
+            const canvas = document.createElement('canvas');
+            JsBarcode(canvas, poId, { format: "CODE128", width: 2, height: 60, displayValue: true, fontSize: 16 });
+            const barcodeImg = canvas.toDataURL('image/png');
+
+            let itemsHtml = selectedMeds.map(m => `<div style="border-bottom:1px dashed #ccc; padding:4px 0; font-size:12px;">- ${m.name} <br>Cur. Stock: ${m.stock} | <b style="font-size:14px;">Required: ${m.reqQty}</b></div>`).join('');
+            
+            const printArea = document.getElementById('printSection');
+            printArea.innerHTML = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: bold;">STOCK ORDER</h3>
+                    <div style="font-size: 12px; margin-top: 5px;">Order ID: <b>${poId}</b></div>
+                    <div style="font-size: 12px;">Date: ${new Date().toLocaleDateString()}</div>
+                </div>
+                <div style="text-align:center; margin: 15px 0;">
+                    <img src="${barcodeImg}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+                </div>
+                <div style="margin-top: 15px;">
+                    <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px;">Items To Buy:</div>
+                    ${itemsHtml}
+                </div>`;
+            window.print();
+            renderPurchases(); 
+        }
+
+        // Add to Stock (From Click or Scan) With Exact Quantities
+        function loadPOToCart(poId) {
+            db.purchaseOrders = db.purchaseOrders || [];
+            const poIndex = db.purchaseOrders.findIndex(p => p.id === poId);
+            
+            if(poIndex === -1) { showToast('Order not found!', 'danger'); return; }
+
+            const po = db.purchaseOrders[poIndex];
+            
+            // Close pending modal if open
+            let pModal = bootstrap.Modal.getInstance(document.getElementById('pendingOrdersModal'));
+            if(pModal) pModal.hide();
+
+            openNewPurchaseModal(); // Open GRN Form
+            
+            // Add items and fill quantities automatically
+            po.items.forEach(item => {
+                addToPurchase(item.id); 
+                
+                // Set timeout to allow UI to render row, then inject the exact ordered quantity
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#purchaseItemsTable tr');
+                    rows.forEach(row => {
+                        if(row.innerHTML.includes(item.id) || row.innerHTML.includes(item.name)) {
+                            let qtyInput = row.querySelector('input[type="number"]');
+                            if(qtyInput) {
+                                qtyInput.value = item.reqQty;
+                                qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                qtyInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+                            }
+                        }
+                    });
+                    if (typeof calculatePurchaseTotal === "function") calculatePurchaseTotal();
+                }, 400);
+            });
+
+            showToast(`Loaded ${po.items.length} items with exact quantities!`, 'success');
+            db.purchaseOrders.splice(poIndex, 1);
+            saveDB();
+            renderPurchases();
+        }
+
+        function manualPOScan() {
+            let val = document.getElementById('manualPOInput').value.trim();
+            if(val) {
+                loadPOToCart(val);
+                document.getElementById('manualPOInput').value = '';
+            }
+        }
+
+        function deletePO(poId) {
+            showConfirm('Delete this pending order record?', () => {
+                db.purchaseOrders = db.purchaseOrders.filter(p => p.id !== poId);
+                saveDB();
+                openPendingOrdersModal(); // Refresh modal table
+                renderPurchases(); // Refresh background
+            });
+        }
+
+// 1. GENERATE ORDER BARCODE WITH QUANTITIES (Fixed Print Issue)
+        function generatePOAndPrint(source) {
+            if (source !== 'page') return; 
+
+            const checkboxes = document.querySelectorAll('.po-checkbox:checked');
+            if(checkboxes.length === 0) { showToast('Please tick the medicines first!', 'warning'); return; }
+
+            let selectedMeds = [];
+            checkboxes.forEach(c => {
+                let m = db.medicines.find(x => x.id === c.value);
+                // NAYA TARIQA: ID ke bajaye direct usi line (row) se quantity uthana
+                let row = c.closest('tr');
+                let inputQty = row.querySelector('input[type="number"]');
+                let reqQty = inputQty ? parseInt(inputQty.value) || 1 : 1;
+                
+                if(m) selectedMeds.push({ id: m.id, name: m.name, stock: m.stock, reqQty: reqQty });
+            });
+
+            const poId = 'PO-' + Date.now().toString().slice(-6); 
+
+            db.purchaseOrders = db.purchaseOrders || [];
+            db.purchaseOrders.push({ id: poId, date: new Date().toLocaleDateString(), items: selectedMeds });
+            saveDB();
+
+            const canvas = document.createElement('canvas');
+            JsBarcode(canvas, poId, { format: "CODE128", width: 2, height: 60, displayValue: true, fontSize: 16 });
+            const barcodeImg = canvas.toDataURL('image/png');
+
+            let itemsHtml = selectedMeds.map(m => `<div style="border-bottom:1px dashed #ccc; padding:4px 0; font-size:12px;">- ${m.name} <br>Cur. Stock: ${m.stock} | <b style="font-size:14px;">Required: ${m.reqQty}</b></div>`).join('');
+            
+            const printArea = document.getElementById('printSection');
+            printArea.innerHTML = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: bold;">STOCK ORDER</h3>
+                    <div style="font-size: 12px; margin-top: 5px;">Order ID: <b>${poId}</b></div>
+                    <div style="font-size: 12px;">Date: ${new Date().toLocaleDateString()}</div>
+                </div>
+                <div style="text-align:center; margin: 15px 0;">
+                    <img src="${barcodeImg}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+                </div>
+                <div style="margin-top: 15px;">
+                    <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px;">Items To Buy:</div>
+                    ${itemsHtml}
+                </div>`;
+            window.print();
+            renderPurchases(); 
+        }
+
+        // 2. ADD TO STOCK AUTOMATICALLY (Fixed Quantity Box Issue)
+        function loadPOToCart(poId) {
+            db.purchaseOrders = db.purchaseOrders || [];
+            const poIndex = db.purchaseOrders.findIndex(p => p.id === poId);
+            
+            if(poIndex === -1) { showToast('Order not found!', 'danger'); return; }
+
+            const po = db.purchaseOrders[poIndex];
+            
+            let pModal = bootstrap.Modal.getInstance(document.getElementById('pendingOrdersModal'));
+            if(pModal) pModal.hide();
+
+            openNewPurchaseModal(); 
+            
+            po.items.forEach(item => {
+                addToPurchase(item.id); 
+                
+                // Thora waqt de kar sahi box mein quantity enter karna
+                setTimeout(() => {
+                    const rows = document.querySelectorAll('#purchaseItemsTable tr');
+                    rows.forEach(row => {
+                        // Dawai ka naam match karna
+                        if(row.innerText.includes(item.id) || row.innerText.includes(item.name)) {
+                            // NAYA TARIQA: Purchase Price aur Quantity dono boxes dhoondna
+                            let inputs = row.querySelectorAll('input[type="number"]');
+                            
+                            // inputs[0] = Purchase Price, inputs[1] = Quantity
+                            let qtyInput = inputs.length >= 2 ? inputs[1] : inputs[0]; 
+                            
+                            if(qtyInput) {
+                                qtyInput.value = item.reqQty;
+                                qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                qtyInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+                                qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    });
+                    
+                    // Grand Total Update Karna
+                    if (typeof calculatePurchaseTotal === "function") calculatePurchaseTotal();
+                }, 600); // 600ms ki delay taake row poori tarah ban jaye
+            });
+
+            showToast(`Loaded ${po.items.length} items with exact quantities!`, 'success');
+            db.purchaseOrders.splice(poIndex, 1);
+            saveDB();
+            renderPurchases();
+        }
+
+        // Add to Stock (From Click or Scan)
+        function loadPOToCart(poId) {
+            db.purchaseOrders = db.purchaseOrders || [];
+            const poIndex = db.purchaseOrders.findIndex(p => p.id === poId);
+            
+            if(poIndex === -1) { 
+                showToast('Order not found or already added!', 'danger'); 
+                return; 
+            }
+
+            const po = db.purchaseOrders[poIndex];
+            openNewPurchaseModal(); // Open GRN Form
+            
+            po.items.forEach(medId => addToPurchase(medId)); // Pre-fill the form
+            showToast(`Loaded ${po.items.length} items to cart!`, 'success');
+
+            // Remove from pending orders list automatically
+            db.purchaseOrders.splice(poIndex, 1);
+            saveDB();
+            renderPurchases();
+        }
+
+        // Search Input Box Logic
+        function manualPOScan() {
+            let val = document.getElementById('manualPOInput').value.trim();
+            if(val) {
+                loadPOToCart(val);
+                document.getElementById('manualPOInput').value = '';
+            }
+        }
+
+        // Delete Pending Order Manually
+        function deletePO(poId) {
+            showConfirm('Delete this pending order record?', () => {
+                db.purchaseOrders = db.purchaseOrders.filter(p => p.id !== poId);
+                saveDB();
+                renderPurchases();
+            });
+        }
+
+        // Select all Checkboxes on Page
+        function toggleAllPoCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('.po-checkbox');
+            for(let i=0; i < checkboxes.length; i++) checkboxes[i].checked = source.checked;
+        }
+
+        // GENERATE ORDER BARCODE (For Thermal Print)
+        function generatePOAndPrint(source) {
+            let selectedMeds = [];
+            
+            if (source === 'page') {
+                const checkboxes = document.querySelectorAll('.po-checkbox:checked');
+                const ids = Array.from(checkboxes).map(c => c.value);
+                selectedMeds = db.medicines.filter(m => ids.includes(m.id));
+                if(ids.length === 0) selectedMeds = db.medicines.filter(m => m.stock <= m.minStock); // Default all low stock if none checked
+            } else if (source === 'modal') {
+                selectedMeds = getSelectedOrAllMeds();
+            }
+
+            if(selectedMeds.length === 0) { showToast('No items to order!', 'warning'); return; }
+
+            // Naya Order ID Banana
+            const poId = 'PO-' + Date.now().toString().slice(-6); // e.g. PO-123456
+            const poItemIds = selectedMeds.map(m => m.id);
+
+            // Database mein Order save karna
+            db.purchaseOrders = db.purchaseOrders || [];
+            db.purchaseOrders.push({ id: poId, date: new Date().toLocaleString(), items: poItemIds });
+            saveDB();
+
+            // Thermal Printer Logic
+            const canvas = document.createElement('canvas');
+            JsBarcode(canvas, poId, { format: "CODE128", width: 2, height: 60, displayValue: true, fontSize: 16 });
+            const barcodeImg = canvas.toDataURL('image/png');
+
+            let itemsHtml = selectedMeds.map(m => `<div style="border-bottom:1px dashed #ccc; margin-bottom:2px;">- ${m.name} <br><small>Cur. Stock: ${m.stock} | Required: ____</small></div>`).join('');
+
+            printGenericRecord('STOCK ORDER REQUEST', {
+                'Order ID': poId,
+                'Date Generated': new Date().toLocaleDateString(),
+                'SCAN THIS BARCODE TO ADD STOCK': `<div style="text-align:center; margin-top:10px;"><img src="${barcodeImg}" style="max-width:100%; height:auto;"></div>`,
+                'Items to Order': `<div style="margin-top:10px;">${itemsHtml}</div>`
+            });
+            
+            if(source === 'modal') bootstrap.Modal.getInstance(document.getElementById('medicineStatsModal')).hide();
+        }
+
+        // Also, make sure to update openMedModal to show/hide the PO button
+        const originalOpenMedModal = openMedModal;
+        openMedModal = function(type) {
+            originalOpenMedModal(type);
+            const poBtn = document.getElementById('btnModalGeneratePO');
+            if(poBtn) poBtn.style.display = (type === 'low_stock') ? 'inline-block' : 'none';
+        };
 
         // NAYA FUNCTION: GRN Print Karne Ke Liye
         function printPurchaseGRN(id) {
@@ -3977,6 +4418,7 @@ let currentModalContext = '';
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             }, 500);
         }
+
 		function onScanSuccess(decodedText, decodedResult) {
             stopScanner(); 
             bootstrap.Modal.getInstance(document.getElementById('scannerModal')).hide(); 
@@ -3988,12 +4430,25 @@ let currentModalContext = '';
                 document.getElementById('medSearch').value = decodedText; 
                 renderMedicines(); 
             } else if (scanContext === 'purchase') {
-                // Naya Purchase Context
-                document.getElementById('purchaseSearchInput').value = decodedText;
-                addToPurchase(decodedText);
+                // Agar Order Barcode (PO) scan hua hai
+                if(decodedText.startsWith('PO-')) {
+                    db.purchaseOrders = db.purchaseOrders || [];
+                    const po = db.purchaseOrders.find(p => p.id === decodedText);
+                    if(po && po.items) {
+                        po.items.forEach(medId => addToPurchase(medId));
+                        showToast(`Order Loaded: ${po.items.length} items added!`, 'success');
+                    } else {
+                        showToast('Invalid or Expired Order Barcode', 'danger');
+                    }
+                } else {
+                    // Agar single dawai ka barcode scan hua hai
+                    document.getElementById('purchaseSearchInput').value = decodedText;
+                    addToPurchase(decodedText);
+                }
                 document.getElementById('purchaseSearchInput').value = '';
             }
         }
+
         function onScanFailure(error) { } 
         function stopScanner() { if(html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e=>console.error(e)); html5QrcodeScanner = null; } }
 
