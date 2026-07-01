@@ -2436,51 +2436,148 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             { id: 'users_manage', name: '🛡️ Users & Roles (Super Admin)' }
         ];
 
+// 2. EDIT USER FUNCTION (Superadmin ko edit hone se rokna)
+        function editManageUser(id) {
+            let userArray = db.users || db.employees; 
+            const user = userArray.find(u => u.id === id);
+            if (!user) return;
+
+            // BACKEND SECURITY CHECK: Agar superadmin hai to edit reject kar do
+            if (user.role === 'superadmin' || user.username === 'superadmin') {
+                showToast('❌ Security Alert: Developer (Superadmin) account cannot be edited!', 'danger');
+                return;
+            }
+
+            document.getElementById('umUserId').value = user.id; 
+            document.getElementById('umName').value = user.name || '';
+            document.getElementById('umUsername').value = user.username || '';
+            document.getElementById('umPassword').value = user.password || '';
+            
+            const roleSelect = document.getElementById('umRole');
+            if(roleSelect) roleSelect.value = user.role || '';
+
+            const checkboxes = document.querySelectorAll('#umPermissionsContainer input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (user.perms && user.perms.includes(cb.value)) cb.checked = true;
+                else cb.checked = false;
+            });
+
+            const tabEl = document.querySelector('#userRolesTabs .nav-link[href="#tab-add-user"]');
+            if (tabEl) new bootstrap.Tab(tabEl).show();
+        }
+
+        // 2. SAVE USER FUNCTION (Update ya Naya Add karna)
+        function saveManageUser(event) {
+            event.preventDefault(); // Page refresh hone se rokna
+            
+            const id = document.getElementById('umUserId').value; // Hidden ID check
+            const name = document.getElementById('umName').value;
+            const username = document.getElementById('umUsername').value;
+            const password = document.getElementById('umPassword').value;
+            const role = document.getElementById('umRole').value;
+
+            // Form se ticked permissions (Allowed Modules) nikalna
+            const perms = [];
+            document.querySelectorAll('#umPermissionsContainer input[type="checkbox"]:checked').forEach(cb => {
+                perms.push(cb.value);
+            });
+
+            let userArray = db.users || db.employees;
+
+            if (id) {
+                // UPDATE MODE: Agar ID mojood hai to purane user ko update karein
+                const user = userArray.find(u => u.id === id);
+                if (user) {
+                    user.name = name;
+                    user.username = username;
+                    user.password = password;
+                    user.role = role;
+                    user.perms = perms;
+                    showToast('User Updated Successfully!', 'success');
+                }
+            } else {
+                // ADD NEW MODE: Agar ID khali hai to naya user banayein
+                userArray.push({
+                    id: 'U' + Date.now(),
+                    name: name,
+                    username: username,
+                    password: password,
+                    role: role,
+                    perms: perms,
+                    status: 'Active'
+                });
+                showToast('New User Added Successfully!', 'success');
+            }
+
+            saveDB(); // Database mehfooz karein
+
+            // Form clear karna
+            document.getElementById('manageUserForm').reset();
+            document.getElementById('umUserId').value = ''; 
+            
+            // Wapas "User List" tab par bhejna
+            const listTab = document.querySelector('#userRolesTabs .nav-link[href="#tab-user-list"]');
+            if(listTab) new bootstrap.Tab(listTab).show();
+            
+            // Table ko refresh karna
+            renderUsersManageTable(); 
+        }
+
+        // 3. TABLE RENDER FUNCTION (Taa ke Edit ka button theek id pass kare)
+// 1. TABLE RENDER FUNCTION (Superadmin ke buttons hide karna)
         function renderUsersManageTable() {
             const tbody = document.getElementById('umUsersTableBody');
-            tbody.innerHTML = '';
-            const query = document.getElementById('userSearch').value.toLowerCase();
+            if (!tbody) return;
             
-            db.users.forEach(u => {
-                if(query && !u.name.toLowerCase().includes(query) && !u.username.toLowerCase().includes(query)) return;
+            let userArray = db.users || db.employees || [];
+            const searchInput = document.getElementById('userSearch');
+            const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+
+            tbody.innerHTML = '';
+
+            userArray.forEach(u => {
+                if (searchVal && !(u.name.toLowerCase().includes(searchVal) || (u.username && u.username.toLowerCase().includes(searchVal)))) return;
+
+                let roleBadge = u.role === 'admin' ? 'bg-danger' : (u.role === 'manager' ? 'bg-info text-dark' : 'bg-primary');
+                if (u.role === 'superadmin' || u.username === 'superadmin') roleBadge = 'bg-dark border border-warning text-warning'; // Superadmin special badge
                 
-                let acts = '';
-                if(u.id !== currentUser.id) {
-                    acts = `<button class="btn btn-sm btn-primary me-1" onclick="editManageUser('${u.id}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteManageUser('${u.id}')">Delete</button>`;
+                // SUPERADMIN LOCK LOGIC
+                let actionBtns = '';
+                if (u.role === 'superadmin' || u.username === 'superadmin') {
+                    // Agar developer hai to buttons mat dikhao, Locked ka nishan dikhao
+                    actionBtns = `<span class="badge bg-secondary p-2"><i class="fas fa-lock text-warning"></i> Developer Locked</span>`;
                 } else {
-                    acts = `<span class="badge bg-info">Current User</span>`;
+                    // Normal users ke liye Edit/Delete buttons
+                    actionBtns = `
+                        <button class="btn btn-sm btn-info text-white me-1" onclick="editManageUser('${u.id}')" title="Edit Permissions">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteManageUser('${u.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
                 }
 
-                tbody.innerHTML += `<tr>
-                    <td><strong>${u.name}</strong></td>
-                    <td>${u.username}</td>
-                    <td><span class="badge bg-secondary">${u.role.toUpperCase()}</span></td>
-                    <td><span class="badge ${u.status==='active'?'bg-success':'bg-danger'}">${u.status}</span></td>
-                    <td class="text-center">${acts}</td>
-                </tr>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${u.name}</td>
+                        <td><span class="badge bg-light text-dark border">${u.username || '-'}</span></td>
+                        <td><span class="badge ${roleBadge} text-uppercase px-2 py-1"><i class="fas ${u.role === 'superadmin' ? 'fa-crown' : 'fa-user'}"></i> ${u.role}</span></td>
+                        <td><span class="badge bg-success">Active</span></td>
+                        <td class="text-center">${actionBtns}</td>
+                    </tr>
+                `;
             });
 
-            // Also render roles table & dropdowns
-            const rolesTbody = document.getElementById('umRolesTableBody');
-            rolesTbody.innerHTML = '';
-            const roleSelect = document.getElementById('umRole');
-            roleSelect.innerHTML = '<option value="">-- Select Role --</option>';
-
-            db.roles.forEach(r => {
-                roleSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
-                
-                let rActs = '';
-                if(r.id !== 'superadmin' && r.id !== 'admin' && r.id !== 'cashier') {
-                    rActs = `<button class="btn btn-sm btn-danger" onclick="deleteRole('${r.id}')"><i class="fas fa-trash"></i></button>`;
-                } else {
-                    rActs = `<span class="badge bg-light text-dark border">System Default</span>`;
-                }
-                rolesTbody.innerHTML += `<tr><td>${r.name}</td><td>${r.id}</td><td>${r.perms.length} Modules</td><td>${rActs}</td></tr>`;
-            });
-
-            buildPermissionsCheckboxes('umPermissionsContainer', 'user_perm_');
-            buildPermissionsCheckboxes('newRolePerms', 'role_perm_');
+            if (tbody.innerHTML === '') {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No users found.</td></tr>`;
+            }
+        }
+        // (Bonus Helper): Tab click karne par form fresh clear ho
+        function resetUserForm() {
+            const form = document.getElementById('manageUserForm');
+            if(form) form.reset();
+            document.getElementById('umUserId').value = '';
         }
 
         function buildPermissionsCheckboxes(containerId, prefix) {
@@ -2514,61 +2611,31 @@ function _0x434c(){const _0x2781d4=['ZMsHG','JrSxP','955JxUqxB','textContent','b
             document.querySelectorAll('.user_perm_checkbox').forEach(chk => chk.checked = false);
         }
 
-        function editManageUser(id) {
-            const u = db.users.find(x => x.id === id);
-            if(!u) return;
-            document.getElementById('umUserId').value = u.id;
-            document.getElementById('umName').value = u.name;
-            document.getElementById('umUsername').value = u.username;
-            document.getElementById('umPassword').value = u.password;
-            document.getElementById('umRole').value = u.role;
-            
-            document.querySelectorAll('.user_perm_checkbox').forEach(chk => {
-                chk.checked = u.perms.includes(chk.value);
-            });
 
-            // Switch Tab
-            document.querySelector('#userRolesTabs .nav-link[href="#tab-add-user"]').click();
-        }
-
-        function saveManageUser(e) {
-            e.preventDefault();
-            const id = document.getElementById('umUserId').value;
-            const uName = document.getElementById('umName').value;
-            const uUser = document.getElementById('umUsername').value;
-            const uPass = document.getElementById('umPassword').value;
-            const uRole = document.getElementById('umRole').value;
-            
-            if(!uRole) { showToast('Please assign a role first', 'warning'); return; }
-
-            // Get selected permissions
-            let selectedPerms = [];
-            document.querySelectorAll('.user_perm_checkbox:checked').forEach(chk => {
-                selectedPerms.push(chk.value);
-            });
-
-            if (id) {
-                // Edit existing
-                const u = db.users.find(x => x.id === id);
-                u.name = uName; u.username = uUser; u.password = uPass; u.role = uRole; u.perms = selectedPerms;
-                showToast('User Updated');
-            } else {
-                // Add new
-                if (db.users.find(x => x.username === uUser)) { showToast('Username already exists!', 'danger'); return; }
-                db.users.push({
-                    id: 'U' + Date.now(), name: uName, username: uUser, password: uPass, role: uRole, status: 'active', perms: selectedPerms
-                });
-                showToast('New User Created');
-            }
-            saveDB();
-            document.querySelector('#userRolesTabs .nav-link[href="#tab-user-list"]').click();
-            renderUsersManageTable();
-        }
-
+// 3. DELETE USER FUNCTION (Superadmin ko delete hone se rokna)
         function deleteManageUser(id) {
-            showConfirm('Delete this User permanently?', () => {
-                db.users = db.users.filter(x => x.id !== id);
-                saveDB(); renderUsersManageTable(); showToast('User Deleted');
+            let userArray = db.users || db.employees || [];
+            const user = userArray.find(u => u.id === id);
+            
+            if (!user) return;
+
+            // BACKEND SECURITY CHECK: Agar superadmin hai to delete reject kar do
+            if (user.role === 'superadmin' || user.username === 'superadmin') {
+                showToast('❌ Security Alert: Developer (Superadmin) account cannot be deleted!', 'danger');
+                return;
+            }
+
+            showConfirm(`Are you sure you want to delete user "${user.name}"?`, () => {
+                // Delete user from array
+                userArray = userArray.filter(u => u.id !== id);
+                
+                // Update database safely
+                if(db.users) db.users = userArray;
+                if(db.employees) db.employees = userArray; // In case both are synced
+                
+                saveDB();
+                renderUsersManageTable();
+                showToast('User Deleted Successfully', 'danger');
             });
         }
 
@@ -4685,86 +4752,129 @@ let currentModalContext = '';
             // ⚠️ ZAROORI NOTE: Is function ke andar saveDB() ya renderQuickItems() ghalti se bhi add na karein, warna system phans (hang ho) jayega.
         }
 
-        // Cart mein manually Qty tabdeel karna (Agar user khud Type kare)
-        function updateSaleQty(id, newQty) {
-            const qty = parseInt(newQty);
-            const m = db.medicines.find(x => x.id === id);
-            
-            if(isNaN(qty) || qty < 1) return;
-            
-            // STOCK CHECK: Agar manually stock se badi raqam likhi jaye
-            if (m && qty > m.stock) {
-                showToast(`❌ Not enough stock! Only ${m.stock} available.`, 'danger');
-                renderCurrentSale(); // Table wapas purani quantity par layega
-                return;
-            }
-
-            const item = db.currentSale.items.find(i => i.id === id);
-            if(item) {
-                item.qty = qty;
-                item.total = item.qty * item.price;
-                renderCurrentSale();
-            }
-        }
-
-		function renderSaleTable() {
-            const tbody = document.getElementById('saleItemsTable'); tbody.innerHTML = ''; 
-            let subTotal = 0; // Asal Qeemat (Bagair kisi tax ya discount ke)
+// 1. GLOBAL TOTALS CALCULATOR (Sirf Total update karne ke liye)
+        function calculateCartTotals() {
+            let subTotal = 0;
             let totalItemDiscount = 0;
             let totalItemTax = 0;
 
-            db.currentSale.items.forEach((item, idx) => {
-                // Item level calculations
+            db.currentSale.items.forEach((item) => {
                 let itemBaseTotal = item.qty * item.price;
                 let itemDiscVal = itemBaseTotal * ((item.discountRate || 0) / 100);
                 let itemTaxVal = (itemBaseTotal - itemDiscVal) * ((item.taxRate || 0) / 100);
-                
-                item.total = itemBaseTotal - itemDiscVal + itemTaxVal;
-                item.totalPurchase = item.qty * item.purchasePrice;
-
                 subTotal += itemBaseTotal;
                 totalItemDiscount += itemDiscVal;
                 totalItemTax += itemTaxVal;
-
-                // UI Display badges
-                let detailBadges = '';
-                if(item.discountRate > 0) detailBadges += `<span class="badge bg-success ms-1">-${item.discountRate}% Disc</span>`;
-                if(item.taxRate > 0) detailBadges += `<span class="badge bg-info ms-1">+${item.taxRate}% Tax</span>`;
-
-                tbody.innerHTML += `<tr>
-                        <td>${item.name} <br>${detailBadges}</td>
-                        <td>${item.price}</td>
-                        <td><div class=\"input-group input-group-sm\" style=\"width:100px\" dir=\"ltr\"><button class=\"btn btn-secondary\" onclick=\"updateSaleQty(${idx}, -1)\">-</button><input class=\"form-control text-center\" value=\"${item.qty}\" readonly><button class=\"btn btn-secondary\" onclick=\"updateSaleQty(${idx}, 1)\">+</button></div></td>
-                        <td class="fw-bold text-primary">Rs ${item.total.toFixed(2)}</td>
-                        <td></td>
-                    </tr>`;
             });
-            
-            // Handle Global Boxes (Oopar wale items calculate hone ke baad)
+
             const discountInput = document.getElementById('saleDiscount');
-            let globalDiscountVal = parseFloat(discountInput.value) || 0;
-            let globalDiscountType = document.getElementById('saleDiscountType').value;
-            let globalTaxPercent = parseFloat(document.getElementById('saleTax').value) || 0;
+            let globalDiscountVal = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+            let globalDiscountType = document.getElementById('saleDiscountType') ? document.getElementById('saleDiscountType').value : 'Rs';
+            let globalTaxPercent = document.getElementById('saleTax') ? (parseFloat(document.getElementById('saleTax').value) || 0) : 0;
 
             let afterItemMods = subTotal - totalItemDiscount + totalItemTax;
-
-            let globalDiscountAmt = 0;
-            if (globalDiscountType === '%') { globalDiscountAmt = afterItemMods * (globalDiscountVal / 100); } 
-            else { globalDiscountAmt = globalDiscountVal; }
-
+            let globalDiscountAmt = (globalDiscountType === '%') ? (afterItemMods * (globalDiscountVal / 100)) : globalDiscountVal;
             let totalAfterGlobalDisc = afterItemMods - globalDiscountAmt;
             let globalTaxAmt = totalAfterGlobalDisc * (globalTaxPercent / 100);
             
             let grandTotal = totalAfterGlobalDisc + globalTaxAmt;
+            if (grandTotal < 0) grandTotal = 0;
 
-            // Database save karna
             db.currentSale.subTotal = subTotal; 
             db.currentSale.discountAmt = totalItemDiscount + globalDiscountAmt; 
             db.currentSale.taxAmt = totalItemTax + globalTaxAmt; 
             db.currentSale.total = grandTotal;
             
-            document.getElementById('saleSubTotal').innerText = subTotal.toFixed(2);
-            document.getElementById('saleGrandTotal').innerText = grandTotal.toFixed(2);
+            if(document.getElementById('saleSubTotal')) document.getElementById('saleSubTotal').innerText = subTotal.toFixed(2);
+            if(document.getElementById('saleGrandTotal')) document.getElementById('saleGrandTotal').innerText = grandTotal.toFixed(2);
+        }
+
+        // 2. DIRECT SCREEN UPDATE (ZERO LAG + - BUTTONS)
+        function updateSaleQty(id, newQty) {
+            const qty = parseInt(newQty);
+            const itemIndex = db.currentSale.items.findIndex(i => i.id === id);
+            
+            if (itemIndex === -1) return;
+            const m = db.medicines.find(x => x.id === id);
+            
+            if (isNaN(qty) || qty < 1) {
+                // Agar dawai remove karni ho to table refresh karna parega
+                db.currentSale.items.splice(itemIndex, 1); 
+                renderSaleTable(); 
+                return;
+            } else if (m && qty > m.stock) {
+                showToast(`❌ Not enough stock! Only ${m.stock} available.`, 'danger');
+                document.getElementById('qtyInput_' + id).value = db.currentSale.items[itemIndex].qty; // Wapas purana number set karna
+                return;
+            } 
+            
+            // Table refresh karne ke bajaye Direct Values set karna
+            let item = db.currentSale.items[itemIndex];
+            item.qty = qty;
+            
+            let itemBaseTotal = item.qty * item.price;
+            let itemDiscVal = itemBaseTotal * ((item.discountRate || 0) / 100);
+            let itemTaxVal = (itemBaseTotal - itemDiscVal) * ((item.taxRate || 0) / 100);
+            item.total = itemBaseTotal - itemDiscVal + itemTaxVal;
+            item.totalPurchase = item.qty * (item.purchasePrice || 0);
+
+            // DIRECT UPDATE (No Loading)
+            const qtyBox = document.getElementById('qtyInput_' + id);
+            if(qtyBox) qtyBox.value = qty;
+            
+            const totalText = document.getElementById('rowTotal_' + id);
+            if(totalText) totalText.innerText = 'Rs ' + item.total.toFixed(2);
+
+            calculateCartTotals(); // Fauran Grand Total badalna
+        }
+
+        function increaseSaleQty(id) {
+            const item = db.currentSale.items.find(i => i.id === id);
+            if(item) updateSaleQty(id, item.qty + 1);
+        }
+
+        function decreaseSaleQty(id) {
+            const item = db.currentSale.items.find(i => i.id === id);
+            if(item) updateSaleQty(id, item.qty - 1);
+        }
+
+        // 3. MAIN TABLE RENDERER
+        function renderSaleTable() {
+            const tbody = document.getElementById('saleItemsTable'); 
+            if(!tbody) return;
+            
+            let htmlContent = ''; 
+
+            db.currentSale.items.forEach((item) => {
+                let itemBaseTotal = item.qty * item.price;
+                let itemDiscVal = itemBaseTotal * ((item.discountRate || 0) / 100);
+                let itemTaxVal = (itemBaseTotal - itemDiscVal) * ((item.taxRate || 0) / 100);
+                item.total = itemBaseTotal - itemDiscVal + itemTaxVal;
+
+                let detailBadges = '';
+                if(item.discountRate > 0) detailBadges += `<span class="badge bg-success ms-1">-${item.discountRate}% Disc</span>`;
+                if(item.taxRate > 0) detailBadges += `<span class="badge bg-info ms-1">+${item.taxRate}% Tax</span>`;
+
+                // NAYA: inputs par specific ID lagayi gayi hai (qtyInput_ aur rowTotal_)
+                htmlContent += `<tr id="saleRow_${item.id}">
+                        <td>
+                            <div class="fw-bold text-dark">${item.name}</div>
+                            <div>${detailBadges}</div>
+                        </td>
+                        <td class="fw-bold text-secondary">Rs ${parseFloat(item.price).toFixed(2)}</td>
+                        <td class="text-center">
+                            <div class="input-group input-group-sm mx-auto shadow-sm" style="width: 120px;" dir="ltr">
+                                <button class="btn btn-outline-danger fw-bold" onclick="decreaseSaleQty('${item.id}')"><i class="fas fa-minus"></i></button>
+                                <input type="number" id="qtyInput_${item.id}" class="form-control text-center fw-bold border-secondary" value="${item.qty}" min="1" onchange="updateSaleQty('${item.id}', this.value)">
+                                <button class="btn btn-outline-success fw-bold" onclick="increaseSaleQty('${item.id}')"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </td>
+                        <td class="text-end fw-bold text-primary fs-6" id="rowTotal_${item.id}">Rs ${item.total.toFixed(2)}</td>
+                    </tr>`;
+            });
+            
+            tbody.innerHTML = htmlContent;
+            calculateCartTotals();
         }
 
         function holdCurrentCart() {
