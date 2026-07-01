@@ -3276,45 +3276,125 @@ function renderCharts() {
             for(let i=0; i < checkboxes.length; i++) checkboxes[i].checked = source.checked;
         }
 
-        // GENERATE ORDER BARCODE (For Thermal Print)
+// 1. GENERATE ORDER BARCODE WITH EXACT QUANTITIES (Fix Print Issue)
         function generatePOAndPrint(source) {
+            if (source !== 'page') return; 
+
+            const checkboxes = document.querySelectorAll('.po-checkbox:checked');
+            if(checkboxes.length === 0) { showToast('Pehle dawai par tick lagayen!', 'warning'); return; }
+
             let selectedMeds = [];
-            
-            if (source === 'page') {
-                const checkboxes = document.querySelectorAll('.po-checkbox:checked');
-                const ids = Array.from(checkboxes).map(c => c.value);
-                selectedMeds = db.medicines.filter(m => ids.includes(m.id));
-                if(ids.length === 0) selectedMeds = db.medicines.filter(m => m.stock <= m.minStock); // Default all low stock if none checked
-            } else if (source === 'modal') {
-                selectedMeds = getSelectedOrAllMeds();
-            }
+            checkboxes.forEach(c => {
+                let medId = c.value;
+                let m = db.medicines.find(x => x.id === medId);
+                
+                // 100% Accurate Tariqa: Direct Box ki ID se Exact Quantity nikalna
+                let inputQtyBox = document.getElementById('reqQty_' + medId);
+                let requestedQuantity = 1; // Default 1
+                
+                if (inputQtyBox) {
+                    requestedQuantity = parseInt(inputQtyBox.value) || 1;
+                }
+                
+                if(m) {
+                    selectedMeds.push({ 
+                        id: m.id, 
+                        name: m.name, 
+                        stock: m.stock, 
+                        reqQty: requestedQuantity 
+                    });
+                }
+            });
 
-            if(selectedMeds.length === 0) { showToast('No items to order!', 'warning'); return; }
+            const poId = 'PO-' + Date.now().toString().slice(-6); 
 
-            // Naya Order ID Banana
-            const poId = 'PO-' + Date.now().toString().slice(-6); // e.g. PO-123456
-            const poItemIds = selectedMeds.map(m => m.id);
-
-            // Database mein Order save karna
             db.purchaseOrders = db.purchaseOrders || [];
-            db.purchaseOrders.push({ id: poId, date: new Date().toLocaleString(), items: poItemIds });
+            db.purchaseOrders.push({ id: poId, date: new Date().toLocaleDateString(), items: selectedMeds });
             saveDB();
 
-            // Thermal Printer Logic
             const canvas = document.createElement('canvas');
             JsBarcode(canvas, poId, { format: "CODE128", width: 2, height: 60, displayValue: true, fontSize: 16 });
             const barcodeImg = canvas.toDataURL('image/png');
 
-            let itemsHtml = selectedMeds.map(m => `<div style="border-bottom:1px dashed #ccc; margin-bottom:2px;">- ${m.name} <br><small>Cur. Stock: ${m.stock} | Required: ____</small></div>`).join('');
-
-            printGenericRecord('STOCK ORDER REQUEST', {
-                'Order ID': poId,
-                'Date Generated': new Date().toLocaleDateString(),
-                'SCAN THIS BARCODE TO ADD STOCK': `<div style="text-align:center; margin-top:10px;"><img src="${barcodeImg}" style="max-width:100%; height:auto;"></div>`,
-                'Items to Order': `<div style="margin-top:10px;">${itemsHtml}</div>`
-            });
+            let itemsHtml = selectedMeds.map(m => `<div style="border-bottom:1px dashed #ccc; padding:4px 0; font-size:12px;">- ${m.name} <br>Cur. Stock: ${m.stock} | <b style="font-size:15px; color:black;">Required Qty: ${m.reqQty}</b></div>`).join('');
             
-            if(source === 'modal') bootstrap.Modal.getInstance(document.getElementById('medicineStatsModal')).hide();
+            const printArea = document.getElementById('printSection');
+            printArea.innerHTML = `
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <h3 style="margin: 0; font-size: 16px; font-weight: bold;">STOCK ORDER</h3>
+                    <div style="font-size: 12px; margin-top: 5px;">Order ID: <b>${poId}</b></div>
+                    <div style="font-size: 12px;">Date: ${new Date().toLocaleDateString()}</div>
+                </div>
+                <div style="text-align:center; margin: 15px 0;">
+                    <img src="${barcodeImg}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+                </div>
+                <div style="margin-top: 15px;">
+                    <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 8px;">Items To Buy:</div>
+                    ${itemsHtml}
+                </div>`;
+            window.print();
+            renderPurchases(); 
+        }
+
+        // 2. ADD TO STOCK AUTOMATICALLY (Fix Add to Stock Quantity Issue)
+        function loadPOToCart(poId) {
+            db.purchaseOrders = db.purchaseOrders || [];
+            const poIndex = db.purchaseOrders.findIndex(p => p.id === poId);
+            
+            if(poIndex === -1) { showToast('Order not found!', 'danger'); return; }
+
+            const po = db.purchaseOrders[poIndex];
+            
+            let pModal = bootstrap.Modal.getInstance(document.getElementById('pendingOrdersModal'));
+            if(pModal) pModal.hide();
+
+            openNewPurchaseModal(); 
+            
+            // Saari dawaiyan form mein daalna
+            po.items.forEach(item => {
+                addToPurchase(item.id); 
+            });
+
+            // Sab items add hone ke baad, form mein exact quantity update karna
+            setTimeout(() => {
+                const rows = document.querySelectorAll('#purchaseItemsTable tr');
+                
+                po.items.forEach(item => {
+                    rows.forEach(row => {
+                        // Sahi dawai ki line (row) dhoondna
+                        if(row.innerText.includes(item.id) || row.innerText.includes(item.name)) {
+                            
+                            let allInputs = row.querySelectorAll('input[type="number"]');
+                            
+                            // Normal GRN table mein 2nd input Quantity ka hota hai (1st Purchase Price ka)
+                            let qtyInput = allInputs.length >= 2 ? allInputs[1] : allInputs[0]; 
+                            
+                            if(qtyInput) {
+                                // Manual likhi hui value set karna
+                                qtyInput.value = item.reqQty;
+                                
+                                // Software ko batana ke value change hui hai taake total sahi banay
+                                qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+                                qtyInput.dispatchEvent(new Event('keyup', { bubbles: true }));
+
+                                if(typeof qtyInput.onchange === 'function') {
+                                    qtyInput.onchange();
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                // Aakhir mein grand total update karna
+                if (typeof calculatePurchaseTotal === "function") calculatePurchaseTotal();
+                
+            }, 800); // 800ms ka waqfa taake form theek se screen par aa jaye
+
+            showToast(`Loaded ${po.items.length} items with exact quantities!`, 'success');
+            db.purchaseOrders.splice(poIndex, 1);
+            saveDB();
+            renderPurchases();
         }
 
         // Also, make sure to update openMedModal to show/hide the PO button
