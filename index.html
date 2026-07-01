@@ -4600,16 +4600,13 @@ let currentModalContext = '';
             if(match) { addToSale(match.id); document.getElementById('saleSearchInput').value = ''; }
         }
 
-// NAYA FUNCTION: Quick Tap Items ko Load aur Clickable banana
+// 1. ULTRA-FAST QUICK ITEMS RENDER
         function renderQuickItems() {
             const quickList = document.getElementById('quickItemsList');
             if (!quickList) return;
-            quickList.innerHTML = '';
-
-            // Sirf wo dawaiyan nikalna jo stock mein mojood hain (Stock > 0)
+            
             let availableMeds = db.medicines.filter(m => m.stock > 0);
 
-            // Agar aapke paas sales ka data hai to sab se zyada bikne wali dawaiyan oopar lana
             if (typeof getMedSalesStats === "function") {
                 const salesData = getMedSalesStats().stats;
                 availableMeds.sort((a, b) => {
@@ -4619,12 +4616,14 @@ let currentModalContext = '';
                 });
             }
 
-            // Shuru ki 18 dawaiyan list mein show karna
             const topMeds = availableMeds.slice(0, 18);
+            
+            // NAYA TARIQA: Speed barhane ke liye variable mein store kar ke ek hi dafa screen par bhejna
+            let htmlContent = ''; 
 
             topMeds.forEach(m => {
-                quickList.innerHTML += `
-                    <button type="button" class="btn text-start p-2 d-flex flex-column justify-content-between" onclick="addToSale('${m.id}')">
+                htmlContent += `
+                    <button type="button" class="btn text-start p-2 d-flex flex-column justify-content-between shadow-sm" onclick="addToSale('${m.id}')">
                         <span style="font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${m.name}</span>
                         <span class="text-primary fw-bold mt-1" style="font-size: 0.9rem;">Rs ${m.price}</span>
                     </button>
@@ -4632,30 +4631,29 @@ let currentModalContext = '';
             });
 
             if (topMeds.length === 0) {
-                quickList.innerHTML = `<span class="text-muted w-100 text-center" style="grid-column: 1 / -1; padding: 20px;">No items in stock</span>`;
+                htmlContent = `<span class="text-muted w-100 text-center" style="grid-column: 1 / -1; padding: 20px;">No items in stock</span>`;
             }
+            
+            quickList.innerHTML = htmlContent;
         }
 
 /* --- Point of Sale (POS) - Stock Restricted --- */
-        
-        // Cart mein item add karna (Button ya Scanner se)
+// 2. ULTRA-FAST ADD TO SALE
         function addToSale(id) {
             const m = db.medicines.find(x => x.id === id);
-            if (!m) { showToast('Item not found', 'danger'); return; }
+            if (!m) return;
 
-            // STOCK CHECK: Pehle se cart mein kitni qty hai?
+            // Check existing cart quantity
             const existingItem = db.currentSale.items.find(i => i.id === m.id);
             const currentCartQty = existingItem ? existingItem.qty : 0;
 
-            // Masla 1: Agar stock 0 hai
             if (m.stock <= 0) {
-                showToast(`❌ OUT OF STOCK! "${m.name}" is currently 0. Please Add Stock first.`, 'danger');
+                showToast(`❌ OUT OF STOCK! "${m.name}" is 0.`, 'danger');
                 return;
             }
 
-            // Masla 2: Agar user stock se zyada add karne ki koshish kare
             if (currentCartQty >= m.stock) {
-                showToast(`❌ Stock limit reached! You only have ${m.stock} items of "${m.name}".`, 'warning');
+                showToast(`❌ Stock limit reached!`, 'warning');
                 return;
             }
 
@@ -4673,12 +4671,18 @@ let currentModalContext = '';
                 });
             }
             
-            const searchInput = document.getElementById('posSearch');
+            // Search box ko khali karna (Agar use ho raha ho to)
+            const searchInput = document.getElementById('saleSearchInput');
             if(searchInput) searchInput.value = '';
             
-            renderCurrentSale();
-			renderQuickItems();
-            showToast(m.name + ' added to cart');
+            // Cart table ko refresh karna
+            if (typeof renderSaleTable === "function") {
+                renderSaleTable(); 
+            } else if (typeof renderCurrentSale === "function") {
+                renderCurrentSale();
+            }
+            
+            // ⚠️ ZAROORI NOTE: Is function ke andar saveDB() ya renderQuickItems() ghalti se bhi add na karein, warna system phans (hang ho) jayega.
         }
 
         // Cart mein manually Qty tabdeel karna (Agar user khud Type kare)
